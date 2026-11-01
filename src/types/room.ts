@@ -12,6 +12,13 @@ export interface Room {
   tenantName: string;
   floor?: number;
   area?: number; // m2
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  tenantRole?: string;
+  tenantPhone?: string;
+  notes?: string;
+  amenities?: string[];
 }
 
 export interface RoomFilterState {

@@ -307,3 +307,43 @@ export const initialRooms: Room[] = [
     area: 33,
   },
 ];
+
+export function getRoomByNumber(roomNumber: string): Room {
+  const found = initialRooms.find(
+    (r) => r.roomNumber.toLowerCase() === roomNumber.toLowerCase()
+  );
+
+  const baseRoom = found || {
+    id: "r_default",
+    roomNumber: roomNumber.toUpperCase(),
+    type: "Phòng Đơn" as const,
+    price: 2500000,
+    priceFormatted: "2.500.000 đ",
+    status: "rented" as const,
+    statusLabel: "Đang Thuê" as const,
+    tenantName: "Nguyễn Văn A",
+    floor: 2,
+    area: 20,
+  };
+
+  return {
+    ...baseRoom,
+    description:
+      baseRoom.description ||
+      `Phòng ở tầng ${baseRoom.floor || 2}, thoáng mát , có cửa sổ , đầy đủ tiện nghi`,
+    startDate: baseRoom.startDate || "01/01/2025",
+    endDate: baseRoom.endDate || "01/01/2026",
+    tenantRole:
+      baseRoom.tenantName !== "---"
+        ? baseRoom.tenantRole || "Sv năm 1 - ĐH Mở"
+        : undefined,
+    tenantPhone:
+      baseRoom.tenantName !== "---"
+        ? baseRoom.tenantPhone || "0912 345 678"
+        : undefined,
+    amenities: baseRoom.amenities || ["Giường", "Tủ", "Wifi", "Máy lạnh"],
+    notes:
+      baseRoom.notes ||
+      "Tiền cọc: 1 tháng tiền phòng. Hợp đồng thanh toán theo quý. Bàn giao 02 chìa khóa cơ, 01 thẻ từ thang máy.",
+  };
+}
