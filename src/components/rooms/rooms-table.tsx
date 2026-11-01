@@ -24,7 +24,7 @@ export function RoomsTable() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
 
-  const itemsPerPage = 6;
+  const itemsPerPage = 10;
 
   // Filter logic
   const filteredRooms = React.useMemo(() => {
@@ -41,6 +41,9 @@ export function RoomsTable() {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredRooms.slice(start, start + itemsPerPage);
   }, [filteredRooms, currentPage]);
+
+  const emptyRowsCount =
+    paginatedRooms.length > 0 ? itemsPerPage - paginatedRooms.length : 0;
 
   const handleDeleteRoom = (id: string, roomNum: string) => {
     if (confirm(`Bạn có chắc chắn muốn xóa phòng ${roomNum}?`)) {
@@ -301,11 +304,27 @@ export function RoomsTable() {
                   </tr>
                 );
               })
-            ) : (
+            ) : null}
+
+            {/* Empty filler rows to preserve exact constant table height across all pages */}
+            {paginatedRooms.length > 0 &&
+              Array.from({ length: emptyRowsCount }).map((_, i) => (
+                <tr
+                  key={`empty-${i}`}
+                  className="h-[68px] border-b border-[#F7FAFD]/80 pointer-events-none select-none"
+                  aria-hidden="true"
+                >
+                  <td colSpan={7} className="px-5 text-transparent">
+                    &nbsp;
+                  </td>
+                </tr>
+              ))}
+
+            {paginatedRooms.length === 0 && (
               <tr>
                 <td
                   colSpan={7}
-                  className="h-36 text-center text-sm font-medium text-[#8EA3BA]"
+                  className="h-[680px] text-center text-sm font-medium text-[#8EA3BA]"
                 >
                   Không tìm thấy phòng nào phù hợp với bộ lọc hiện tại.
                 </td>
