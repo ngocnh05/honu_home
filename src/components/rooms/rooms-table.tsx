@@ -7,12 +7,14 @@ import {
   ChevronDown,
   ChevronRight,
   ChevronLeft,
-  SquarePen,
-  Trash2,
-  Eye,
   DoorOpen,
   Filter,
 } from "lucide-react";
+import {
+  EditActionIcon,
+  DeleteActionIcon,
+  ViewActionIcon,
+} from "@/components/icons/action-icons";
 import type { Room, RoomStatus } from "@/types/room";
 import { initialRooms } from "@/lib/mock-data/rooms";
 import { AddRoomModal } from "@/components/rooms/add-room-modal";
@@ -167,21 +169,18 @@ export function RoomsTable() {
               paginatedRooms.map((room, idx) => {
                 const stt = (currentPage - 1) * itemsPerPage + idx + 1;
 
-                // Status Badge & Dot indicator
+                // Status Badge styles matching exact Figma colors
                 const statusConfig = {
                   rented: {
-                    badge: "bg-emerald-50 text-emerald-700 border-emerald-200/90",
-                    dot: "bg-emerald-500",
+                    badge: "bg-[#b5dda6] text-[#253f5b] font-extrabold",
                     label: "Đang Thuê",
                   },
                   available: {
-                    badge: "bg-sky-50 text-sky-700 border-sky-200/90",
-                    dot: "bg-sky-500",
+                    badge: "bg-[#8fbffa] text-[#253f5b] font-extrabold",
                     label: "Trống",
                   },
                   maintenance: {
-                    badge: "bg-amber-50 text-amber-700 border-amber-200/90",
-                    dot: "bg-amber-500",
+                    badge: "bg-[#fff9bf] text-[#253f5b] font-extrabold",
                     label: "Đang sửa",
                   },
                 };
@@ -234,15 +233,12 @@ export function RoomsTable() {
                       </div>
                     </td>
 
-                    {/* Trạng Thái */}
+                    {/* Trạng Thái - Chuẩn Figma Pill */}
                     <td className="px-5">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${currentConfig.badge}`}
+                        className={`inline-flex items-center justify-center min-w-[96px] px-3.5 py-1.5 rounded-[30px] text-xs font-extrabold ${currentConfig.badge}`}
                       >
-                        <span
-                          className={`w-2 h-2 rounded-full ${currentConfig.dot}`}
-                        />
-                        <span>{currentConfig.label}</span>
+                        {currentConfig.label}
                       </span>
                     </td>
 
@@ -264,41 +260,41 @@ export function RoomsTable() {
                       )}
                     </td>
 
-                    {/* Thao Tác (3 Actions: Sửa, Xóa, Chi tiết) */}
+                    {/* Thao Tác (Chuẩn Figma theo thứ tự: 1. Sửa, 2. Xóa, 3. Chi tiết) */}
                     <td className="pr-7">
-                      <div className="flex items-center justify-center gap-2">
-                        {/* Chi tiết */}
-                        <Link
-                          href={`/rooms/${room.roomNumber}`}
-                          className="p-2 rounded-lg text-[#5C84BE] hover:bg-[#EBF3FB] transition-colors group"
-                          title="Xem chi tiết"
-                        >
-                          <Eye className="w-4 h-4 stroke-[2.2] group-hover:scale-110 transition-transform" />
-                        </Link>
-
-                        {/* Chỉnh sửa */}
+                      <div className="flex items-center justify-center gap-3 text-[#757575]">
+                        {/* 1. Chỉnh sửa (reicon:pen-add2) */}
                         <button
                           type="button"
                           onClick={() =>
                             alert(`Chỉnh sửa phòng ${room.roomNumber}`)
                           }
-                          className="p-2 rounded-lg text-[#5A738E] hover:bg-[#EEF4FA] transition-colors group cursor-pointer"
+                          className="p-1.5 rounded-lg text-[#757575] hover:text-[#5C84BE] hover:bg-[#EBF3FB] transition-all cursor-pointer"
                           title="Chỉnh sửa"
                         >
-                          <SquarePen className="w-4 h-4 stroke-[2.2] group-hover:scale-110 transition-transform" />
+                          <EditActionIcon className="w-5 h-5" />
                         </button>
 
-                        {/* Xóa phòng */}
+                        {/* 2. Xóa phòng (fluent:delete-12-filled) */}
                         <button
                           type="button"
                           onClick={() =>
                             handleDeleteRoom(room.id, room.roomNumber)
                           }
-                          className="p-2 rounded-lg text-rose-500 hover:bg-rose-50 transition-colors group cursor-pointer"
+                          className="p-1.5 rounded-lg text-[#757575] hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer"
                           title="Xóa phòng"
                         >
-                          <Trash2 className="w-4 h-4 stroke-[2.2] group-hover:scale-110 transition-transform" />
+                          <DeleteActionIcon className="w-5 h-5" />
                         </button>
+
+                        {/* 3. Xem chi tiết (material-symbols:read-more) */}
+                        <Link
+                          href={`/rooms/${room.roomNumber}`}
+                          className="p-1.5 rounded-lg text-[#757575] hover:text-[#5C84BE] hover:bg-[#EBF3FB] transition-all"
+                          title="Xem chi tiết"
+                        >
+                          <ViewActionIcon className="w-5 h-5" />
+                        </Link>
                       </div>
                     </td>
                   </tr>
