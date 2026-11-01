@@ -25,6 +25,20 @@ export async function loginAction(
 
   const { email, password } = validation.data;
 
+  // Kiểm tra tài khoản Demo: tk ngoc - mk ngoc
+  if (email.trim().toLowerCase() === "ngoc" && password === "ngoc") {
+    return {
+      success: true,
+      message: "Đăng nhập thành công với tài khoản demo Ngọc!",
+      user: {
+        id: "usr_ngoc",
+        name: "Hồng Ngọc",
+        email: "ngoc@honuhome.vn",
+        role: "manager",
+      },
+    };
+  }
+
   // Giả lập xác thực (có thể thay thế bằng Auth.js / NextAuth / Supabase / Database verification)
   if (email === "admin@flohouse.vn" && password === "123456") {
     return {

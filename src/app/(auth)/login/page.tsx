@@ -6,8 +6,8 @@ export default function LoginPage() {
     <div className="w-[640px] bg-[#294255]/70 backdrop-blur-xl border-2 border-white/90 rounded-[26px] shadow-2xl p-12 space-y-8 animate-fadeIn mx-auto">
       {/* Header with Logo & Welcome Title */}
       <AuthHeader
-        title="Welcome back!"
-        subtitle="Sign in to access your guided meditations, daily practices, and personal journey"
+        title="Chào mừng trở lại!"
+        subtitle="Đăng nhập để quản lý dự án, hệ thống phòng và khách thuê HonuHome"
       />
 
       {/* Main Login Form */}

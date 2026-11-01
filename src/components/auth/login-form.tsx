@@ -23,9 +23,9 @@ export function LoginForm() {
   } | null>(null);
 
   const [formData, setFormData] = React.useState({
-    email: "",
-    password: "",
-    rememberMe: false,
+    email: "ngoc",
+    password: "ngoc",
+    rememberMe: true,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +102,41 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="w-full space-y-6">
+      {/* Demo Account Badge & Quick Fill */}
+      <div className="bg-white/10 border border-white/25 rounded-2xl p-4 text-xs text-white backdrop-blur-md flex items-center justify-between gap-3 shadow-inner">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 font-bold text-emerald-300">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+            </span>
+            <span>Tài khoản Demo sẵn có:</span>
+          </div>
+          <div className="flex items-center gap-3 font-mono text-[13px] text-white/90">
+            <span>
+              Tài khoản: <strong className="text-white font-bold bg-white/15 px-2 py-0.5 rounded">ngoc</strong>
+            </span>
+            <span className="text-white/40">•</span>
+            <span>
+              Mật khẩu: <strong className="text-white font-bold bg-white/15 px-2 py-0.5 rounded">ngoc</strong>
+            </span>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            setFormData({
+              email: "ngoc",
+              password: "ngoc",
+              rememberMe: true,
+            })
+          }
+          className="px-3.5 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 active:scale-95 text-white font-bold text-xs transition-all border border-white/20 cursor-pointer whitespace-nowrap shadow-xs"
+        >
+          Điền sẵn
+        </button>
+      </div>
+
       {/* Alert banner if error or success */}
       {serverMessage && (
         <div
@@ -120,15 +155,15 @@ export function LoginForm() {
         </div>
       )}
 
-      {/* Email Input Field */}
+      {/* Account / Email Input Field */}
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">Tài khoản / Email</Label>
         <Input
           id="email"
           name="email"
-          type="email"
-          placeholder="Enter your email"
-          autoComplete="email"
+          type="text"
+          placeholder="Nhập tài khoản hoặc email (ví dụ: ngoc)"
+          autoComplete="username"
           value={formData.email}
           onChange={handleChange}
           error={errors.email}
@@ -138,12 +173,12 @@ export function LoginForm() {
 
       {/* Password Input Field */}
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">Mật khẩu</Label>
         <Input
           id="password"
           name="password"
           type={showPassword ? "text" : "password"}
-          placeholder="Enter your password"
+          placeholder="Nhập mật khẩu (ví dụ: ngoc)"
           autoComplete="current-password"
           value={formData.password}
           onChange={handleChange}
@@ -153,7 +188,7 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="text-white/70 hover:text-white transition-colors focus:outline-none p-1"
+              className="text-white/70 hover:text-white transition-colors focus:outline-none p-1 cursor-pointer"
               aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
             >
               {showPassword ? (
@@ -170,7 +205,7 @@ export function LoginForm() {
           <Checkbox
             id="rememberMe"
             name="rememberMe"
-            label="Remember me"
+            label="Ghi nhớ đăng nhập"
             checked={formData.rememberMe}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, rememberMe: e.target.checked }))
@@ -181,7 +216,7 @@ export function LoginForm() {
             href="/forgot-password"
             className="text-white/90 hover:text-white font-medium hover:underline transition-all text-xs sm:text-sm ml-auto"
           >
-            Forgot password?
+            Quên mật khẩu?
           </Link>
         </div>
       </div>
@@ -193,9 +228,9 @@ export function LoginForm() {
           variant="primary"
           size="pill"
           isLoading={isPending}
-          className="w-full text-base font-semibold tracking-wide"
+          className="w-full text-base font-semibold tracking-wide cursor-pointer"
         >
-          Log In
+          Đăng Nhập
         </Button>
       </div>
 
@@ -203,7 +238,7 @@ export function LoginForm() {
       <div className="relative flex items-center justify-center my-6">
         <div className="border-t border-white/40 w-full" />
         <span className="bg-transparent px-4 text-sm font-medium text-white/80 select-none uppercase tracking-wider">
-          Or
+          Hoặc
         </span>
         <div className="border-t border-white/40 w-full" />
       </div>
@@ -214,20 +249,20 @@ export function LoginForm() {
         variant="glass"
         size="pill"
         onClick={handleGoogleSignIn}
-        className="w-full gap-3 text-base font-medium"
+        className="w-full gap-3 text-base font-medium cursor-pointer"
       >
         <GoogleIcon className="w-5 h-5" />
-        <span>Sign In with Google</span>
+        <span>Đăng nhập bằng Google</span>
       </Button>
 
       {/* Sign Up Prompt Footer */}
       <p className="text-center text-sm text-white/80 pt-2">
-        Don&apos;t have an account?{" "}
+        Chưa có tài khoản?{" "}
         <Link
           href="/register"
           className="text-white font-semibold underline underline-offset-4 hover:text-white/90 transition-colors"
         >
-          Sign Up
+          Đăng ký ngay
         </Link>
       </p>
     </form>

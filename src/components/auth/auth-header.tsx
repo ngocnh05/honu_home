@@ -6,8 +6,8 @@ interface AuthHeaderProps {
 }
 
 export function AuthHeader({
-  title = "Welcome back!",
-  subtitle = "Sign in to access your properties, manage rooms, and track tenants",
+  title = "Chào mừng trở lại!",
+  subtitle = "Đăng nhập để quản lý dự án, hệ thống phòng và khách thuê HonuHome",
 }: AuthHeaderProps) {
   return (
     <div className="flex flex-col items-center text-center space-y-4">
@@ -15,7 +15,7 @@ export function AuthHeader({
       <div className="relative w-12 h-12 flex items-center justify-center">
         <Image
           src="/images/auth/logo-icon.svg"
-          alt="FloHouse Logo"
+          alt="HonuHome Logo"
           width={49}
           height={49}
           className="w-full h-full object-contain drop-shadow"
