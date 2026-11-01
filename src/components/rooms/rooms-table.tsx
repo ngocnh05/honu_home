@@ -24,7 +24,7 @@ export function RoomsTable() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
 
-  const itemsPerPage = 10;
+  const itemsPerPage = 7;
 
   // Filter logic
   const filteredRooms = React.useMemo(() => {
@@ -324,7 +324,7 @@ export function RoomsTable() {
               <tr>
                 <td
                   colSpan={7}
-                  className="h-[680px] text-center text-sm font-medium text-[#8EA3BA]"
+                  className="h-[476px] text-center text-sm font-medium text-[#8EA3BA]"
                 >
                   Không tìm thấy phòng nào phù hợp với bộ lọc hiện tại.
                 </td>
