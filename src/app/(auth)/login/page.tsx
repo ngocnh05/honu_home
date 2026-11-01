@@ -3,7 +3,7 @@ import { LoginForm } from "@/components/auth/login-form";
 
 export default function LoginPage() {
   return (
-    <div className="w-full bg-[#294255]/70 backdrop-blur-xl border-2 border-white/90 rounded-[22px] sm:rounded-[26px] shadow-2xl p-5 sm:p-8 md:p-12 space-y-6 sm:space-y-8 animate-fadeIn">
+    <div className="w-[640px] bg-[#294255]/70 backdrop-blur-xl border-2 border-white/90 rounded-[26px] shadow-2xl p-12 space-y-8 animate-fadeIn mx-auto">
       {/* Header with Logo & Welcome Title */}
       <AuthHeader
         title="Welcome back!"

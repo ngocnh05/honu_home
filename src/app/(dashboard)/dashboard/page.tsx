@@ -15,66 +15,70 @@ export default function DashboardPage() {
     mockDashboardData;
 
   return (
-    <div className="space-y-8 animate-fadeIn pb-12">
-      {/* Welcome Greeting Header */}
-      <div className="space-y-1.5">
+    <div className="space-y-8 animate-fadeIn pb-12 w-[1096px]">
+      {/* Welcome Greeting Header - Figma: Frame 2 & Frame 6 */}
+      <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#253F5B] tracking-tight">
+          <h1 className="text-3xl font-extrabold text-[#253F5B] tracking-tight">
             Xin chào, {managerName}
           </h1>
-          <span className="text-2xl sm:text-3xl animate-bounce">👋</span>
+          <span className="text-3xl">👋</span>
         </div>
-        <p className="text-sm sm:text-base text-[#67829E] font-medium flex items-center gap-1.5">
+        <p className="text-base text-[#67829E] font-medium flex items-center gap-1.5">
           <span>Chúc bạn một ngày mới tốt lành</span>
           <span>😊</span>
         </p>
       </div>
 
-      {/* 4 Summary KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+      {/* 4 Summary KPI Cards - Figma Frame 15: 1096px x 170px, 4 cards 230x150 */}
+      <div className="grid grid-cols-4 gap-6 w-[1096px]">
         <KpiCard
           label="Tổng số phòng"
           value={kpis.totalRooms}
           icon={Building2}
           variant="primary"
+          className="w-[230px] h-[150px]"
         />
         <KpiCard
           label="Đang Thuê"
           value={kpis.occupiedRooms}
           icon={UserCheck}
           variant="success"
+          className="w-[230px] h-[150px]"
         />
         <KpiCard
           label="Phòng Trống"
           value={kpis.availableRooms}
           icon={KeyRound}
           variant="warning"
+          className="w-[230px] h-[150px]"
         />
         <KpiCard
           label="Tỷ lệ lấp đầy"
           value={kpis.occupancyRate}
           icon={TrendingUp}
           variant="info"
+          className="w-[230px] h-[150px]"
         />
       </div>
 
-      {/* Bottom Section: Revenue Chart & Quick Action Widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Monthly Revenue Chart (takes 6 cols on lg/xl) */}
-        <div className="lg:col-span-12 xl:col-span-6">
+      {/* Bottom Section: Revenue Chart (502px) + Invoices (245px) + Maintenance (245px) */}
+      <div className="flex items-start gap-6 w-[1096px]">
+        {/* Monthly Revenue Chart - Figma 35:82: 502px x 397px */}
+        <div className="w-[502px] shrink-0">
           <RevenueChart
             data={monthlyRevenue.chartData}
             totalFormatted={monthlyRevenue.totalFormatted}
           />
         </div>
 
-        {/* Unpaid Invoices Widget (takes 3 cols on xl) */}
-        <div className="lg:col-span-6 xl:col-span-3">
+        {/* Unpaid Invoices Widget - Figma 36:193: 245px x 397px */}
+        <div className="w-[245px] shrink-0">
           <UnpaidInvoicesCard summary={unpaidInvoices} />
         </div>
 
-        {/* Maintenance Requests Widget (takes 3 cols on xl) */}
-        <div className="lg:col-span-6 xl:col-span-3">
+        {/* Maintenance Requests Widget - Figma 36:183: 245px x 397px */}
+        <div className="w-[245px] shrink-0">
           <MaintenanceCard summary={maintenance} />
         </div>
       </div>

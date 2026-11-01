@@ -1,6 +1,3 @@
-"use client";
-
-import * as React from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopHeader } from "@/components/layout/top-header";
 import { mockDashboardData } from "@/lib/mock-data/dashboard";
@@ -10,26 +7,18 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
-
   return (
-    <div className="min-h-screen bg-[#EAF2F8] flex">
-      {/* Sidebar Navigation */}
-      <Sidebar
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+    <div className="min-h-screen bg-[#EAF2F8] flex min-w-[1440px]">
+      {/* Sidebar Navigation - Fixed 250px */}
+      <Sidebar />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-[260px] transition-all">
+      {/* Main Content Area - Fixed offset 250px */}
+      <div className="flex-1 flex flex-col min-w-[1190px] pl-[250px]">
         {/* Top Header with 99 unread notifications */}
-        <TopHeader
-          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
-          unreadCount={mockDashboardData.unreadNotifications}
-        />
+        <TopHeader unreadCount={mockDashboardData.unreadNotifications} />
 
         {/* Page Inner Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1400px] w-full mx-auto">
+        <main className="flex-1 p-8 w-full max-w-[1190px]">
           {children}
         </main>
       </div>
