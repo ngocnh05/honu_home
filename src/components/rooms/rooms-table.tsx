@@ -70,9 +70,9 @@ export function RoomsTable() {
   };
 
   return (
-    <div className="w-[1100px] space-y-6 animate-fadeIn pb-12 select-none">
+    <div className="w-full space-y-6 animate-fadeIn pb-12 select-none">
       {/* 1. Top Bar: Tiêu đề trang & Thanh công cụ gom gọn chuyên nghiệp */}
-      <div className="flex items-center justify-between bg-white px-7 py-5 rounded-2xl border border-[#E3EDF6] shadow-sm">
+      <div className="flex items-center justify-between bg-white px-8 py-5 rounded-3xl border border-[#E3EDF6] shadow-sm w-full">
         {/* Title & Badge số lượng */}
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shadow-inner">

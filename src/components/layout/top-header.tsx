@@ -11,7 +11,7 @@ export function TopHeader({ unreadCount = 99 }: TopHeaderProps) {
   const [searchValue, setSearchValue] = React.useState("");
 
   return (
-    <header className="sticky top-0 z-30 h-[101px] bg-white border-b border-[#E3EDF6] flex items-center justify-between px-8 min-w-[950px]">
+    <header className="sticky top-0 z-30 h-[101px] bg-white border-b border-[#E3EDF6] flex items-center justify-between px-8 w-full">
       {/* Search Bar - Chuẩn Figma Pill 100px: 556px x 56px */}
       <div className="relative w-[556px]">
         <input
