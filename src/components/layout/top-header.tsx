@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search, Bell, Menu } from "lucide-react";
+import { Search, BellRing, Menu } from "lucide-react";
 
 interface TopHeaderProps {
   onToggleSidebar?: () => void;
@@ -54,7 +54,7 @@ export function TopHeader({
             className="relative p-2 sm:p-3 rounded-2xl text-[#253F5B] hover:bg-[#F2F8FC] hover:text-[#5C84BE] transition-all group"
             aria-label="Thông báo hệ thống"
           >
-            <Bell className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2] transition-transform group-hover:rotate-12" />
+            <BellRing className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2] origin-top group-hover:animate-bell-ring transition-transform" />
 
             {/* Notification Badge: 99 */}
             {unreadCount > 0 && (

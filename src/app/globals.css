@@ -24,3 +24,20 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes bellRing {
+  0% { transform: rotate(0); }
+  12% { transform: rotate(18deg); }
+  24% { transform: rotate(-18deg); }
+  36% { transform: rotate(14deg); }
+  48% { transform: rotate(-14deg); }
+  60% { transform: rotate(10deg); }
+  72% { transform: rotate(-10deg); }
+  84% { transform: rotate(5deg); }
+  100% { transform: rotate(0); }
+}
+
+.group:hover .group-hover\:animate-bell-ring {
+  transform-origin: top center;
+  animation: bellRing 0.85s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+}
