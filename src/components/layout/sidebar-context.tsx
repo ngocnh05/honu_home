@@ -37,6 +37,36 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  // Keyboard shortcut: Ctrl+Shift+S or Ctrl+B (like ChatGPT & VS Code)
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing inside input, textarea, or contentEditable
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      const isMac = typeof navigator !== "undefined" && /Mac/i.test(navigator.userAgent);
+      const modifier = isMac ? e.metaKey : e.ctrlKey;
+
+      if (
+        (modifier && e.shiftKey && e.key.toLowerCase() === "s") ||
+        (modifier && !e.shiftKey && e.key.toLowerCase() === "b")
+      ) {
+        e.preventDefault();
+        toggleSidebar();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [toggleSidebar]);
+
   return (
     <SidebarContext.Provider
       value={{ isCollapsed, toggleSidebar, setIsCollapsed }}

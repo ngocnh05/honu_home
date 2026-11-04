@@ -16,20 +16,30 @@ export function TopHeader({ unreadCount = 99 }: TopHeaderProps) {
     <header className="sticky top-0 z-30 h-[76px] xl:h-[96px] bg-white border-b border-[#E3EDF6] flex items-center justify-between px-6 xl:px-8 w-full transition-all">
       {/* Left Area: Toggle Menu Button & Search Bar */}
       <div className="flex items-center gap-3 w-full max-w-[420px] lg:max-w-[520px] xl:max-w-[610px]">
-        {/* Toggle Sidebar Menu Button */}
-        <button
-          type="button"
-          onClick={toggleSidebar}
-          className="p-2.5 rounded-2xl bg-[#F2F8FC] hover:bg-[#E4EFF8] text-[#5C84BE] hover:text-[#253F5B] border border-[#DEEBF5] transition-all cursor-pointer shrink-0 active:scale-95 shadow-2xs"
-          title={isCollapsed ? "Mở rộng menu" : "Thu gọn menu"}
-          aria-label={isCollapsed ? "Mở rộng menu" : "Thu gọn menu"}
-        >
-          {isCollapsed ? (
-            <PanelLeftOpen className="w-5 h-5 stroke-[2.2]" />
-          ) : (
-            <PanelLeftClose className="w-5 h-5 stroke-[2.2]" />
-          )}
-        </button>
+        {/* Toggle Sidebar Menu Button with Tooltip */}
+        <div className="relative group/headertoggle shrink-0">
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="p-2.5 rounded-2xl bg-[#F2F8FC] hover:bg-[#E4EFF8] text-[#5C84BE] hover:text-[#253F5B] border border-[#DEEBF5] transition-all cursor-pointer shrink-0 active:scale-95 shadow-2xs"
+            aria-label={isCollapsed ? "Mở rộng menu" : "Thu gọn menu"}
+          >
+            {isCollapsed ? (
+              <PanelLeftOpen className="w-5 h-5 stroke-[2.2]" />
+            ) : (
+              <PanelLeftClose className="w-5 h-5 stroke-[2.2]" />
+            )}
+          </button>
+
+          {/* ChatGPT-style Tooltip */}
+          <div className="pointer-events-none absolute left-0 top-[calc(100%+8px)] hidden group-hover/headertoggle:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0D0D0D] text-white text-xs font-medium shadow-2xl z-50 whitespace-nowrap animate-in fade-in duration-150">
+            <span>{isCollapsed ? "Mở rộng menu" : "Thu gọn menu"}</span>
+            <span className="bg-[#2D2D2D] px-2 py-0.5 rounded-md text-[10px] text-neutral-300 font-mono font-medium">
+              Ctrl+Shift+S
+            </span>
+            <div className="absolute bottom-full left-4 border-4 border-transparent border-b-[#0D0D0D]" />
+          </div>
+        </div>
 
         {/* Search Bar - Responsive Pill: up to 556px */}
         <div className="relative flex-1">
