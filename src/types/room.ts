@@ -1,6 +1,13 @@
 export type RoomStatus = "rented" | "available" | "maintenance";
 export type RoomType = "Phòng Đơn" | "Phòng Đôi" | "Phòng Ba";
 
+export interface CustomService {
+  id: string;
+  name: string; // Tên dịch vụ (VD: Điện, Nước, Wifi, Cầu thang, Giặt sấy, Xe máy,...)
+  price: number; // Đơn giá
+  unit: string; // đ/kWh, đ/khối, đ/người, đ/phòng, đ/xe, đ/tháng
+}
+
 export interface RoomServices {
   electricityPrice: number; // đ/kWh (vd: 3500, 3600)
   waterPrice: number; // đơn giá nước
@@ -25,6 +32,7 @@ export interface Room {
   endDate?: string;
   deposit?: number; // Tiền đặt cọc
   services?: RoomServices;
+  customServices?: CustomService[];
   tenantRole?: string;
   tenantPhone?: string;
   notes?: string;

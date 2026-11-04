@@ -6,20 +6,34 @@ import {
   Plus,
   Building2,
   Calendar,
-  Zap,
-  Droplets,
-  Wifi,
-  ShieldCheck,
-  ChevronDown,
-  ChevronUp,
+  Trash2,
+  Sparkles,
+  Layers,
+  Phone,
+  User,
+  DollarSign,
 } from "lucide-react";
-import type { Room, RoomServices, RoomStatus, RoomType } from "@/types/room";
+import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
 
 interface AddRoomModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddRoom: (room: Omit<Room, "id" | "priceFormatted" | "statusLabel">) => void;
 }
+
+const defaultInitialServices: CustomService[] = [
+  { id: "s1", name: "Tiền điện", price: 3500, unit: "đ/kWh" },
+  { id: "s2", name: "Tiền nước", price: 30000, unit: "đ/khối" },
+  { id: "s3", name: "Wifi / Mạng", price: 50000, unit: "đ/phòng" },
+  { id: "s4", name: "Cầu thang & Vệ sinh", price: 100000, unit: "đ/người" },
+];
+
+const serviceSuggestions = [
+  { name: "Phí gửi xe máy", price: 100000, unit: "đ/xe" },
+  { name: "Máy giặt chung", price: 50000, unit: "đ/người" },
+  { name: "Thang máy", price: 50000, unit: "đ/người" },
+  { name: "Phí quản lý", price: 100000, unit: "đ/phòng" },
+];
 
 export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) {
   // Basic Info
@@ -36,15 +50,41 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
   const [endDate, setEndDate] = React.useState("01/01/2027");
   const [deposit, setDeposit] = React.useState("2700000");
 
-  // Service Pricing (Customizable per room / property)
-  const [showServiceConfig, setShowServiceConfig] = React.useState(true);
-  const [electricityPrice, setElectricityPrice] = React.useState("3500");
-  const [waterUnit, setWaterUnit] = React.useState<"m3" | "person" | "room">("m3");
-  const [waterPrice, setWaterPrice] = React.useState("30000");
-  const [wifiPrice, setWifiPrice] = React.useState("50000");
-  const [generalServicePrice, setGeneralServicePrice] = React.useState("100000");
+  // Dynamic Custom Services List
+  const [services, setServices] = React.useState<CustomService[]>(defaultInitialServices);
 
   if (!isOpen) return null;
+
+  // Add a new empty service row
+  const handleAddService = (
+    template?: { name: string; price: number; unit: string }
+  ) => {
+    const newService: CustomService = template
+      ? { id: `srv_${Date.now()}_${Math.random()}`, ...template }
+      : {
+          id: `srv_${Date.now()}`,
+          name: "",
+          price: 0,
+          unit: "đ/tháng",
+        };
+    setServices((prev) => [...prev, newService]);
+  };
+
+  // Remove a service row
+  const handleRemoveService = (id: string) => {
+    setServices((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  // Update a service field
+  const handleUpdateService = (
+    id: string,
+    field: keyof CustomService,
+    value: string | number
+  ) => {
+    setServices((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, [field]: value } : s))
+    );
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,12 +93,30 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
       return;
     }
 
-    const services: RoomServices = {
-      electricityPrice: Number(electricityPrice) || 3500,
-      waterPrice: Number(waterPrice) || 30000,
-      waterUnit,
-      wifiPrice: Number(wifiPrice) || 0,
-      generalServicePrice: Number(generalServicePrice) || 0,
+    // Filter out services with empty names
+    const validServices = services.filter((s) => s.name.trim() !== "");
+
+    // Build backward-compatible RoomServices object from list
+    const elec = validServices.find((s) => s.name.toLowerCase().includes("điện"));
+    const water = validServices.find((s) => s.name.toLowerCase().includes("nước"));
+    const wifi = validServices.find((s) => s.name.toLowerCase().includes("wifi") || s.name.toLowerCase().includes("mạng"));
+    const general = validServices.find(
+      (s) =>
+        s.name.toLowerCase().includes("cầu thang") ||
+        s.name.toLowerCase().includes("vệ sinh") ||
+        s.name.toLowerCase().includes("quản lý")
+    );
+
+    const legacyServices = {
+      electricityPrice: elec ? elec.price : 3500,
+      waterPrice: water ? water.price : 30000,
+      waterUnit: (water?.unit.includes("người")
+        ? "person"
+        : water?.unit.includes("phòng")
+        ? "room"
+        : "m3") as "m3" | "person" | "room",
+      wifiPrice: wifi ? wifi.price : 50000,
+      generalServicePrice: general ? general.price : 100000,
     };
 
     onAddRoom({
@@ -72,7 +130,8 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
       endDate: status === "rented" && endDate.trim() ? endDate.trim() : "---",
       deposit: status === "rented" ? Number(deposit) || Number(price) : undefined,
       area: Number(area) || 20,
-      services,
+      services: legacyServices,
+      customServices: validServices,
     });
 
     // Reset form
@@ -84,16 +143,21 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto animate-fadeIn">
-      <div className="bg-white rounded-3xl w-full max-w-[560px] max-h-[92vh] overflow-y-auto p-6 xl:p-8 shadow-2xl border border-[#E3EDF6] space-y-5 animate-scaleUp">
+      {/* Modal Container: Rộng ngang (max-w-[880px] / xl:max-w-[940px]) cho vừa mắt và dễ thao tác */}
+      <div className="bg-white rounded-3xl w-full max-w-[880px] xl:max-w-[940px] max-h-[92vh] flex flex-col shadow-2xl border border-[#E3EDF6] animate-scaleUp overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#EAF2F8] pb-4 sticky top-0 bg-white z-10">
+        <div className="flex items-center justify-between px-6 xl:px-8 py-4 border-b border-[#EAF2F8] bg-white shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center">
-              <Building2 className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shadow-inner">
+              <Building2 className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-[#253F5B]">Thêm Phòng Mới</h3>
-              <p className="text-xs text-[#7A92AB]">Nhập thông tin chi tiết phòng & định mức dịch vụ</p>
+              <h3 className="text-xl font-extrabold text-[#253F5B] tracking-tight">
+                Thêm Phòng Mới
+              </h3>
+              <p className="text-xs text-[#7A92AB] font-medium">
+                Cấu hình thông tin phòng, hợp đồng và các khoản dịch vụ linh hoạt
+              </p>
             </div>
           </div>
           <button
@@ -105,326 +169,322 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Section 1: Thông tin cơ bản */}
-          <div className="grid grid-cols-2 gap-3.5">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-[#253F5B]">Số Phòng *</label>
-              <input
-                type="text"
-                placeholder="VD: P102"
-                value={roomNumber}
-                onChange={(e) => setRoomNumber(e.target.value)}
-                className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-sm text-[#253F5B]"
-                required
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-[#253F5B]">Loại Phòng</label>
-              <select
-                value={type}
-                onChange={(e) => setType(e.target.value as RoomType)}
-                className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-sm text-[#253F5B] bg-white cursor-pointer"
-              >
-                <option value="Phòng Đơn">Phòng Đơn</option>
-                <option value="Phòng Đôi">Phòng Đôi</option>
-                <option value="Phòng Ba">Phòng Ba</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3.5">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-[#253F5B]">Giá Thuê (đ/tháng) *</label>
-              <input
-                type="number"
-                placeholder="2.700.000"
-                value={price}
-                onChange={(e) => {
-                  setPrice(e.target.value);
-                  if (!deposit || deposit === price) {
-                    setDeposit(e.target.value);
-                  }
-                }}
-                className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-sm text-[#253F5B]"
-                required
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-[#253F5B]">Diện Tích (m²)</label>
-              <input
-                type="number"
-                placeholder="20"
-                value={area}
-                onChange={(e) => setArea(e.target.value)}
-                className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-sm text-[#253F5B]"
-              />
-            </div>
-          </div>
-
-          {/* Trạng Thái Ban Đầu */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-[#253F5B]">Trạng Thái Ban Đầu</label>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { key: "available", label: "Trống" },
-                { key: "rented", label: "Đang Thuê" },
-                { key: "maintenance", label: "Đang sửa" },
-              ].map((st) => (
-                <button
-                  type="button"
-                  key={st.key}
-                  onClick={() => setStatus(st.key as RoomStatus)}
-                  className={`h-9 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
-                    status === st.key
-                      ? "bg-[#5C84BE] text-white border-[#5C84BE] shadow-xs"
-                      : "bg-[#F4F9FD] text-[#4A6482] border-[#D9E6F2] hover:bg-[#E9F3FC]"
-                  }`}
-                >
-                  {st.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Section 2: Thông tin Hợp đồng (Khi chọn Đang Thuê) */}
-          {status === "rented" && (
-            <div className="p-4 rounded-2xl bg-[#F6F9FD] border border-[#DEEBF5] space-y-3 animate-fadeIn">
-              <div className="flex items-center gap-2 text-xs font-bold text-[#253F5B]">
-                <Calendar className="w-4 h-4 text-[#5C84BE]" />
-                <span>Thông tin Hợp đồng & Khách thuê</span>
+        {/* Form Body - 2 Columns Side by Side */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 xl:p-8 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 items-start">
+            {/* CỘT TRÁI (5 cột): Thông tin phòng & Hợp đồng */}
+            <div className="lg:col-span-5 space-y-4">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#253F5B] uppercase tracking-wider pb-1 border-b border-[#EEF4FA]">
+                <Layers className="w-4 h-4 text-[#5C84BE]" />
+                <span>1. Thông tin phòng</span>
               </div>
 
+              {/* Số Phòng & Loại Phòng */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-[#506A88]">Tên Người Thuê *</label>
+                  <label className="text-xs font-bold text-[#253F5B]">Số Phòng *</label>
                   <input
                     type="text"
-                    placeholder="VD: Quý Bình"
-                    value={tenantName}
-                    onChange={(e) => setTenantName(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
-                    required={status === "rented"}
+                    placeholder="VD: P102"
+                    value={roomNumber}
+                    onChange={(e) => setRoomNumber(e.target.value)}
+                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B] font-semibold"
+                    required
                   />
                 </div>
+
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-[#506A88]">Số Điện Thoại</label>
-                  <input
-                    type="tel"
-                    placeholder="0987.654.321"
-                    value={tenantPhone}
-                    onChange={(e) => setTenantPhone(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
-                  />
+                  <label className="text-xs font-bold text-[#253F5B]">Loại Phòng</label>
+                  <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value as RoomType)}
+                    className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer"
+                  >
+                    <option value="Phòng Đơn">Phòng Đơn</option>
+                    <option value="Phòng Đôi">Phòng Đôi</option>
+                    <option value="Phòng Ba">Phòng Ba</option>
+                  </select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2.5">
+              {/* Giá Thuê & Diện Tích */}
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-[#506A88]">Ngày Bắt Đầu</label>
-                  <input
-                    type="text"
-                    placeholder="01/01/2026"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full h-9 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-[#506A88]">Hạn Hợp Đồng</label>
-                  <input
-                    type="text"
-                    placeholder="01/01/2027"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full h-9 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-[#506A88]">Tiền Đặt Cọc (đ)</label>
+                  <label className="text-xs font-bold text-[#253F5B]">Giá Thuê (đ/tháng) *</label>
                   <input
                     type="number"
                     placeholder="2.700.000"
-                    value={deposit}
-                    onChange={(e) => setDeposit(e.target.value)}
-                    className="w-full h-9 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                    value={price}
+                    onChange={(e) => {
+                      setPrice(e.target.value);
+                      if (!deposit || deposit === price) {
+                        setDeposit(e.target.value);
+                      }
+                    }}
+                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B] font-bold"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#253F5B]">Diện Tích (m²)</label>
+                  <input
+                    type="number"
+                    placeholder="20"
+                    value={area}
+                    onChange={(e) => setArea(e.target.value)}
+                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B]"
                   />
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* Section 3: Cấu hình Đơn giá Dịch vụ riêng của phòng */}
-          <div className="rounded-2xl border border-[#DEEBF5] overflow-hidden transition-all">
-            <button
-              type="button"
-              onClick={() => setShowServiceConfig(!showServiceConfig)}
-              className="w-full flex items-center justify-between p-3.5 bg-[#F9FBFE] hover:bg-[#F0F6FC] transition-colors cursor-pointer text-left"
-            >
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-500" />
-                <div>
-                  <span className="text-xs font-bold text-[#253F5B]">
-                    Đơn giá Dịch vụ phòng (Điện, Nước, Dịch vụ chung)
-                  </span>
-                  <p className="text-[10px] text-[#7B93AD]">
-                    Tùy chỉnh riêng cho phòng này hoặc áp dụng theo bảng giá cơ sở
-                  </p>
+              {/* Trạng Thái Ban Đầu */}
+              <div className="space-y-1.5 pt-1">
+                <label className="text-xs font-bold text-[#253F5B]">Trạng Thái Ban Đầu</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { key: "available", label: "Trống" },
+                    { key: "rented", label: "Đang Thuê" },
+                    { key: "maintenance", label: "Đang sửa" },
+                  ].map((st) => (
+                    <button
+                      type="button"
+                      key={st.key}
+                      onClick={() => setStatus(st.key as RoomStatus)}
+                      className={`h-9 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                        status === st.key
+                          ? "bg-[#5C84BE] text-white border-[#5C84BE] shadow-xs"
+                          : "bg-[#F4F9FD] text-[#4A6482] border-[#D9E6F2] hover:bg-[#E9F3FC]"
+                      }`}
+                    >
+                      {st.label}
+                    </button>
+                  ))}
                 </div>
               </div>
-              {showServiceConfig ? (
-                <ChevronUp className="w-4 h-4 text-[#7A93AD]" />
-              ) : (
-                <ChevronDown className="w-4 h-4 text-[#7A93AD]" />
+
+              {/* Thông tin Hợp đồng & Khách thuê khi Đang Thuê */}
+              {status === "rented" && (
+                <div className="p-3.5 rounded-2xl bg-[#F6F9FD] border border-[#DEEBF5] space-y-3 animate-fadeIn">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#253F5B]">
+                    <Calendar className="w-4 h-4 text-[#5C84BE]" />
+                    <span>Hợp đồng & Người thuê</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-[#506A88]">Tên Người Thuê *</label>
+                      <input
+                        type="text"
+                        placeholder="VD: Quý Bình"
+                        value={tenantName}
+                        onChange={(e) => setTenantName(e.target.value)}
+                        className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE]"
+                        required={status === "rented"}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-[#506A88]">Số Điện Thoại</label>
+                      <input
+                        type="tel"
+                        placeholder="0987.654.321"
+                        value={tenantPhone}
+                        onChange={(e) => setTenantPhone(e.target.value)}
+                        className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-[#506A88]">Ngày Bắt Đầu HĐ</label>
+                      <input
+                        type="text"
+                        placeholder="01/01/2026"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="w-full h-9 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-[#506A88]">Hạn Hợp Đồng</label>
+                      <input
+                        type="text"
+                        placeholder="01/01/2027"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="w-full h-9 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-[#506A88]">Tiền Đặt Cọc (đ)</label>
+                    <input
+                      type="number"
+                      placeholder="2.700.000"
+                      value={deposit}
+                      onChange={(e) => setDeposit(e.target.value)}
+                      className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-bold outline-none focus:border-[#5C84BE]"
+                    />
+                  </div>
+                </div>
               )}
-            </button>
+            </div>
 
-            {showServiceConfig && (
-              <div className="p-4 bg-white space-y-3.5 border-t border-[#EAF2F8] animate-fadeIn">
-                {/* 1. Tiền điện */}
-                <div className="grid grid-cols-2 gap-3 items-center">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                      <Zap className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-[#253F5B]">Giá Điện</span>
-                      <p className="text-[10px] text-[#859BB5]">Đơn vị: đ / kWh</p>
-                    </div>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={electricityPrice}
-                      onChange={(e) => setElectricityPrice(e.target.value)}
-                      placeholder="3500"
-                      className="w-full h-9 pl-3 pr-14 rounded-lg border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-semibold text-right"
-                    />
-                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD]">
-                      đ/kWh
-                    </span>
+            {/* CỘT PHẢI (7 cột): Bảng Dịch Vụ Linh Hoạt (Tên dịch vụ, Đơn giá, Đơn vị tính) */}
+            <div className="lg:col-span-7 space-y-3.5 bg-[#F9FBFE] p-4 xl:p-5 rounded-2xl border border-[#DEEBF5]">
+              <div className="flex items-center justify-between pb-2 border-b border-[#E4EFF8]">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#5C84BE]" />
+                  <div>
+                    <h4 className="text-xs font-bold text-[#253F5B] uppercase tracking-wider">
+                      2. Các khoản Dịch vụ của phòng
+                    </h4>
+                    <p className="text-[11px] text-[#7B92AC]">
+                      Nhập tên & giá tùy biến theo từng trọ / cơ sở
+                    </p>
                   </div>
                 </div>
 
-                {/* 2. Tiền nước */}
-                <div className="space-y-1.5 pt-1 border-t border-[#F1F6FB]">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
-                        <Droplets className="w-3.5 h-3.5" />
-                      </div>
-                      <div>
-                        <span className="text-xs font-bold text-[#253F5B]">Giá Nước</span>
-                        <p className="text-[10px] text-[#859BB5]">Cách tính & đơn giá</p>
-                      </div>
+                <button
+                  type="button"
+                  onClick={() => handleAddService()}
+                  className="px-3 py-1.5 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-95 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>Thêm dịch vụ</span>
+                </button>
+              </div>
+
+              {/* Service Rows List */}
+              <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
+                {services.map((service, idx) => (
+                  <div
+                    key={service.id}
+                    className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-[#DCE8F4] shadow-2xs group hover:border-[#5C84BE] transition-colors"
+                  >
+                    {/* Tên dịch vụ (Text input tự gõ) */}
+                    <div className="flex-1 min-w-[140px]">
+                      <input
+                        type="text"
+                        placeholder="Tên dịch vụ (VD: Điện, Nước...)"
+                        value={service.name}
+                        onChange={(e) =>
+                          handleUpdateService(service.id, "name", e.target.value)
+                        }
+                        className="w-full h-8 px-2.5 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-semibold"
+                      />
                     </div>
-                    <div className="flex items-center gap-1 bg-[#F0F5FA] p-0.5 rounded-lg text-[10px] font-bold">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setWaterUnit("m3");
-                          if (waterPrice === "100000" || waterPrice === "150000") setWaterPrice("30000");
-                        }}
-                        className={`px-2 py-1 rounded-md transition-all ${
-                          waterUnit === "m3" ? "bg-white text-[#253F5B] shadow-2xs" : "text-[#7B92AC]"
-                        }`}
-                      >
-                        Khối (m³)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setWaterUnit("person");
-                          if (waterPrice === "30000") setWaterPrice("100000");
-                        }}
-                        className={`px-2 py-1 rounded-md transition-all ${
-                          waterUnit === "person" ? "bg-white text-[#253F5B] shadow-2xs" : "text-[#7B92AC]"
-                        }`}
-                      >
-                        Đầu người
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setWaterUnit("room");
-                          if (waterPrice === "30000") setWaterPrice("150000");
-                        }}
-                        className={`px-2 py-1 rounded-md transition-all ${
-                          waterUnit === "room" ? "bg-white text-[#253F5B] shadow-2xs" : "text-[#7B92AC]"
-                        }`}
-                      >
-                        Khoán phòng
-                      </button>
+
+                    {/* Đơn giá */}
+                    <div className="w-[100px] xl:w-[110px]">
+                      <input
+                        type="number"
+                        placeholder="Đơn giá"
+                        value={service.price || ""}
+                        onChange={(e) =>
+                          handleUpdateService(
+                            service.id,
+                            "price",
+                            Number(e.target.value) || 0
+                          )
+                        }
+                        className="w-full h-8 px-2 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-bold text-right"
+                      />
                     </div>
-                  </div>
 
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={waterPrice}
-                      onChange={(e) => setWaterPrice(e.target.value)}
-                      placeholder={waterUnit === "m3" ? "30000" : "100000"}
-                      className="w-full h-9 pl-3 pr-20 rounded-lg border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-semibold text-right"
-                    />
-                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD]">
-                      {waterUnit === "m3" ? "đ/khối" : waterUnit === "person" ? "đ/người" : "đ/phòng"}
-                    </span>
-                  </div>
-                </div>
+                    {/* Đơn vị tính */}
+                    <div className="w-[85px] xl:w-[95px]">
+                      <select
+                        value={service.unit}
+                        onChange={(e) =>
+                          handleUpdateService(service.id, "unit", e.target.value)
+                        }
+                        className="w-full h-8 px-1.5 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-[11px] font-bold text-[#4B6584] bg-white cursor-pointer"
+                      >
+                        <option value="đ/kWh">đ/kWh</option>
+                        <option value="đ/khối">đ/khối</option>
+                        <option value="đ/người">đ/người</option>
+                        <option value="đ/phòng">đ/phòng</option>
+                        <option value="đ/xe">đ/xe</option>
+                        <option value="đ/tháng">đ/tháng</option>
+                      </select>
+                    </div>
 
-                {/* 3. Dịch vụ chung & Wifi */}
-                <div className="grid grid-cols-2 gap-3 pt-1 border-t border-[#F1F6FB]">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1.5">
-                      <Wifi className="w-3.5 h-3.5 text-indigo-500" />
-                      <span>Wifi / Mạng (đ/tháng)</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={wifiPrice}
-                      onChange={(e) => setWifiPrice(e.target.value)}
-                      placeholder="50000"
-                      className="w-full h-8 px-2.5 rounded-lg border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-semibold text-right"
-                    />
+                    {/* Nút Xóa */}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveService(service.id)}
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      title="Xóa dịch vụ này"
+                      aria-label="Xóa dịch vụ"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
+                ))}
 
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1.5">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>Cầu thang, Rác, Vệ sinh</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={generalServicePrice}
-                      onChange={(e) => setGeneralServicePrice(e.target.value)}
-                      placeholder="100000"
-                      className="w-full h-8 px-2.5 rounded-lg border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-semibold text-right"
-                    />
+                {services.length === 0 && (
+                  <div className="py-6 text-center text-xs text-[#7A93AD] border border-dashed border-[#CFDFEE] rounded-xl bg-white">
+                    Chưa có khoản dịch vụ nào. Bấm <b>"+ Thêm dịch vụ"</b> để thêm.
                   </div>
+                )}
+              </div>
+
+              {/* Gợi ý thêm nhanh dịch vụ phổ biến */}
+              <div className="pt-2 border-t border-[#E4EFF8]">
+                <p className="text-[11px] font-bold text-[#7A93AD] mb-1.5">
+                  Gợi ý thêm nhanh:
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {serviceSuggestions.map((sug) => {
+                    const isAdded = services.some(
+                      (s) => s.name.toLowerCase() === sug.name.toLowerCase()
+                    );
+                    return (
+                      <button
+                        key={sug.name}
+                        type="button"
+                        onClick={() => handleAddService(sug)}
+                        disabled={isAdded}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                          isAdded
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : "bg-white hover:bg-[#EAF2F8] text-[#5C84BE] border border-[#D5E4F2] shadow-2xs cursor-pointer active:scale-95"
+                        }`}
+                      >
+                        + {sug.name} ({sug.price.toLocaleString("vi-VN")} {sug.unit})
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EAF2F8]">
-            <button
-              type="button"
-              onClick={onClose}
-              className="h-10 px-5 rounded-xl border border-[#D9E6F2] text-xs font-semibold text-[#5C728C] hover:bg-gray-50 cursor-pointer"
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="h-10 px-6 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-[#5C84BE]/20 cursor-pointer active:scale-95 transition-all"
-            >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Tạo Phòng</span>
-            </button>
+          <div className="flex items-center justify-between pt-4 border-t border-[#EAF2F8]">
+            <div className="text-xs text-[#7A92AB] font-medium hidden sm:block">
+              Đã cấu hình <b className="text-[#253F5B]">{services.length}</b> khoản dịch vụ cho phòng này
+            </div>
+
+            <div className="flex items-center gap-3 ml-auto">
+              <button
+                type="button"
+                onClick={onClose}
+                className="h-10 px-5 rounded-xl border border-[#D9E6F2] text-xs font-semibold text-[#5C728C] hover:bg-gray-50 cursor-pointer"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                className="h-10 px-6 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-[#5C84BE]/20 cursor-pointer active:scale-95 transition-all"
+              >
+                <Plus className="w-4 h-4 stroke-[3]" />
+                <span>Tạo Phòng</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>
