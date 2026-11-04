@@ -216,19 +216,8 @@ export function CreateRoomView() {
   };
 
   return (
-    <div className="w-full space-y-6 animate-fadeIn pb-16 select-none max-w-[1300px] mx-auto">
-      {/* 1. Breadcrumb navigation */}
-      <div>
-        <Link
-          href="/rooms"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5C84BE] hover:text-[#41689E] transition-colors group cursor-pointer"
-        >
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Quay lại danh sách phòng</span>
-        </Link>
-      </div>
-
-      {/* 2. Top Header Bar (Tương tự Trang Chi Tiết Phòng) */}
+    <div className="w-full space-y-6 animate-fadeIn pb-16 select-none">
+      {/* Top Header Bar (Tương tự Trang Quản Lý Phòng & Chi Tiết Phòng) */}
       <div className="flex items-center justify-between bg-white px-8 py-5 rounded-3xl border border-[#E3EDF6] shadow-sm w-full">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shadow-inner">
