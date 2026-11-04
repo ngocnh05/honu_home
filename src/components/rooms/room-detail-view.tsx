@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  ChevronLeft,
   Calendar,
   Phone,
   UserCheck,
@@ -91,18 +90,7 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
 
   return (
     <div className="w-full space-y-5 animate-fadeIn pb-12 select-none">
-      {/* 1. Breadcrumb navigation */}
-      <div>
-        <Link
-          href="/rooms"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5C84BE] hover:text-[#41689E] transition-colors group cursor-pointer"
-        >
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Quay lại danh sách phòng</span>
-        </Link>
-      </div>
-
-      {/* 2. Top Header Bar: Status Badge + Tiêu đề phòng (Chuẩn Figma 37:172, 37:185) */}
+      {/* 1. Top Header Bar: Status Badge + Tiêu đề phòng (Chuẩn Figma 37:172, 37:185) */}
       <div className="flex items-center justify-between bg-white px-8 py-5 rounded-3xl border border-[#E3EDF6] shadow-sm w-full">
         <div className="flex items-center gap-4">
           {/* Status Badge */}
