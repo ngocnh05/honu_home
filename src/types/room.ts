@@ -32,6 +32,7 @@ export interface Room {
   description?: string;
   image?: string; // Ảnh đại diện chính
   galleryImages?: string[]; // Các ảnh nhỏ / góc phòng
+  videoUrl?: string; // Link/File video quay phòng thực tế (MP4 / Youtube / Drive)
   startDate?: string;
   endDate?: string;
   deposit?: number; // Tiền đặt cọc

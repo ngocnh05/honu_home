@@ -26,6 +26,7 @@ import {
   ShieldCheck,
   ImageIcon,
   X,
+  Video,
 } from "lucide-react";
 import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
 
@@ -91,6 +92,7 @@ export function CreateRoomView() {
   const [galleryImages, setGalleryImages] = React.useState<string[]>([
     "/images/rooms/room-demo.png",
   ]);
+  const [videoUrl, setVideoUrl] = React.useState<string>("");
 
   // Contract Details theo đúng thứ tự:
   // 1. Người thuê, 2. Số điện thoại, 3. Số người ở, 4. Số xe, 5. Ngày bắt đầu HĐ, 6. Ngày kết thúc, 7. Tiền đặt cọc, 8. Quê quán, 9. Tuổi
@@ -200,6 +202,7 @@ export function CreateRoomView() {
       description,
       image: coverImage,
       galleryImages,
+      videoUrl: videoUrl.trim() || undefined,
       amenities: selectedAmenities,
       occupantsCount: Number(occupantsCount) || 1,
       vehiclesCount: Number(vehiclesCount) || 0,
@@ -362,6 +365,27 @@ export function CreateRoomView() {
                       />
                     </label>
                   )}
+                </div>
+
+                {/* Video quay phòng thực tế */}
+                <div className="space-y-2 pt-3 border-t border-[#EEF4FA]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                      <Video className="w-3.5 h-3.5 text-[#5C84BE]" />
+                      Video quay phòng thực tế
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-semibold">Tùy chọn</span>
+                  </div>
+                  <input
+                    type="url"
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                    placeholder="Link video Youtube, TikTok, Drive hoặc file MP4..."
+                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-medium text-[#253F5B] transition-all placeholder:text-[#A4B3C6]"
+                  />
+                  <p className="text-[10px] text-slate-400">
+                    Giúp khách thuê xem trước toàn cảnh phòng trực quan trước khi chốt thuê
+                  </p>
                 </div>
               </div>
             </div>
