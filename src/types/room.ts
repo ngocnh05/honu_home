@@ -18,6 +18,8 @@ export interface RoomServices {
 
 export interface Room {
   id: string;
+  buildingId?: string; // Thuộc tòa nhà/cơ sở nào (VD: bld_cg)
+  buildingName?: string; // Tên tòa nhà (VD: HonuHome Cầu Giấy)
   roomNumber: string;
   type: RoomType;
   price: number;

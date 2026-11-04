@@ -10,6 +10,7 @@ import {
   DoorOpen,
   Filter,
   Calendar,
+  Building2,
 } from "lucide-react";
 import {
   EditActionIcon,
@@ -22,6 +23,7 @@ import { AddRoomModal } from "@/components/rooms/add-room-modal";
 
 export function RoomsTable() {
   const [rooms, setRooms] = React.useState<Room[]>(initialRooms);
+  const [buildingFilter, setBuildingFilter] = React.useState("ALL");
   const [typeFilter, setTypeFilter] = React.useState("ALL");
   const [statusFilter, setStatusFilter] = React.useState("ALL");
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -32,11 +34,15 @@ export function RoomsTable() {
   // Filter logic
   const filteredRooms = React.useMemo(() => {
     return rooms.filter((r) => {
+      const matchBuilding =
+        buildingFilter === "ALL" ||
+        r.buildingId === buildingFilter ||
+        (!r.buildingId && buildingFilter === "bld_cg"); // default mock rooms to first building
       const matchType = typeFilter === "ALL" || r.type === typeFilter;
       const matchStatus = statusFilter === "ALL" || r.status === statusFilter;
-      return matchType && matchStatus;
+      return matchBuilding && matchType && matchStatus;
     });
-  }, [rooms, typeFilter, statusFilter]);
+  }, [rooms, buildingFilter, typeFilter, statusFilter]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredRooms.length / itemsPerPage) || 1;
@@ -104,6 +110,24 @@ export function RoomsTable() {
 
         {/* Right Toolbar: Bộ lọc gọn gàng + Nút Thêm Phòng */}
         <div className="flex items-center gap-3">
+          {/* Lọc cơ sở / tòa nhà */}
+          <div className="relative">
+            <select
+              value={buildingFilter}
+              onChange={(e) => {
+                setBuildingFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="h-11 pl-4 pr-9 appearance-none rounded-xl bg-[#F4F8FC] hover:bg-[#EAF2F9] border border-[#D9E6F2] focus:border-[#5C84BE] text-xs font-bold text-[#253F5B] outline-none cursor-pointer transition-all"
+            >
+              <option value="ALL">Tất cả cơ sở</option>
+              <option value="bld_cg">HonuHome Cầu Giấy</option>
+              <option value="bld_md">HonuHome Mỹ Đình</option>
+              <option value="bld_cl">HonuHome Đống Đa</option>
+            </select>
+            <Building2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5C84BE] pointer-events-none" />
+          </div>
+
           {/* Lọc loại phòng */}
           <div className="relative">
             <select

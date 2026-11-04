@@ -67,6 +67,7 @@ export function CreateRoomView() {
   const router = useRouter();
 
   // Basic Info
+  const [buildingId, setBuildingId] = React.useState("bld_cg");
   const [roomNumber, setRoomNumber] = React.useState("");
   const [type, setType] = React.useState<RoomType>("Phòng Đơn");
   const [floor, setFloor] = React.useState<number>(1);
@@ -177,6 +178,7 @@ export function CreateRoomView() {
 
     const newRoom: Partial<Room> = {
       id: `r_${Date.now()}`,
+      buildingId,
       roomNumber: roomNumber.trim().toUpperCase(),
       type,
       floor,
@@ -369,6 +371,23 @@ export function CreateRoomView() {
               <div className="flex items-center gap-2 text-xs font-bold text-[#253F5B] uppercase tracking-wider pb-2 border-b border-[#F0F5FA]">
                 <Layers className="w-4 h-4 text-[#5C84BE]" />
                 <span>Thông số căn phòng</span>
+              </div>
+
+              {/* Thuộc cơ sở / tòa nhà */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-[#5C84BE]" />
+                  <span>Thuộc Cơ sở / Tòa nhà *</span>
+                </label>
+                <select
+                  value={buildingId}
+                  onChange={(e) => setBuildingId(e.target.value)}
+                  className="w-full h-11 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer transition-all"
+                >
+                  <option value="bld_cg">HonuHome Cầu Giấy (Số 18, Ngõ 86 Duy Tân, Dịch Vọng Hậu)</option>
+                  <option value="bld_md">HonuHome Mỹ Đình (Số 5, Ngõ 12 Lê Đức Thọ, Nam Từ Liêm)</option>
+                  <option value="bld_cl">HonuHome Đống Đa (Số 22, Ngõ 91 Chùa Láng, Láng Thượng)</option>
+                </select>
               </div>
 
               {/* Hàng 1: Số Phòng & Loại Phòng & Tầng */}
