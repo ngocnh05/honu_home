@@ -82,7 +82,7 @@ export function SnackbarProvider({ children }: { children: React.ReactNode }) {
       {/* Top Right Floating Container */}
       <div
         aria-live="assertive"
-        className="fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none select-none transition-all duration-300"
+        className="fixed top-4 right-4 z-[9999] flex flex-col items-end gap-2 max-w-lg w-full pointer-events-none select-none transition-all duration-300"
       >
         {snackbars.map((item) => (
           <SnackbarCard
@@ -171,44 +171,39 @@ function SnackbarCard({
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className={`pointer-events-auto relative w-full rounded-2xl border p-4 shadow-xl backdrop-blur-md transition-all duration-300 animate-in slide-in-from-top-3 fade-in duration-200 overflow-hidden ${config.bg}`}
+      className={`pointer-events-auto relative flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border shadow-lg backdrop-blur-md transition-all duration-300 animate-in slide-in-from-top-2 fade-in overflow-hidden max-w-md ${config.bg}`}
     >
-      <div className="flex items-start gap-3.5">
-        {/* Icon Circle */}
-        <div
-          className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-md ${config.iconBg}`}
-        >
-          <Icon className="w-5 h-5 stroke-[2.4]" />
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 min-w-0 pr-4">
-          <div className="flex items-center gap-2">
-            <h4 className={`text-sm font-extrabold tracking-tight leading-snug ${config.titleColor}`}>
-              {item.title}
-            </h4>
-          </div>
-
-          {item.message && (
-            <p className={`text-xs font-medium mt-1 leading-relaxed ${config.msgColor}`}>
-              {item.message}
-            </p>
-          )}
-        </div>
-
-        {/* Close Button */}
-        <button
-          type="button"
-          onClick={onClose}
-          className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-black/5 transition-colors cursor-pointer shrink-0"
-          aria-label="Đóng thông báo"
-        >
-          <X className="w-4 h-4" />
-        </button>
+      {/* Small Icon Badge */}
+      <div
+        className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 shadow-xs ${config.iconBg}`}
+      >
+        <Icon className="w-3.5 h-3.5 stroke-[2.5]" />
       </div>
 
-      {/* Countdown Progress Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/5 overflow-hidden">
+      {/* 1 Dòng Duy Nhất: Tiêu đề + Nội dung */}
+      <div className="flex items-center gap-1.5 min-w-0 pr-1 text-xs">
+        <span className={`font-extrabold whitespace-nowrap shrink-0 ${config.titleColor}`}>
+          {item.title}
+        </span>
+        {item.message && (
+          <span className={`font-medium truncate ${config.msgColor}`}>
+            — {item.message}
+          </span>
+        )}
+      </div>
+
+      {/* Close Button */}
+      <button
+        type="button"
+        onClick={onClose}
+        className="p-1 -mr-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-black/5 transition-colors cursor-pointer shrink-0"
+        aria-label="Đóng thông báo"
+      >
+        <X className="w-3.5 h-3.5" />
+      </button>
+
+      {/* Slim Countdown Progress Bar (2px) */}
+      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-black/5 overflow-hidden">
         <div
           className={`h-full transition-all duration-75 ease-linear ${config.progressBar}`}
           style={{ width: `${progress}%` }}
