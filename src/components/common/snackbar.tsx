@@ -171,35 +171,29 @@ function SnackbarCard({
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className={`pointer-events-auto relative flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border shadow-lg backdrop-blur-md transition-all duration-300 animate-in slide-in-from-top-2 fade-in overflow-hidden max-w-md ${config.bg}`}
+      className={`pointer-events-auto relative inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl border shadow-md backdrop-blur-md transition-all duration-200 animate-in slide-in-from-top-2 fade-in overflow-hidden max-w-sm ${config.bg}`}
     >
       {/* Small Icon Badge */}
       <div
-        className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 shadow-xs ${config.iconBg}`}
+        className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 shadow-2xs ${config.iconBg}`}
       >
-        <Icon className="w-3.5 h-3.5 stroke-[2.5]" />
+        <Icon className="w-3 h-3 stroke-[2.6]" />
       </div>
 
-      {/* 1 Dòng Duy Nhất: Tiêu đề + Nội dung */}
-      <div className="flex items-center gap-1.5 min-w-0 pr-1 text-xs">
-        <span className={`font-extrabold whitespace-nowrap shrink-0 ${config.titleColor}`}>
-          {item.title}
-        </span>
-        {item.message && (
-          <span className={`font-medium truncate ${config.msgColor}`}>
-            — {item.message}
-          </span>
-        )}
-      </div>
+      {/* 1 Dòng Duy Nhất: Siêu gọn gàng */}
+      <span className={`text-xs font-bold whitespace-nowrap ${config.titleColor}`}>
+        {item.title}
+        {item.message ? ` — ${item.message}` : ""}
+      </span>
 
       {/* Close Button */}
       <button
         type="button"
         onClick={onClose}
-        className="p-1 -mr-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-black/5 transition-colors cursor-pointer shrink-0"
+        className="p-0.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-black/5 transition-colors cursor-pointer shrink-0 ml-1"
         aria-label="Đóng thông báo"
       >
-        <X className="w-3.5 h-3.5" />
+        <X className="w-3 h-3" />
       </button>
 
       {/* Slim Countdown Progress Bar (2px) */}

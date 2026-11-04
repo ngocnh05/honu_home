@@ -216,10 +216,7 @@ export function CreateRoomView() {
     console.log("New Room Created:", newRoom);
 
     // Navigate back to rooms page with toast
-    success(
-      "Thêm phòng mới thành công!",
-      `Căn hộ phòng ${newRoom.roomNumber} đã được lưu và cập nhật vào danh sách.`
-    );
+    success(`Đã thêm phòng ${newRoom.roomNumber}`);
     setTimeout(() => {
       router.push("/rooms");
     }, 400);

@@ -69,7 +69,7 @@ export function BuildingsView() {
             : b
         )
       );
-      success("Cập nhật thành công!", `Thông tin cơ sở "${data.name}" đã được cập nhật.`);
+      success(`Đã lưu cơ sở "${data.name}"`);
       setEditingBuilding(null);
     } else {
       const newBuilding: Building = {
@@ -82,7 +82,7 @@ export function BuildingsView() {
         createdAt: new Intl.DateTimeFormat("vi-VN").format(new Date()),
       };
       setBuildings((prev) => [newBuilding, ...prev]);
-      success("Tạo cơ sở mới thành công!", `Cơ sở "${data.name}" đã được thêm vào hệ thống.`);
+      success(`Đã thêm cơ sở "${data.name}"`);
     }
   };
 
@@ -98,7 +98,7 @@ export function BuildingsView() {
   const handleConfirmDelete = () => {
     if (deleteTarget) {
       setBuildings((prev) => prev.filter((b) => b.id !== deleteTarget.id));
-      error("Đã xóa cơ sở!", `Cơ sở "${deleteTarget.name}" đã được xóa vĩnh viễn khỏi hệ thống.`);
+      error(`Đã xóa cơ sở "${deleteTarget.name}"`);
       setDeleteTarget(null);
     }
   };

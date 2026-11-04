@@ -65,7 +65,7 @@ export function RoomsTable() {
   const handleConfirmDeleteRoom = () => {
     if (deleteTarget) {
       setRooms((prev) => prev.filter((r) => r.id !== deleteTarget.id));
-      error("Đã xóa phòng!", `Phòng ${deleteTarget.roomNumber} đã được gỡ bỏ khỏi hệ thống.`);
+      error(`Đã xóa phòng ${deleteTarget.roomNumber}`);
       setDeleteTarget(null);
     }
   };
@@ -92,7 +92,7 @@ export function RoomsTable() {
     };
 
     setRooms((prev) => [newRoom, ...prev]);
-    success("Thêm phòng mới thành công!", `Phòng ${newRoom.roomNumber} đã được thêm vào danh sách.`);
+    success(`Đã thêm phòng ${newRoom.roomNumber}`);
   };
 
   return (
