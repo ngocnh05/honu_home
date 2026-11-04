@@ -13,6 +13,10 @@ import {
   Bike,
   CheckCircle2,
   Wrench,
+  MapPin,
+  User,
+  Phone,
+  Cake,
 } from "lucide-react";
 import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
 
@@ -60,16 +64,17 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
   const [status, setStatus] = React.useState<RoomStatus>("available");
   const [area, setArea] = React.useState("20");
 
-  // People & Vehicles in Room (Ô nhập)
-  const [occupantsCount, setOccupantsCount] = React.useState<string>("1");
-  const [vehiclesCount, setVehiclesCount] = React.useState<string>("1");
-
-  // Contract Details (when status === "rented")
+  // Contract Details theo đúng thứ tự:
+  // 1. người thuê, 2. số điện thoại, 3. số ng ở, 4. số xe, 5. ngày bắt đầu hd, 6. ngày kết thúc, 7. tiền đặt cọc, 8. quê quán, 9. tuổi
   const [tenantName, setTenantName] = React.useState("");
   const [tenantPhone, setTenantPhone] = React.useState("");
+  const [occupantsCount, setOccupantsCount] = React.useState<string>("1");
+  const [vehiclesCount, setVehiclesCount] = React.useState<string>("1");
   const [startDate, setStartDate] = React.useState("01/01/2026");
   const [endDate, setEndDate] = React.useState("01/01/2027");
-  const [deposit, setDeposit] = React.useState<string>("2.700.000"); // Formatted with dots
+  const [deposit, setDeposit] = React.useState<string>("2.700.000");
+  const [tenantHometown, setTenantHometown] = React.useState("");
+  const [tenantAge, setTenantAge] = React.useState("");
 
   // Dynamic Custom Services List
   const [services, setServices] = React.useState<CustomService[]>(defaultInitialServices);
@@ -160,6 +165,8 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
       area: Number(area) || 20,
       occupantsCount: Number(occupantsCount) || 1,
       vehiclesCount: Number(vehiclesCount) || 0,
+      tenantHometown: status === "rented" && tenantHometown.trim() ? tenantHometown.trim() : undefined,
+      tenantAge: status === "rented" && tenantAge.trim() ? tenantAge.trim() : undefined,
       services: legacyServices,
       customServices: validServices,
     });
@@ -168,18 +175,20 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
     setRoomNumber("");
     setTenantName("");
     setTenantPhone("");
+    setTenantHometown("");
+    setTenantAge("");
     onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
-      {/* Modal Container: Dài height rộng rãi (w: 960px, h: 740px - max-h 94vh) thoáng đãng, sang trọng */}
+      {/* Modal Container: Cao rộng rãi (w: 960px, h: 740px - max-h 94vh) */}
       <div className="bg-white rounded-3xl w-full max-w-[960px] h-[740px] max-h-[94vh] flex flex-col shadow-2xl border border-[#E3EDF6] animate-scaleUp overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 xl:px-8 py-4.5 border-b border-[#EAF2F8] bg-white shrink-0">
+        <div className="flex items-center justify-between px-6 xl:px-8 py-4 border-b border-[#EAF2F8] bg-white shrink-0">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shadow-inner">
-              <Building2 className="w-6 h-6 stroke-[2.2]" />
+            <div className="w-10 h-10 rounded-2xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shadow-inner">
+              <Building2 className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
               <h3 className="text-xl font-extrabold text-[#253F5B] tracking-tight">
@@ -199,37 +208,37 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
           </button>
         </div>
 
-        {/* Form Body - 2 Cột song song thoáng đãng với chiều cao h-[570px] */}
+        {/* Form Body - 2 Cột song song */}
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between p-6 xl:p-8 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 xl:gap-8 items-start h-[560px]">
-            {/* CỘT TRÁI (6 cột): Thông tin phòng & Hợp đồng */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 xl:gap-8 items-start h-[565px]">
+            {/* CỘT TRÁI (6 cột): Thông tin phòng & Hợp đồng (sắp xếp đúng thứ tự) */}
             <div className="lg:col-span-6 flex flex-col justify-between h-full pr-1">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-xs font-bold text-[#253F5B] uppercase tracking-wider pb-2 border-b border-[#EEF4FA]">
+              <div className="space-y-3.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#253F5B] uppercase tracking-wider pb-1.5 border-b border-[#EEF4FA]">
                   <Layers className="w-4 h-4 text-[#5C84BE]" />
                   <span>1. Thông tin căn phòng</span>
                 </div>
 
                 {/* Hàng 1: Số Phòng & Loại Phòng */}
                 <div className="grid grid-cols-2 gap-3.5">
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <label className="text-xs font-bold text-[#253F5B]">Số Phòng *</label>
                     <input
                       type="text"
                       placeholder="VD: P102"
                       value={roomNumber}
                       onChange={(e) => setRoomNumber(e.target.value)}
-                      className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B] font-semibold transition-all"
+                      className="w-full h-9.5 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B] font-semibold transition-all"
                       required
                     />
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <label className="text-xs font-bold text-[#253F5B]">Loại Phòng</label>
                     <select
                       value={type}
                       onChange={(e) => setType(e.target.value as RoomType)}
-                      className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer transition-all"
+                      className="w-full h-9.5 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer transition-all"
                     >
                       <option value="Phòng Đơn">Phòng Đơn</option>
                       <option value="Phòng Đôi">Phòng Đôi</option>
@@ -240,7 +249,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
 
                 {/* Hàng 2: Giá Thuê & Diện Tích */}
                 <div className="grid grid-cols-2 gap-3.5">
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <label className="text-xs font-bold text-[#253F5B]">Giá Thuê (đ/tháng) *</label>
                     <div className="relative">
                       <input
@@ -255,7 +264,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                             setDeposit(formatted);
                           }
                         }}
-                        className="w-full h-10 pl-3.5 pr-10 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B] font-bold text-right transition-all"
+                        className="w-full h-9.5 pl-3.5 pr-10 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B] font-bold text-right transition-all"
                         required
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-bold pointer-events-none">
@@ -264,7 +273,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <label className="text-xs font-bold text-[#253F5B]">Diện Tích (m²)</label>
                     <div className="relative">
                       <input
@@ -272,7 +281,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                         placeholder="20"
                         value={area}
                         onChange={(e) => setArea(e.target.value)}
-                        className="w-full h-10 pl-3.5 pr-10 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
+                        className="w-full h-9.5 pl-3.5 pr-10 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-bold pointer-events-none">
                         m²
@@ -282,7 +291,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                 </div>
 
                 {/* Hàng 3: Trạng Thái Ban Đầu */}
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <label className="text-xs font-bold text-[#253F5B]">Trạng Thái Ban Đầu</label>
                   <div className="grid grid-cols-3 gap-2.5">
                     {[
@@ -294,7 +303,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                         type="button"
                         key={st.key}
                         onClick={() => setStatus(st.key as RoomStatus)}
-                        className={`h-9.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                        className={`h-9 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                           status === st.key
                             ? "bg-[#5C84BE] text-white border-[#5C84BE] shadow-xs"
                             : "bg-[#F4F9FD] text-[#4A6482] border-[#D9E6F2] hover:bg-[#E9F3FC]"
@@ -305,143 +314,178 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                     ))}
                   </div>
                 </div>
-
-                {/* Hàng 4: Ô NHẬP Số Người Thuê & Số Xe Máy */}
-                <div className="grid grid-cols-2 gap-3.5">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                      <Users className="w-4 h-4 text-[#5C84BE]" />
-                      <span>Số người ở</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        placeholder="1"
-                        value={occupantsCount}
-                        onChange={(e) => setOccupantsCount(e.target.value)}
-                        className="w-full h-10 px-3.5 pr-14 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
-                      />
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-medium pointer-events-none">
-                        người
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                      <Bike className="w-4 h-4 text-[#5C84BE]" />
-                      <span>Số xe máy</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        placeholder="1"
-                        value={vehiclesCount}
-                        onChange={(e) => setVehiclesCount(e.target.value)}
-                        className="w-full h-10 px-3.5 pr-12 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
-                      />
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-medium pointer-events-none">
-                        xe
-                      </span>
-                    </div>
-                  </div>
-                </div>
               </div>
 
-              {/* KHỐI CỐ ĐỊNH CHIỀU CAO (h-[220px]): Thoáng đãng, không bao giờ bị xê dịch khi chuyển đổi trạng thái */}
-              <div className="h-[220px] pt-1">
+              {/* KHỐI HỢP ĐỒNG & KHÁCH THUÊ: SẮP XẾP CHUẨN THỨ TỰ YÊU CẦU:
+                  1. Người thuê, 2. Số điện thoại, 3. Số ng ở, 4. Số xe, 5. Ngày bắt đầu hd, 6. Ngày kết thúc, 7. Tiền đặt cọc, 8. Quê quán, 9. Tuổi */}
+              <div className="h-[270px] pt-1">
                 {status === "rented" ? (
-                  <div className="h-full p-4 rounded-2xl bg-[#F6F9FD] border border-[#DEEBF5] flex flex-col justify-between animate-fadeIn shadow-2xs">
-                    {/* Hàng 1: Người thuê & SĐT */}
+                  <div className="h-full p-3.5 rounded-2xl bg-[#F6F9FD] border border-[#DEEBF5] flex flex-col justify-between animate-fadeIn shadow-2xs">
+                    {/* Hàng 1: 1. Người thuê & 2. Số điện thoại */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-[#506A88]">
-                          Người thuê *
+                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
+                          <User className="w-3.5 h-3.5 text-[#5C84BE]" />
+                          <span>1. Người thuê *</span>
                         </label>
                         <input
                           type="text"
-                          placeholder="VD: Nguyễn Văn A"
+                          placeholder="Họ và tên khách thuê"
                           value={tenantName}
                           onChange={(e) => setTenantName(e.target.value)}
-                          className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE]"
+                          className="w-full h-8 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE]"
                           required={status === "rented"}
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-[#506A88]">
-                          Số điện thoại
+                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
+                          <Phone className="w-3.5 h-3.5 text-[#5C84BE]" />
+                          <span>2. Số điện thoại</span>
                         </label>
                         <input
                           type="tel"
                           placeholder="0987.654.321"
                           value={tenantPhone}
                           onChange={(e) => setTenantPhone(e.target.value)}
-                          className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                          className="w-full h-8 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
                         />
                       </div>
                     </div>
 
-                    {/* Hàng 2: 2 cái DATE CÓ TIÊU ĐỀ RÕ RÀNG */}
+                    {/* Hàng 2: 3. Số người ở & 4. Số xe */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1.5">
+                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
+                          <Users className="w-3.5 h-3.5 text-[#5C84BE]" />
+                          <span>3. Số người ở</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            placeholder="1"
+                            value={occupantsCount}
+                            onChange={(e) => setOccupantsCount(e.target.value)}
+                            className="w-full h-8 px-2.5 pr-12 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-medium pointer-events-none">
+                            người
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
+                          <Bike className="w-3.5 h-3.5 text-[#5C84BE]" />
+                          <span>4. Số xe</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            placeholder="1"
+                            value={vehiclesCount}
+                            onChange={(e) => setVehiclesCount(e.target.value)}
+                            className="w-full h-8 px-2.5 pr-10 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-medium pointer-events-none">
+                            xe
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Hàng 3: 5. Ngày bắt đầu HĐ & 6. Ngày kết thúc */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-[#5C84BE]" />
-                          <span>Ngày bắt đầu HĐ</span>
+                          <span>5. Ngày bắt đầu HĐ</span>
                         </label>
                         <input
                           type="text"
                           placeholder="01/01/2026"
                           value={startDate}
                           onChange={(e) => setStartDate(e.target.value)}
-                          className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                          className="w-full h-8 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1.5">
+                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-[#5C84BE]" />
-                          <span>Hạn hợp đồng</span>
+                          <span>6. Ngày kết thúc</span>
                         </label>
                         <input
                           type="text"
                           placeholder="01/01/2027"
                           value={endDate}
                           onChange={(e) => setEndDate(e.target.value)}
-                          className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                          className="w-full h-8 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
                         />
                       </div>
                     </div>
 
-                    {/* Hàng 3: Tiền đặt cọc */}
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-bold text-[#506A88]">
-                        Tiền đặt cọc
-                      </label>
-                      <div className="relative">
+                    {/* Hàng 4: 7. Tiền đặt cọc & 8. Quê quán & 9. Tuổi */}
+                    <div className="grid grid-cols-12 gap-2.5">
+                      {/* 7. Tiền đặt cọc (5 cột) */}
+                      <div className="col-span-5 space-y-1">
+                        <label className="text-[11px] font-bold text-[#506A88] truncate block">
+                          7. Tiền đặt cọc
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="2.700.000"
+                            value={deposit}
+                            onChange={(e) => setDeposit(formatPrice(e.target.value))}
+                            className="w-full h-8 pl-2.5 pr-10 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-bold outline-none focus:border-[#5C84BE] text-right"
+                          />
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-bold pointer-events-none">
+                            VNĐ
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 8. Quê quán (4 cột) */}
+                      <div className="col-span-4 space-y-1">
+                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1 truncate">
+                          <MapPin className="w-3 h-3 text-[#5C84BE] shrink-0" />
+                          <span>8. Quê quán</span>
+                        </label>
                         <input
                           type="text"
-                          inputMode="numeric"
-                          placeholder="2.700.000"
-                          value={deposit}
-                          onChange={(e) => setDeposit(formatPrice(e.target.value))}
-                          className="w-full h-9 pl-3.5 pr-14 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-bold outline-none focus:border-[#5C84BE] text-right"
+                          placeholder="VD: Hà Nội"
+                          value={tenantHometown}
+                          onChange={(e) => setTenantHometown(e.target.value)}
+                          className="w-full h-8 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE]"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-bold pointer-events-none">
-                          VNĐ
-                        </span>
+                      </div>
+
+                      {/* 9. Tuổi (3 cột) */}
+                      <div className="col-span-3 space-y-1">
+                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1 truncate">
+                          <Cake className="w-3 h-3 text-[#5C84BE] shrink-0" />
+                          <span>9. Tuổi</span>
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="VD: 22"
+                          value={tenantAge}
+                          onChange={(e) => setTenantAge(e.target.value)}
+                          className="w-full h-8 px-2 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-center"
+                        />
                       </div>
                     </div>
                   </div>
                 ) : status === "available" ? (
-                  <div className="h-full rounded-2xl border border-dashed border-[#CFDFEE] bg-[#F8FBFE] flex flex-col items-center justify-center p-5 text-center">
-                    <CheckCircle2 className="w-8 h-8 text-emerald-500 mb-2" />
+                  <div className="h-full rounded-2xl border border-dashed border-[#CFDFEE] bg-[#F8FBFE] flex flex-col items-center justify-center p-6 text-center">
+                    <CheckCircle2 className="w-9 h-9 text-emerald-500 mb-2" />
                     <p className="text-sm font-bold text-[#253F5B]">Phòng trống sẵn sàng đón khách</p>
                     <p className="text-xs text-[#7B92AC] mt-1 max-w-[280px]">
-                      Chọn nút <b>"Đang Thuê"</b> ở trên nếu phòng đã có khách vào ở để nhập hợp đồng và tiền cọc
+                      Chọn nút <b>"Đang Thuê"</b> ở trên nếu phòng đã có khách vào ở để nhập thông tin hợp đồng và khách thuê
                     </p>
                   </div>
                 ) : (
-                  <div className="h-full rounded-2xl border border-dashed border-[#F3E2A8] bg-[#FFFDF5] flex flex-col items-center justify-center p-5 text-center">
-                    <Wrench className="w-8 h-8 text-amber-500 mb-2" />
+                  <div className="h-full rounded-2xl border border-dashed border-[#F3E2A8] bg-[#FFFDF5] flex flex-col items-center justify-center p-6 text-center">
+                    <Wrench className="w-9 h-9 text-amber-500 mb-2" />
                     <p className="text-sm font-bold text-[#7A5A00]">Phòng đang bảo trì / sửa chữa</p>
                     <p className="text-xs text-[#9A7D2C] mt-1 max-w-[280px]">
                       Tạm thời không nhận người thuê cho đến khi hoàn tất sửa chữa
