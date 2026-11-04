@@ -19,17 +19,17 @@ function DashboardLayoutContent({
       {/* Sidebar Navigation */}
       <Sidebar />
 
-      {/* Main Content Area - Transitions padding when sidebar is collapsed (72px) vs expanded (235px/245px) */}
+      {/* Main Content Area - Transitions padding when sidebar is collapsed (72px) vs expanded (230px/240px) */}
       <div
         className={`flex-1 flex flex-col min-w-0 w-full transition-all duration-300 ease-in-out ${
-          isCollapsed ? "pl-[72px]" : "pl-[235px] xl:pl-[245px]"
+          isCollapsed ? "pl-[72px]" : "pl-[230px] xl:pl-[240px]"
         }`}
       >
         {/* Top Header with toggle & notifications */}
         <TopHeader unreadCount={unreadCount} />
 
-        {/* Page Inner Container - Responsive padding & max width */}
-        <main className="flex-1 p-5 lg:p-7 xl:p-8 w-full max-w-[1440px] mx-auto transition-all">
+        {/* Page Inner Container - Perfectly aligned with TopHeader (px-5 xl:px-7), no awkward mx-auto gap */}
+        <main className="flex-1 px-5 xl:px-7 py-5 lg:py-6 w-full transition-all">
           {children}
         </main>
       </div>

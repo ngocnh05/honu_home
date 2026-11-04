@@ -77,7 +77,7 @@ export function Sidebar() {
         "fixed top-0 left-0 bottom-0 z-40 bg-[#EAF2F8] border-r border-[#D2E2F0] flex flex-col justify-between py-3 xl:py-4 select-none transition-all duration-300 ease-in-out",
         isCollapsed
           ? "w-[72px] px-2 items-center overflow-visible"
-          : "w-[235px] xl:w-[245px] px-3 xl:px-3.5 overflow-y-auto overflow-x-hidden"
+          : "w-[230px] xl:w-[240px] px-3 xl:px-3.5 overflow-y-auto overflow-x-hidden"
       )}
     >
       {/* Top Header & Logo Area */}
