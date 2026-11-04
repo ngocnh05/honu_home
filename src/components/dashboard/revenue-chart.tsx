@@ -46,17 +46,17 @@ export function RevenueChart({ data, totalFormatted }: RevenueChartProps) {
   const xTicks = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45];
 
   return (
-    <div className="w-[502px] h-[397px] bg-white rounded-3xl p-7 border border-[#E3EDF6] shadow-sm flex flex-col justify-between">
+    <div className="w-full h-full min-h-[360px] xl:min-h-[397px] bg-white rounded-3xl p-5 xl:p-7 border border-[#E3EDF6] shadow-sm flex flex-col justify-between">
       {/* Card Header */}
       <div>
-        <p className="text-base font-semibold text-[#68819D]">Doanh thu tháng</p>
-        <p className="text-3xl font-extrabold text-[#253F5B] tracking-tight mt-1">
+        <p className="text-sm xl:text-base font-semibold text-[#68819D]">Doanh thu tháng</p>
+        <p className="text-2xl xl:text-3xl font-extrabold text-[#253F5B] tracking-tight mt-1">
           {totalFormatted}
         </p>
       </div>
 
       {/* SVG Line Chart */}
-      <div className="relative w-full h-[260px] flex items-center justify-center">
+      <div className="relative w-full h-[230px] xl:h-[260px] flex items-center justify-center">
         <svg
           viewBox={`0 0 ${width} ${height}`}
           className="w-full h-full overflow-visible select-none"
