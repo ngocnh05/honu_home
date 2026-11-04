@@ -14,6 +14,11 @@ import {
   Edit,
   History,
   CheckCircle2,
+  Zap,
+  Droplets,
+  Wifi,
+  ShieldCheck,
+  BadgeDollarSign,
 } from "lucide-react";
 import type { Room } from "@/types/room";
 
@@ -337,6 +342,80 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                     <p className="text-lg font-black text-[#253F5B]">
                       {room.endDate || "01/01/2026"}
                     </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Đơn giá Dịch vụ & Tiền cọc */}
+              <div className="pt-4 border-t border-[#E8F1FA] space-y-3">
+                <h4 className="text-xs font-bold text-[#7A93AD] uppercase tracking-wider">
+                  Bảng giá dịch vụ phòng & tiền cọc
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {/* Điện */}
+                  <div className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                      <Zap className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-[#7A93AD] font-bold">Điện</p>
+                      <p className="text-xs font-extrabold text-[#253F5B]">
+                        {room.services?.electricityPrice
+                          ? `${room.services.electricityPrice.toLocaleString("vi-VN")} đ/kWh`
+                          : "3.500 đ/kWh"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Nước */}
+                  <div className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+                      <Droplets className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-[#7A93AD] font-bold">Nước</p>
+                      <p className="text-xs font-extrabold text-[#253F5B]">
+                        {room.services?.waterPrice
+                          ? `${room.services.waterPrice.toLocaleString("vi-VN")} đ/${
+                              room.services.waterUnit === "m3"
+                                ? "m³"
+                                : room.services.waterUnit === "person"
+                                ? "người"
+                                : "phòng"
+                            }`
+                          : "30.000 đ/m³"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Dịch vụ / Wifi */}
+                  <div className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                      <Wifi className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-[#7A93AD] font-bold">Wifi / Dịch vụ</p>
+                      <p className="text-xs font-extrabold text-[#253F5B]">
+                        {room.services?.wifiPrice
+                          ? `${room.services.wifiPrice.toLocaleString("vi-VN")} đ/tháng`
+                          : "50.000 đ/tháng"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Tiền cọc */}
+                  <div className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                      <BadgeDollarSign className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-[#7A93AD] font-bold">Tiền cọc</p>
+                      <p className="text-xs font-extrabold text-[#253F5B]">
+                        {room.deposit
+                          ? `${room.deposit.toLocaleString("vi-VN")} đ`
+                          : room.priceFormatted}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
