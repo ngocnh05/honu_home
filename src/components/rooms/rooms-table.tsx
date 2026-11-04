@@ -20,6 +20,7 @@ import {
 import type { Room, RoomStatus } from "@/types/room";
 import { initialRooms } from "@/lib/mock-data/rooms";
 import { AddRoomModal } from "@/components/rooms/add-room-modal";
+import { DeleteConfirmDialog } from "@/components/common/delete-confirm-dialog";
 
 export function RoomsTable() {
   const [rooms, setRooms] = React.useState<Room[]>(initialRooms);
@@ -28,6 +29,7 @@ export function RoomsTable() {
   const [statusFilter, setStatusFilter] = React.useState("ALL");
   const [currentPage, setCurrentPage] = React.useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; roomNumber: string } | null>(null);
 
   const itemsPerPage = 7;
 
@@ -55,8 +57,13 @@ export function RoomsTable() {
     paginatedRooms.length > 0 ? itemsPerPage - paginatedRooms.length : 0;
 
   const handleDeleteRoom = (id: string, roomNum: string) => {
-    if (confirm(`Bạn có chắc chắn muốn xóa phòng ${roomNum}?`)) {
-      setRooms((prev) => prev.filter((r) => r.id !== id));
+    setDeleteTarget({ id, roomNumber: roomNum });
+  };
+
+  const handleConfirmDeleteRoom = () => {
+    if (deleteTarget) {
+      setRooms((prev) => prev.filter((r) => r.id !== deleteTarget.id));
+      setDeleteTarget(null);
     }
   };
 
@@ -437,6 +444,17 @@ export function RoomsTable() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAddRoom={handleAddRoom}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        isOpen={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleConfirmDeleteRoom}
+        title="Xác nhận xóa phòng"
+        itemName={deleteTarget ? `Phòng ${deleteTarget.roomNumber}` : undefined}
+        description={`Bạn có chắc chắn muốn xóa phòng ${deleteTarget?.roomNumber}? Toàn bộ lịch sử thuê và dữ liệu liên quan sẽ bị xóa khỏi hệ thống.`}
+        confirmText="Xóa phòng này"
       />
     </div>
   );

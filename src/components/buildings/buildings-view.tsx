@@ -21,12 +21,14 @@ import {
 import type { Building, NewBuildingInput } from "@/types/building";
 import { initialBuildings } from "@/lib/mock-data/buildings";
 import { AddBuildingModal } from "./add-building-modal";
+import { DeleteConfirmDialog } from "@/components/common/delete-confirm-dialog";
 
 export function BuildingsView() {
   const [buildings, setBuildings] = React.useState<Building[]>(initialBuildings);
   const [statusFilter, setStatusFilter] = React.useState<string>("ALL");
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingBuilding, setEditingBuilding] = React.useState<Building | null>(null);
+  const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; name: string } | null>(null);
 
   // Compute aggregate KPIs
   const stats = React.useMemo(() => {
@@ -85,9 +87,14 @@ export function BuildingsView() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string, name: string) => {
-    if (confirm(`Bạn có chắc chắn muốn xóa cơ sở "${name}" khỏi hệ thống?`)) {
-      setBuildings((prev) => prev.filter((b) => b.id !== id));
+  const handleDeleteClick = (id: string, name: string) => {
+    setDeleteTarget({ id, name });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteTarget) {
+      setBuildings((prev) => prev.filter((b) => b.id !== deleteTarget.id));
+      setDeleteTarget(null);
     }
   };
 
@@ -375,7 +382,7 @@ export function BuildingsView() {
 
                     <button
                       type="button"
-                      onClick={() => handleDelete(building.id, building.name)}
+                      onClick={() => handleDeleteClick(building.id, building.name)}
                       className="p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                       title="Xóa cơ sở"
                     >
@@ -398,6 +405,17 @@ export function BuildingsView() {
         }}
         onSubmit={handleAddBuilding}
         editingBuilding={editingBuilding}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        isOpen={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleConfirmDelete}
+        title="Xác nhận xóa cơ sở"
+        itemName={deleteTarget?.name}
+        description={`Bạn có chắc chắn muốn xóa cơ sở "${deleteTarget?.name}"? Toàn bộ danh sách phòng và dữ liệu liên quan thuộc cơ sở này sẽ bị xóa khỏi hệ thống.`}
+        confirmText="Xóa cơ sở này"
       />
     </div>
   );
