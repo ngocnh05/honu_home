@@ -49,23 +49,16 @@ const defaultInitialServices: CustomService[] = [
   { id: "s4", name: "Cầu thang & Vệ sinh", price: 100000, unit: "đ/người" },
 ];
 
-const serviceSuggestions = [
-  { name: "Phí gửi xe máy", price: 100000, unit: "đ/xe" },
-  { name: "Máy giặt chung", price: 50000, unit: "đ/người" },
-  { name: "Thang máy", price: 50000, unit: "đ/người" },
-  { name: "Phí quản lý", price: 100000, unit: "đ/phòng" },
-];
-
 export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) {
   // Basic Info
   const [roomNumber, setRoomNumber] = React.useState("");
   const [type, setType] = React.useState<RoomType>("Phòng Đơn");
-  const [price, setPrice] = React.useState<string>("2.700.000"); // Formatted with dots
+  const [price, setPrice] = React.useState<string>("2.700.000");
   const [status, setStatus] = React.useState<RoomStatus>("available");
   const [area, setArea] = React.useState("20");
 
   // Contract Details theo đúng thứ tự:
-  // 1. người thuê, 2. số điện thoại, 3. số ng ở, 4. số xe, 5. ngày bắt đầu hd, 6. ngày kết thúc, 7. tiền đặt cọc, 8. quê quán, 9. tuổi
+  // Người thuê, Số điện thoại, Số người ở, Số xe, Ngày bắt đầu HĐ, Ngày kết thúc, Tiền đặt cọc, Quê quán, Tuổi
   const [tenantName, setTenantName] = React.useState("");
   const [tenantPhone, setTenantPhone] = React.useState("");
   const [occupantsCount, setOccupantsCount] = React.useState<string>("1");
@@ -82,17 +75,13 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
   if (!isOpen) return null;
 
   // Add a new empty service row
-  const handleAddService = (
-    template?: { name: string; price: number; unit: string }
-  ) => {
-    const newService: CustomService = template
-      ? { id: `srv_${Date.now()}_${Math.random()}`, ...template }
-      : {
-          id: `srv_${Date.now()}`,
-          name: "",
-          price: 0,
-          unit: "đ/tháng",
-        };
+  const handleAddService = () => {
+    const newService: CustomService = {
+      id: `srv_${Date.now()}_${Math.random()}`,
+      name: "",
+      price: 0,
+      unit: "đ/tháng",
+    };
     setServices((prev) => [...prev, newService]);
   };
 
@@ -182,9 +171,9 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
-      {/* Modal Container: Cao rộng rãi (w: 960px, h: 740px - max-h 94vh) */}
-      <div className="bg-white rounded-3xl w-full max-w-[960px] h-[740px] max-h-[94vh] flex flex-col shadow-2xl border border-[#E3EDF6] animate-scaleUp overflow-hidden">
-        {/* Header */}
+      {/* Modal Container: CỐ ĐỊNH KÍCH THƯỚC TUYỆT ĐỐI (w: 960px, h: 690px), KHÔNG BAO GIỜ BỊ CO DÃN HAY XÊ DỊCH */}
+      <div className="bg-white rounded-3xl w-full max-w-[960px] h-[690px] flex flex-col shadow-2xl border border-[#E3EDF6] animate-scaleUp overflow-hidden">
+        {/* Header (Cố định shrink-0) */}
         <div className="flex items-center justify-between px-6 xl:px-8 py-4 border-b border-[#EAF2F8] bg-white shrink-0">
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-2xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shadow-inner">
@@ -208,15 +197,15 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
           </button>
         </div>
 
-        {/* Form Body - 2 Cột song song */}
+        {/* Form Body - Khóa cứng chiều cao (h-[525px]), bên trong chỉ cuộn danh sách dịch vụ, form không bao giờ nở */}
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between p-6 xl:p-8 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 xl:gap-8 items-start h-[565px]">
-            {/* CỘT TRÁI (6 cột): Thông tin phòng & Hợp đồng (sắp xếp đúng thứ tự) */}
-            <div className="lg:col-span-6 flex flex-col justify-between h-full pr-1">
-              <div className="space-y-3.5">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 xl:gap-8 items-start h-[520px] overflow-hidden">
+            {/* CỘT TRÁI (6 cột): Thông tin căn phòng & Hợp đồng */}
+            <div className="lg:col-span-6 flex flex-col justify-between h-full pr-1 overflow-hidden">
+              <div className="space-y-3">
                 <div className="flex items-center gap-2 text-xs font-bold text-[#253F5B] uppercase tracking-wider pb-1.5 border-b border-[#EEF4FA]">
                   <Layers className="w-4 h-4 text-[#5C84BE]" />
-                  <span>1. Thông tin căn phòng</span>
+                  <span>Thông tin căn phòng</span>
                 </div>
 
                 {/* Hàng 1: Số Phòng & Loại Phòng */}
@@ -316,17 +305,16 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                 </div>
               </div>
 
-              {/* KHỐI HỢP ĐỒNG & KHÁCH THUÊ: SẮP XẾP CHUẨN THỨ TỰ YÊU CẦU:
-                  1. Người thuê, 2. Số điện thoại, 3. Số ng ở, 4. Số xe, 5. Ngày bắt đầu hd, 6. Ngày kết thúc, 7. Tiền đặt cọc, 8. Quê quán, 9. Tuổi */}
-              <div className="h-[270px] pt-1">
+              {/* KHỐI HỢP ĐỒNG & KHÁCH THUÊ: CỐ ĐỊNH CHIỀU CAO (h-[265px]), BỎ ĐẾM 1234567, TIỀN CỌC NHỎ GỌN */}
+              <div className="h-[265px] pt-1">
                 {status === "rented" ? (
                   <div className="h-full p-3.5 rounded-2xl bg-[#F6F9FD] border border-[#DEEBF5] flex flex-col justify-between animate-fadeIn shadow-2xs">
-                    {/* Hàng 1: 1. Người thuê & 2. Số điện thoại */}
+                    {/* Hàng 1: Người thuê & Số điện thoại */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
                           <User className="w-3.5 h-3.5 text-[#5C84BE]" />
-                          <span>1. Người thuê *</span>
+                          <span>Người thuê *</span>
                         </label>
                         <input
                           type="text"
@@ -340,7 +328,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
                           <Phone className="w-3.5 h-3.5 text-[#5C84BE]" />
-                          <span>2. Số điện thoại</span>
+                          <span>Số điện thoại</span>
                         </label>
                         <input
                           type="tel"
@@ -352,12 +340,12 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                       </div>
                     </div>
 
-                    {/* Hàng 2: 3. Số người ở & 4. Số xe */}
+                    {/* Hàng 2: Số người ở & Số xe */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
                           <Users className="w-3.5 h-3.5 text-[#5C84BE]" />
-                          <span>3. Số người ở</span>
+                          <span>Số người ở</span>
                         </label>
                         <div className="relative">
                           <input
@@ -375,7 +363,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
                           <Bike className="w-3.5 h-3.5 text-[#5C84BE]" />
-                          <span>4. Số xe</span>
+                          <span>Số xe</span>
                         </label>
                         <div className="relative">
                           <input
@@ -392,12 +380,12 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                       </div>
                     </div>
 
-                    {/* Hàng 3: 5. Ngày bắt đầu HĐ & 6. Ngày kết thúc */}
+                    {/* Hàng 3: Ngày bắt đầu HĐ & Ngày kết thúc */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-[#5C84BE]" />
-                          <span>5. Ngày bắt đầu HĐ</span>
+                          <span>Ngày bắt đầu HĐ</span>
                         </label>
                         <input
                           type="text"
@@ -410,7 +398,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-[#5C84BE]" />
-                          <span>6. Ngày kết thúc</span>
+                          <span>Ngày kết thúc</span>
                         </label>
                         <input
                           type="text"
@@ -422,12 +410,12 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                       </div>
                     </div>
 
-                    {/* Hàng 4: 7. Tiền đặt cọc & 8. Quê quán & 9. Tuổi */}
+                    {/* Hàng 4: Tiền đặt cọc nhỏ lại & Quê quán & Tuổi */}
                     <div className="grid grid-cols-12 gap-2.5">
-                      {/* 7. Tiền đặt cọc (5 cột) */}
-                      <div className="col-span-5 space-y-1">
+                      {/* Tiền đặt cọc (nhỏ gọn 4 cột) */}
+                      <div className="col-span-4 space-y-1">
                         <label className="text-[11px] font-bold text-[#506A88] truncate block">
-                          7. Tiền đặt cọc
+                          Tiền đặt cọc
                         </label>
                         <div className="relative">
                           <input
@@ -436,19 +424,19 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                             placeholder="2.700.000"
                             value={deposit}
                             onChange={(e) => setDeposit(formatPrice(e.target.value))}
-                            className="w-full h-8 pl-2.5 pr-10 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-bold outline-none focus:border-[#5C84BE] text-right"
+                            className="w-full h-8 pl-2 pr-7 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-bold outline-none focus:border-[#5C84BE] text-right"
                           />
-                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-bold pointer-events-none">
-                            VNĐ
+                          <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9.5px] text-[#7A93AD] font-bold pointer-events-none">
+                            đ
                           </span>
                         </div>
                       </div>
 
-                      {/* 8. Quê quán (4 cột) */}
-                      <div className="col-span-4 space-y-1">
+                      {/* Quê quán (5 cột) */}
+                      <div className="col-span-5 space-y-1">
                         <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1 truncate">
                           <MapPin className="w-3 h-3 text-[#5C84BE] shrink-0" />
-                          <span>8. Quê quán</span>
+                          <span>Quê quán</span>
                         </label>
                         <input
                           type="text"
@@ -459,15 +447,15 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                         />
                       </div>
 
-                      {/* 9. Tuổi (3 cột) */}
+                      {/* Tuổi (3 cột) */}
                       <div className="col-span-3 space-y-1">
                         <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1 truncate">
                           <Cake className="w-3 h-3 text-[#5C84BE] shrink-0" />
-                          <span>9. Tuổi</span>
+                          <span>Tuổi</span>
                         </label>
                         <input
                           type="number"
-                          placeholder="VD: 22"
+                          placeholder="22"
                           value={tenantAge}
                           onChange={(e) => setTenantAge(e.target.value)}
                           className="w-full h-8 px-2 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-center"
@@ -495,140 +483,110 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
               </div>
             </div>
 
-            {/* CỘT PHẢI (6 cột): Bảng Dịch Vụ Linh Hoạt */}
-            <div className="lg:col-span-6 flex flex-col justify-between h-full bg-[#F9FBFE] p-5 rounded-2xl border border-[#DEEBF5]">
-              <div className="space-y-3.5">
-                <div className="flex items-center justify-between pb-2.5 border-b border-[#E4EFF8]">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#5C84BE]" />
-                    <div>
-                      <h4 className="text-xs font-bold text-[#253F5B] uppercase tracking-wider">
-                        2. Các khoản Dịch vụ phòng
-                      </h4>
-                      <p className="text-[11px] text-[#7B92AC]">
-                        Tự gõ tên dịch vụ & đơn giá riêng theo từng trọ
-                      </p>
-                    </div>
+            {/* CỘT PHẢI (6 cột): Bảng Dịch Vụ - ĐÃ BỎ THÊM NHANH 1 CHẠM, CUỘN NỘI BỘ, KHÔNG BAO GIỜ KÉO DÃN FORM */}
+            <div className="lg:col-span-6 flex flex-col h-full bg-[#F9FBFE] p-5 rounded-2xl border border-[#DEEBF5] overflow-hidden">
+              {/* Header Dịch vụ (shrink-0) */}
+              <div className="flex items-center justify-between pb-3 border-b border-[#E4EFF8] shrink-0">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#5C84BE]" />
+                  <div>
+                    <h4 className="text-xs font-bold text-[#253F5B] uppercase tracking-wider">
+                      Dịch vụ phòng
+                    </h4>
+                    <p className="text-[11px] text-[#7B92AC]">
+                      Tự gõ tên dịch vụ & đơn giá riêng theo từng trọ
+                    </p>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleAddService()}
-                    className="px-3 py-1.5 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-95 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                    <span>Thêm dòng</span>
-                  </button>
                 </div>
 
-                {/* Service Rows List (Thoáng đãng max-h-[360px]) */}
-                <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
-                  {services.map((service) => (
-                    <div
-                      key={service.id}
-                      className="flex items-center gap-2.5 bg-white p-2.5 rounded-xl border border-[#DCE8F4] shadow-2xs group hover:border-[#5C84BE] transition-colors"
-                    >
-                      {/* Tên dịch vụ */}
-                      <div className="flex-1 min-w-[130px]">
-                        <input
-                          type="text"
-                          placeholder="Tên dịch vụ..."
-                          value={service.name}
-                          onChange={(e) =>
-                            handleUpdateService(service.id, "name", e.target.value)
-                          }
-                          className="w-full h-8.5 px-3 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-semibold"
-                        />
-                      </div>
-
-                      {/* Đơn giá (Format mỗi 3 số có dấu chấm: 3.500, 30.000) */}
-                      <div className="w-[100px] xl:w-[110px]">
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          placeholder="Đơn giá"
-                          value={formatPrice(service.price)}
-                          onChange={(e) =>
-                            handleUpdateService(
-                              service.id,
-                              "price",
-                              parsePrice(e.target.value)
-                            )
-                          }
-                          className="w-full h-8.5 px-2.5 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-bold text-right"
-                        />
-                      </div>
-
-                      {/* Đơn vị tính */}
-                      <div className="w-[88px] xl:w-[96px]">
-                        <select
-                          value={service.unit}
-                          onChange={(e) =>
-                            handleUpdateService(service.id, "unit", e.target.value)
-                          }
-                          className="w-full h-8.5 px-2 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-[11px] font-bold text-[#4B6584] bg-white cursor-pointer"
-                        >
-                          <option value="đ/kWh">đ/kWh</option>
-                          <option value="đ/khối">đ/khối</option>
-                          <option value="đ/người">đ/người</option>
-                          <option value="đ/phòng">đ/phòng</option>
-                          <option value="đ/xe">đ/xe</option>
-                          <option value="đ/tháng">đ/tháng</option>
-                        </select>
-                      </div>
-
-                      {/* Nút Xóa */}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveService(service.id)}
-                        className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                        title="Xóa dịch vụ này"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-
-                  {services.length === 0 && (
-                    <div className="py-8 text-center text-xs text-[#7A93AD] border border-dashed border-[#CFDFEE] rounded-xl bg-white">
-                      Chưa có dịch vụ nào. Bấm <b>"+ Thêm dòng"</b> để tạo.
-                    </div>
-                  )}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => handleAddService()}
+                  className="px-3.5 py-1.5 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-95 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>Thêm dòng</span>
+                </button>
               </div>
 
-              {/* Gợi ý thêm nhanh */}
-              <div className="pt-3 border-t border-[#E4EFF8]">
-                <p className="text-xs font-bold text-[#7A93AD] mb-2">
-                  Thêm nhanh 1 chạm:
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {serviceSuggestions.map((sug) => {
-                    const isAdded = services.some(
-                      (s) => s.name.toLowerCase() === sug.name.toLowerCase()
-                    );
-                    return (
-                      <button
-                        key={sug.name}
-                        type="button"
-                        onClick={() => handleAddService(sug)}
-                        disabled={isAdded}
-                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
-                          isAdded
-                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                            : "bg-white hover:bg-[#EAF2F8] text-[#5C84BE] border border-[#D5E4F2] shadow-2xs cursor-pointer active:scale-95"
-                        }`}
+              {/* Service Rows List: Cuộn mượt nội bộ bên trong, thêm bao nhiêu dòng cũng không làm giãn form */}
+              <div className="flex-1 overflow-y-auto pr-1.5 pt-3 space-y-2.5 min-h-0">
+                {services.map((service) => (
+                  <div
+                    key={service.id}
+                    className="flex items-center gap-2.5 bg-white p-2.5 rounded-xl border border-[#DCE8F4] shadow-2xs group hover:border-[#5C84BE] transition-colors"
+                  >
+                    {/* Tên dịch vụ */}
+                    <div className="flex-1 min-w-[130px]">
+                      <input
+                        type="text"
+                        placeholder="Tên dịch vụ..."
+                        value={service.name}
+                        onChange={(e) =>
+                          handleUpdateService(service.id, "name", e.target.value)
+                        }
+                        className="w-full h-8.5 px-3 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-semibold"
+                      />
+                    </div>
+
+                    {/* Đơn giá */}
+                    <div className="w-[100px] xl:w-[110px]">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="Đơn giá"
+                        value={formatPrice(service.price)}
+                        onChange={(e) =>
+                          handleUpdateService(
+                            service.id,
+                            "price",
+                            parsePrice(e.target.value)
+                          )
+                        }
+                        className="w-full h-8.5 px-2.5 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-bold text-right"
+                      />
+                    </div>
+
+                    {/* Đơn vị tính */}
+                    <div className="w-[88px] xl:w-[96px]">
+                      <select
+                        value={service.unit}
+                        onChange={(e) =>
+                          handleUpdateService(service.id, "unit", e.target.value)
+                        }
+                        className="w-full h-8.5 px-2 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-[11px] font-bold text-[#4B6584] bg-white cursor-pointer"
                       >
-                        + {sug.name} ({sug.price.toLocaleString("vi-VN")})
-                      </button>
-                    );
-                  })}
-                </div>
+                        <option value="đ/kWh">đ/kWh</option>
+                        <option value="đ/khối">đ/khối</option>
+                        <option value="đ/người">đ/người</option>
+                        <option value="đ/phòng">đ/phòng</option>
+                        <option value="đ/xe">đ/xe</option>
+                        <option value="đ/tháng">đ/tháng</option>
+                      </select>
+                    </div>
+
+                    {/* Nút Xóa */}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveService(service.id)}
+                      className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      title="Xóa dịch vụ này"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+
+                {services.length === 0 && (
+                  <div className="py-12 text-center text-xs text-[#7A93AD] border border-dashed border-[#CFDFEE] rounded-xl bg-white">
+                    Chưa có dịch vụ nào. Bấm <b>"+ Thêm dòng"</b> ở trên để tạo.
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Footer Actions */}
+          {/* Footer Actions (Cố định shrink-0) */}
           <div className="flex items-center justify-between pt-4 border-t border-[#EAF2F8] shrink-0">
             <div className="text-xs text-[#7A92AB] font-medium hidden sm:block">
               Định mức: <b className="text-[#253F5B]">{occupantsCount || 0} người</b> • <b className="text-[#253F5B]">{vehiclesCount || 0} xe</b> • <b className="text-[#253F5B]">{services.length} dịch vụ</b>
