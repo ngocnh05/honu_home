@@ -10,14 +10,16 @@ interface TopHeaderProps {
 }
 
 const routeNames: Record<string, string> = {
-  dashboard: "Trang chủ",
-  rooms: "Quản lí phòng",
+  dashboard: "Tổng quan",
+  buildings: "Cơ sở / Tòa nhà",
+  rooms: "Quản lý phòng",
   create: "Thêm phòng mới",
-  tenants: "Người thuê",
   contracts: "Hợp đồng",
-  invoices: "Hóa đơn",
+  tenants: "Khách thuê",
+  invoices: "Hóa đơn & Thu tiền",
+  services: "Bảng giá dịch vụ",
   maintenance: "Sự cố / Bảo trì",
-  reports: "Báo cáo",
+  reports: "Báo cáo thống kê",
   settings: "Cài đặt",
 };
 
@@ -29,11 +31,11 @@ export function TopHeader({ unreadCount = 99 }: TopHeaderProps) {
   const breadcrumbs = React.useMemo(() => {
     const parts = pathname.split("/").filter(Boolean);
     if (parts.length === 0 || (parts.length === 1 && parts[0] === "dashboard")) {
-      return [{ label: "Trang chủ", href: "/dashboard", isCurrent: true }];
+      return [{ label: "Tổng quan", href: "/dashboard", isCurrent: true }];
     }
 
     const items = [
-      { label: "Trang chủ", href: "/dashboard", isCurrent: false },
+      { label: "Tổng quan", href: "/dashboard", isCurrent: false },
     ];
 
     let currentPath = "";

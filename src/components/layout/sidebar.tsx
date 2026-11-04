@@ -14,6 +14,8 @@ import {
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
+  Building2,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "./sidebar-context";
@@ -26,42 +28,52 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    name: "Trang chủ",
+    name: "Tổng quan",
     href: "/dashboard",
     icon: Home,
   },
   {
-    name: "Quản Lí Phòng",
+    name: "Cơ sở / Tòa nhà",
+    href: "/buildings",
+    icon: Building2,
+  },
+  {
+    name: "Quản lý phòng",
     href: "/rooms",
     icon: DoorOpen,
   },
   {
-    name: "Người Thuê",
-    href: "/tenants",
-    icon: Users,
-  },
-  {
-    name: "Hợp Đồng",
+    name: "Hợp đồng",
     href: "/contracts",
     icon: FileCheck2,
   },
   {
-    name: "Hóa Đơn",
+    name: "Khách thuê",
+    href: "/tenants",
+    icon: Users,
+  },
+  {
+    name: "Hóa đơn & Thu tiền",
     href: "/invoices",
     icon: Receipt,
   },
   {
-    name: "Sự Cố/ Bảo Trì",
+    name: "Bảng giá dịch vụ",
+    href: "/services",
+    icon: Zap,
+  },
+  {
+    name: "Sự cố / Bảo trì",
     href: "/maintenance",
     icon: Wrench,
   },
   {
-    name: "Báo Cáo",
+    name: "Báo cáo thống kê",
     href: "/reports",
     icon: BarChart3,
   },
   {
-    name: "Cài Đặt",
+    name: "Cài đặt",
     href: "/settings",
     icon: Settings,
   },
