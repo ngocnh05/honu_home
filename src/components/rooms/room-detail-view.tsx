@@ -589,8 +589,14 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
 
       {/* Renew Modal Demo */}
       {showRenewModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-[#E3EDF6] space-y-4 animate-scaleIn">
+        <div
+          onClick={() => setShowRenewModal(false)}
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-6 sm:p-10 cursor-pointer animate-fadeIn"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-[#E3EDF6] space-y-4 animate-scaleIn cursor-default"
+          >
             <h3 className="text-lg font-black text-[#253F5B]">
               Gia hạn hợp đồng phòng {room.roomNumber}
             </h3>
@@ -634,8 +640,14 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
 
       {/* Tenant Profile Modal */}
       {showTenantModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-[#E3EDF6] space-y-4 animate-scaleIn">
+        <div
+          onClick={() => setShowTenantModal(false)}
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-6 sm:p-10 cursor-pointer animate-fadeIn"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-[#E3EDF6] space-y-4 animate-scaleIn cursor-default"
+          >
             <div className="flex items-center gap-3">
               <div className="relative w-12 h-12 rounded-full overflow-hidden bg-[#0D99FF]/10 shrink-0">
                 <Image

@@ -82,6 +82,16 @@ export function AddBuildingModal({
     }
   }, [editingBuilding, isOpen]);
 
+  // Close modal when pressing Escape key
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,9 +145,12 @@ export function AddBuildingModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-10 xl:p-14 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200 cursor-pointer"
+    >
       <div
-        className="bg-white rounded-3xl w-full max-w-4xl xl:max-w-5xl max-h-[92vh] flex flex-col shadow-2xl border border-[#DCE8F2] overflow-hidden"
+        className="bg-white rounded-3xl w-full max-w-4xl xl:max-w-5xl max-h-[90vh] flex flex-col shadow-2xl border border-[#DCE8F2] overflow-hidden cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}

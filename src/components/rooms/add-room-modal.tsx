@@ -72,6 +72,16 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
   // Dynamic Custom Services List
   const [services, setServices] = React.useState<CustomService[]>(defaultInitialServices);
 
+  // Close modal on Escape
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   // Add a new empty service row
@@ -170,9 +180,15 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-6 sm:p-10 xl:p-14 animate-fadeIn cursor-pointer"
+    >
       {/* Modal Container: CỐ ĐỊNH KÍCH THƯỚC TUYỆT ĐỐI (w: 960px, h: 690px), KHÔNG BAO GIỜ BỊ CO DÃN HAY XÊ DỊCH */}
-      <div className="bg-white rounded-3xl w-full max-w-[960px] h-[690px] flex flex-col shadow-2xl border border-[#E3EDF6] animate-scaleUp overflow-hidden">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-3xl w-full max-w-[960px] h-[690px] flex flex-col shadow-2xl border border-[#E3EDF6] animate-scaleUp overflow-hidden cursor-default"
+      >
         {/* Header (Cố định shrink-0) */}
         <div className="flex items-center justify-between px-6 xl:px-8 py-4 border-b border-[#EAF2F8] bg-white shrink-0">
           <div className="flex items-center gap-3.5">
