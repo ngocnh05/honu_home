@@ -19,10 +19,10 @@ function DashboardLayoutContent({
       {/* Sidebar Navigation */}
       <Sidebar />
 
-      {/* Main Content Area - Transitions padding when sidebar is collapsed (78px) vs expanded (240px/250px) */}
+      {/* Main Content Area - Transitions padding when sidebar is collapsed (72px) vs expanded (235px/245px) */}
       <div
         className={`flex-1 flex flex-col min-w-0 w-full transition-all duration-300 ease-in-out ${
-          isCollapsed ? "pl-[78px]" : "pl-[240px] xl:pl-[250px]"
+          isCollapsed ? "pl-[72px]" : "pl-[235px] xl:pl-[245px]"
         }`}
       >
         {/* Top Header with toggle & notifications */}
