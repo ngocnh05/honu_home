@@ -13,7 +13,6 @@ import {
   Bike,
   CheckCircle2,
   Wrench,
-  ShieldAlert,
 } from "lucide-react";
 import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
 
@@ -45,9 +44,9 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
   const [status, setStatus] = React.useState<RoomStatus>("available");
   const [area, setArea] = React.useState("20");
 
-  // People & Vehicles in Room
-  const [occupantsCount, setOccupantsCount] = React.useState<number>(1);
-  const [vehiclesCount, setVehiclesCount] = React.useState<number>(1);
+  // People & Vehicles in Room (Ô nhập)
+  const [occupantsCount, setOccupantsCount] = React.useState<string>("1");
+  const [vehiclesCount, setVehiclesCount] = React.useState<string>("1");
 
   // Contract Details (when status === "rented")
   const [tenantName, setTenantName] = React.useState("");
@@ -140,8 +139,8 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
       endDate: status === "rented" && endDate.trim() ? endDate.trim() : "---",
       deposit: status === "rented" ? Number(deposit) || Number(price) : undefined,
       area: Number(area) || 20,
-      occupantsCount,
-      vehiclesCount,
+      occupantsCount: Number(occupantsCount) || 1,
+      vehiclesCount: Number(vehiclesCount) || 0,
       services: legacyServices,
       customServices: validServices,
     });
@@ -155,8 +154,8 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
-      {/* Modal Container: Cố định kích thước chuẩn (w: 920px, h: 560px) để khi bấm Đang Thuê không bao giờ bị nhảy/giật hay nở to form */}
-      <div className="bg-white rounded-3xl w-full max-w-[920px] h-[580px] flex flex-col shadow-2xl border border-[#E3EDF6] animate-scaleUp overflow-hidden">
+      {/* Modal Container: Ngang rộng rãi, cố định chiều cao hợp lý để không bị giật form */}
+      <div className="bg-white rounded-3xl w-full max-w-[940px] max-h-[92vh] flex flex-col shadow-2xl border border-[#E3EDF6] animate-scaleUp overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 xl:px-8 py-3.5 border-b border-[#EAF2F8] bg-white shrink-0">
           <div className="flex items-center gap-3">
@@ -168,7 +167,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                 Thêm Phòng Mới
               </h3>
               <p className="text-[11px] text-[#7A92AB] font-medium">
-                Cấu hình thông tin phòng, số người/xe và bảng giá dịch vụ
+                Cấu hình thông tin phòng, hợp đồng và các khoản dịch vụ linh hoạt
               </p>
             </div>
           </div>
@@ -181,322 +180,340 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
           </button>
         </div>
 
-        {/* Form Body - 2 Columns cố định chiều cao, không bị phình to */}
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between p-6 xl:p-7 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-[410px]">
-            {/* CỘT TRÁI (5.5 cột): Thông tin phòng, số người/xe & Hợp đồng */}
-            <div className="lg:col-span-6 flex flex-col justify-between h-full pr-1">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-[11px] font-bold text-[#253F5B] uppercase tracking-wider pb-1 border-b border-[#EEF4FA]">
-                  <Layers className="w-3.5 h-3.5 text-[#5C84BE]" />
-                  <span>1. Thông tin căn phòng</span>
-                </div>
+        {/* Form Body - 2 Cột song song */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 xl:p-7 space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* CỘT TRÁI (6 cột): Thông tin phòng, số người/xe & Hợp đồng */}
+            <div className="lg:col-span-6 space-y-3">
+              <div className="flex items-center gap-2 text-[11px] font-bold text-[#253F5B] uppercase tracking-wider pb-1 border-b border-[#EEF4FA]">
+                <Layers className="w-3.5 h-3.5 text-[#5C84BE]" />
+                <span>1. Thông tin căn phòng</span>
+              </div>
 
-                {/* Hàng 1: Số Phòng & Loại Phòng */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-[#253F5B]">Số Phòng *</label>
-                    <input
-                      type="text"
-                      placeholder="VD: P102"
-                      value={roomNumber}
-                      onChange={(e) => setRoomNumber(e.target.value)}
-                      className="w-full h-8.5 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-semibold"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-[#253F5B]">Loại Phòng</label>
-                    <select
-                      value={type}
-                      onChange={(e) => setType(e.target.value as RoomType)}
-                      className="w-full h-8.5 px-2.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer"
-                    >
-                      <option value="Phòng Đơn">Phòng Đơn</option>
-                      <option value="Phòng Đôi">Phòng Đôi</option>
-                      <option value="Phòng Ba">Phòng Ba</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Hàng 2: Giá Thuê & Diện Tích (Bỏ 2 mũi tên lên xuống bằng CSS & textfield) */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-[#253F5B]">Giá Thuê (đ/tháng) *</label>
-                    <input
-                      type="number"
-                      placeholder="2.700.000"
-                      value={price}
-                      onChange={(e) => {
-                        setPrice(e.target.value);
-                        if (!deposit || deposit === price) {
-                          setDeposit(e.target.value);
-                        }
-                      }}
-                      className="w-full h-8.5 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-[#253F5B]">Diện Tích (m²)</label>
-                    <input
-                      type="number"
-                      placeholder="20"
-                      value={area}
-                      onChange={(e) => setArea(e.target.value)}
-                      className="w-full h-8.5 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Hàng 3: Trạng Thái Ban Đầu */}
+              {/* Hàng 1: Số Phòng & Loại Phòng */}
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-[#253F5B]">Trạng Thái Ban Đầu</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { key: "available", label: "Trống" },
-                      { key: "rented", label: "Đang Thuê" },
-                      { key: "maintenance", label: "Đang sửa" },
-                    ].map((st) => (
-                      <button
-                        type="button"
-                        key={st.key}
-                        onClick={() => setStatus(st.key as RoomStatus)}
-                        className={`h-8 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
-                          status === st.key
-                            ? "bg-[#5C84BE] text-white border-[#5C84BE] shadow-xs"
-                            : "bg-[#F4F9FD] text-[#4A6482] border-[#D9E6F2] hover:bg-[#E9F3FC]"
-                        }`}
-                      >
-                        {st.label}
-                      </button>
-                    ))}
+                  <label className="text-[11px] font-bold text-[#253F5B]">Số Phòng *</label>
+                  <input
+                    type="text"
+                    placeholder="VD: P102"
+                    value={roomNumber}
+                    onChange={(e) => setRoomNumber(e.target.value)}
+                    className="w-full h-8.5 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-semibold"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-[#253F5B]">Loại Phòng</label>
+                  <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value as RoomType)}
+                    className="w-full h-8.5 px-2.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer"
+                  >
+                    <option value="Phòng Đơn">Phòng Đơn</option>
+                    <option value="Phòng Đôi">Phòng Đôi</option>
+                    <option value="Phòng Ba">Phòng Ba</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Hàng 2: Giá Thuê & Diện Tích (Không có spinner mũi tên) */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-[#253F5B]">Giá Thuê (đ/tháng) *</label>
+                  <input
+                    type="number"
+                    placeholder="2.700.000"
+                    value={price}
+                    onChange={(e) => {
+                      setPrice(e.target.value);
+                      if (!deposit || deposit === price) {
+                        setDeposit(e.target.value);
+                      }
+                    }}
+                    className="w-full h-8.5 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-[#253F5B]">Diện Tích (m²)</label>
+                  <input
+                    type="number"
+                    placeholder="20"
+                    value={area}
+                    onChange={(e) => setArea(e.target.value)}
+                    className="w-full h-8.5 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+              </div>
+
+              {/* Hàng 3: Trạng Thái Ban Đầu */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-[#253F5B]">Trạng Thái Ban Đầu</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { key: "available", label: "Trống" },
+                    { key: "rented", label: "Đang Thuê" },
+                    { key: "maintenance", label: "Đang sửa" },
+                  ].map((st) => (
+                    <button
+                      type="button"
+                      key={st.key}
+                      onClick={() => setStatus(st.key as RoomStatus)}
+                      className={`h-8 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                        status === st.key
+                          ? "bg-[#5C84BE] text-white border-[#5C84BE] shadow-xs"
+                          : "bg-[#F4F9FD] text-[#4A6482] border-[#D9E6F2] hover:bg-[#E9F3FC]"
+                      }`}
+                    >
+                      {st.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Hàng 4: Ô NHẬP Số Người Thuê & Số Xe Máy (Không còn nút, dùng ô nhập chuẩn) */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-[#253F5B] flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5 text-[#5C84BE]" />
+                    <span>Số người ở</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      placeholder="1"
+                      value={occupantsCount}
+                      onChange={(e) => setOccupantsCount(e.target.value)}
+                      className="w-full h-8.5 px-3 pr-14 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-medium pointer-events-none">
+                      người
+                    </span>
                   </div>
                 </div>
 
-                {/* Hàng 4: Số Người Thuê & Số Xe Máy (Bổ sung theo yêu cầu) */}
-                <div className="grid grid-cols-2 gap-3 pt-0.5">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
-                      <Users className="w-3.5 h-3.5 text-[#5C84BE]" />
-                      <span>Số người ở</span>
-                    </label>
-                    <div className="flex items-center gap-1.5">
-                      {[1, 2, 3, 4].map((num) => (
-                        <button
-                          type="button"
-                          key={num}
-                          onClick={() => setOccupantsCount(num)}
-                          className={`flex-1 h-7.5 rounded-lg text-xs font-bold transition-all border cursor-pointer ${
-                            occupantsCount === num
-                              ? "bg-[#5C84BE] text-white border-[#5C84BE] shadow-2xs"
-                              : "bg-white text-[#4A6482] border-[#D9E6F2] hover:bg-[#F2F7FC]"
-                          }`}
-                        >
-                          {num}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
-                      <Bike className="w-3.5 h-3.5 text-[#5C84BE]" />
-                      <span>Số xe máy</span>
-                    </label>
-                    <div className="flex items-center gap-1.5">
-                      {[0, 1, 2, 3].map((num) => (
-                        <button
-                          type="button"
-                          key={num}
-                          onClick={() => setVehiclesCount(num)}
-                          className={`flex-1 h-7.5 rounded-lg text-xs font-bold transition-all border cursor-pointer ${
-                            vehiclesCount === num
-                              ? "bg-[#5C84BE] text-white border-[#5C84BE] shadow-2xs"
-                              : "bg-white text-[#4A6482] border-[#D9E6F2] hover:bg-[#F2F7FC]"
-                          }`}
-                        >
-                          {num}
-                        </button>
-                      ))}
-                    </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-[#253F5B] flex items-center gap-1">
+                    <Bike className="w-3.5 h-3.5 text-[#5C84BE]" />
+                    <span>Số xe máy</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      placeholder="1"
+                      value={vehiclesCount}
+                      onChange={(e) => setVehiclesCount(e.target.value)}
+                      className="w-full h-8.5 px-3 pr-12 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-medium pointer-events-none">
+                      xe
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* KHỐI CỐ ĐỊNH CHIỀU CAO (h-[128px]): Đảm bảo khi chọn Đang Thuê / Trống / Đang Sửa form không bao giờ bị phình to */}
-              <div className="h-[128px] mt-2">
+              {/* KHỐI CỐ ĐỊNH CHIỀU CAO: Hợp đồng có đầy đủ TIÊU ĐỀ cho ngày tháng */}
+              <div className="min-h-[160px] pt-1">
                 {status === "rented" ? (
-                  <div className="h-full p-2.5 rounded-2xl bg-[#F6F9FD] border border-[#DEEBF5] flex flex-col justify-between animate-fadeIn">
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="text"
-                        placeholder="Họ tên người thuê *"
-                        value={tenantName}
-                        onChange={(e) => setTenantName(e.target.value)}
-                        className="w-full h-7.5 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE]"
-                        required={status === "rented"}
-                      />
-                      <input
-                        type="tel"
-                        placeholder="Số điện thoại"
-                        value={tenantPhone}
-                        onChange={(e) => setTenantPhone(e.target.value)}
-                        className="w-full h-7.5 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
-                      />
+                  <div className="p-3 rounded-2xl bg-[#F6F9FD] border border-[#DEEBF5] space-y-2.5 animate-fadeIn">
+                    {/* Hàng: Tên người thuê & SĐT */}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="space-y-1">
+                        <label className="text-[10.5px] font-bold text-[#506A88]">
+                          Người thuê *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Họ và tên..."
+                          value={tenantName}
+                          onChange={(e) => setTenantName(e.target.value)}
+                          className="w-full h-7.5 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE]"
+                          required={status === "rented"}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10.5px] font-bold text-[#506A88]">
+                          Số điện thoại
+                        </label>
+                        <input
+                          type="tel"
+                          placeholder="0987.654.321"
+                          value={tenantPhone}
+                          onChange={(e) => setTenantPhone(e.target.value)}
+                          className="w-full h-7.5 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                        />
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="text"
-                        placeholder="Ngày bắt đầu (01/01/2026)"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="w-full h-7.5 px-2 rounded-lg border border-[#D0DFEE] bg-white text-[11px] text-[#253F5B] outline-none focus:border-[#5C84BE]"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Hạn hợp đồng (01/01/2027)"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="w-full h-7.5 px-2 rounded-lg border border-[#D0DFEE] bg-white text-[11px] text-[#253F5B] outline-none focus:border-[#5C84BE]"
-                      />
+                    {/* Hàng: 2 cái DATE CÓ TIÊU ĐỀ RÕ RÀNG */}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="space-y-1">
+                        <label className="text-[10.5px] font-bold text-[#506A88] flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-[#5C84BE]" />
+                          <span>Ngày bắt đầu HĐ</span>
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="01/01/2026"
+                          value={startDate}
+                          onChange={(e) => setStartDate(e.target.value)}
+                          className="w-full h-7.5 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-[11px] text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10.5px] font-bold text-[#506A88] flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-[#5C84BE]" />
+                          <span>Hạn hợp đồng</span>
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="01/01/2027"
+                          value={endDate}
+                          onChange={(e) => setEndDate(e.target.value)}
+                          className="w-full h-7.5 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-[11px] text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                        />
+                      </div>
                     </div>
 
-                    <div className="relative">
-                      <input
-                        type="number"
-                        placeholder="Tiền đặt cọc (đ)"
-                        value={deposit}
-                        onChange={(e) => setDeposit(e.target.value)}
-                        className="w-full h-7.5 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-bold outline-none focus:border-[#5C84BE] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
-                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-medium">
-                        VNĐ cọc
-                      </span>
+                    {/* Hàng: Tiền đặt cọc */}
+                    <div className="space-y-1">
+                      <label className="text-[10.5px] font-bold text-[#506A88]">
+                        Tiền đặt cọc
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          placeholder="2.700.000"
+                          value={deposit}
+                          onChange={(e) => setDeposit(e.target.value)}
+                          className="w-full h-7.5 px-2.5 pr-14 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-bold outline-none focus:border-[#5C84BE] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-medium">
+                          VNĐ
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ) : status === "available" ? (
-                  <div className="h-full rounded-2xl border border-dashed border-[#CFDFEE] bg-[#F8FBFE] flex flex-col items-center justify-center p-3 text-center">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500 mb-1" />
+                  <div className="h-[155px] rounded-2xl border border-dashed border-[#CFDFEE] bg-[#F8FBFE] flex flex-col items-center justify-center p-3 text-center">
+                    <CheckCircle2 className="w-6 h-6 text-emerald-500 mb-1" />
                     <p className="text-xs font-bold text-[#253F5B]">Phòng trống sẵn sàng đón khách</p>
-                    <p className="text-[10px] text-[#7B92AC] mt-0.5">
-                      Bấm nút "Đang Thuê" ở trên nếu phòng đã có khách vào ở
+                    <p className="text-[10px] text-[#7B92AC] mt-0.5 max-w-[260px]">
+                      Chọn nút "Đang Thuê" ở trên nếu phòng đã có khách vào ở để nhập thông tin hợp đồng
                     </p>
                   </div>
                 ) : (
-                  <div className="h-full rounded-2xl border border-dashed border-[#F3E2A8] bg-[#FFFDF5] flex flex-col items-center justify-center p-3 text-center">
-                    <Wrench className="w-5 h-5 text-amber-500 mb-1" />
+                  <div className="h-[155px] rounded-2xl border border-dashed border-[#F3E2A8] bg-[#FFFDF5] flex flex-col items-center justify-center p-3 text-center">
+                    <Wrench className="w-6 h-6 text-amber-500 mb-1" />
                     <p className="text-xs font-bold text-[#7A5A00]">Phòng đang bảo trì / sửa chữa</p>
-                    <p className="text-[10px] text-[#9A7D2C] mt-0.5">
-                      Tạm thời không nhận người thuê cho đến khi hoàn tất
+                    <p className="text-[10px] text-[#9A7D2C] mt-0.5 max-w-[260px]">
+                      Tạm thời không nhận người thuê cho đến khi hoàn tất sửa chữa
                     </p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* CỘT PHẢI (6 cột): Bảng Dịch Vụ Linh Hoạt (Không có spin button lên xuống) */}
-            <div className="lg:col-span-6 flex flex-col justify-between h-full bg-[#F9FBFE] p-4 rounded-2xl border border-[#DEEBF5]">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-[#E4EFF8]">
-                  <div className="flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-[#5C84BE]" />
-                    <div>
-                      <h4 className="text-[11px] font-bold text-[#253F5B] uppercase tracking-wider">
-                        2. Các khoản Dịch vụ phòng
-                      </h4>
-                      <p className="text-[10px] text-[#7B92AC]">
-                        Tự gõ tên dịch vụ & đơn giá riêng theo từng trọ
-                      </p>
-                    </div>
+            {/* CỘT PHẢI (6 cột): Bảng Dịch Vụ Linh Hoạt */}
+            <div className="lg:col-span-6 space-y-3 bg-[#F9FBFE] p-4 rounded-2xl border border-[#DEEBF5]">
+              <div className="flex items-center justify-between pb-2 border-b border-[#E4EFF8]">
+                <div className="flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-[#5C84BE]" />
+                  <div>
+                    <h4 className="text-[11px] font-bold text-[#253F5B] uppercase tracking-wider">
+                      2. Các khoản Dịch vụ phòng
+                    </h4>
+                    <p className="text-[10px] text-[#7B92AC]">
+                      Tự gõ tên dịch vụ & đơn giá riêng theo từng trọ
+                    </p>
                   </div>
+                </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleAddService()}
-                    className="px-2.5 py-1 rounded-lg bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-95 text-white text-[11px] font-bold flex items-center gap-1 shadow-2xs transition-all cursor-pointer"
+                <button
+                  type="button"
+                  onClick={() => handleAddService()}
+                  className="px-2.5 py-1 rounded-lg bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-95 text-white text-[11px] font-bold flex items-center gap-1 shadow-2xs transition-all cursor-pointer"
+                >
+                  <Plus className="w-3 h-3 stroke-[3]" />
+                  <span>Thêm dòng</span>
+                </button>
+              </div>
+
+              {/* Service Rows List (Không có mũi tên spin) */}
+              <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
+                {services.map((service) => (
+                  <div
+                    key={service.id}
+                    className="flex items-center gap-1.5 bg-white p-2 rounded-xl border border-[#DCE8F4] shadow-2xs group hover:border-[#5C84BE] transition-colors"
                   >
-                    <Plus className="w-3 h-3 stroke-[3]" />
-                    <span>Thêm dòng</span>
-                  </button>
-                </div>
+                    {/* Tên dịch vụ */}
+                    <div className="flex-1 min-w-[120px]">
+                      <input
+                        type="text"
+                        placeholder="Tên dịch vụ..."
+                        value={service.name}
+                        onChange={(e) =>
+                          handleUpdateService(service.id, "name", e.target.value)
+                        }
+                        className="w-full h-7 px-2 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-semibold"
+                      />
+                    </div>
 
-                {/* Service Rows List (Scrollable, không có spin buttons) */}
-                <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
-                  {services.map((service) => (
-                    <div
-                      key={service.id}
-                      className="flex items-center gap-1.5 bg-white p-2 rounded-xl border border-[#DCE8F4] shadow-2xs group hover:border-[#5C84BE] transition-colors"
-                    >
-                      {/* Tên dịch vụ */}
-                      <div className="flex-1 min-w-[120px]">
-                        <input
-                          type="text"
-                          placeholder="Tên dịch vụ..."
-                          value={service.name}
-                          onChange={(e) =>
-                            handleUpdateService(service.id, "name", e.target.value)
-                          }
-                          className="w-full h-7 px-2 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-semibold"
-                        />
-                      </div>
+                    {/* Đơn giá (Bỏ spinner 2 mũi tên lên xuống) */}
+                    <div className="w-[85px] xl:w-[95px]">
+                      <input
+                        type="number"
+                        placeholder="Đơn giá"
+                        value={service.price || ""}
+                        onChange={(e) =>
+                          handleUpdateService(
+                            service.id,
+                            "price",
+                            Number(e.target.value) || 0
+                          )
+                        }
+                        className="w-full h-7 px-2 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-bold text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                    </div>
 
-                      {/* Đơn giá (Bỏ spinner 2 mũi tên lên xuống) */}
-                      <div className="w-[85px] xl:w-[95px]">
-                        <input
-                          type="number"
-                          placeholder="Đơn giá"
-                          value={service.price || ""}
-                          onChange={(e) =>
-                            handleUpdateService(
-                              service.id,
-                              "price",
-                              Number(e.target.value) || 0
-                            )
-                          }
-                          className="w-full h-7 px-2 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-bold text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                      </div>
-
-                      {/* Đơn vị tính */}
-                      <div className="w-[80px] xl:w-[88px]">
-                        <select
-                          value={service.unit}
-                          onChange={(e) =>
-                            handleUpdateService(service.id, "unit", e.target.value)
-                          }
-                          className="w-full h-7 px-1 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-[10px] font-bold text-[#4B6584] bg-white cursor-pointer"
-                        >
-                          <option value="đ/kWh">đ/kWh</option>
-                          <option value="đ/khối">đ/khối</option>
-                          <option value="đ/người">đ/người</option>
-                          <option value="đ/phòng">đ/phòng</option>
-                          <option value="đ/xe">đ/xe</option>
-                          <option value="đ/tháng">đ/tháng</option>
-                        </select>
-                      </div>
-
-                      {/* Nút Xóa */}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveService(service.id)}
-                        className="p-1 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                        title="Xóa"
+                    {/* Đơn vị tính */}
+                    <div className="w-[80px] xl:w-[88px]">
+                      <select
+                        value={service.unit}
+                        onChange={(e) =>
+                          handleUpdateService(service.id, "unit", e.target.value)
+                        }
+                        className="w-full h-7 px-1 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-[10px] font-bold text-[#4B6584] bg-white cursor-pointer"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                        <option value="đ/kWh">đ/kWh</option>
+                        <option value="đ/khối">đ/khối</option>
+                        <option value="đ/người">đ/người</option>
+                        <option value="đ/phòng">đ/phòng</option>
+                        <option value="đ/xe">đ/xe</option>
+                        <option value="đ/tháng">đ/tháng</option>
+                      </select>
                     </div>
-                  ))}
 
-                  {services.length === 0 && (
-                    <div className="py-4 text-center text-xs text-[#7A93AD] border border-dashed border-[#CFDFEE] rounded-xl bg-white">
-                      Chưa có dịch vụ nào. Bấm <b>"+ Thêm dòng"</b> để tạo.
-                    </div>
-                  )}
-                </div>
+                    {/* Nút Xóa */}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveService(service.id)}
+                      className="p-1 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      title="Xóa"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+
+                {services.length === 0 && (
+                  <div className="py-4 text-center text-xs text-[#7A93AD] border border-dashed border-[#CFDFEE] rounded-xl bg-white">
+                    Chưa có dịch vụ nào. Bấm <b>"+ Thêm dòng"</b> để tạo.
+                  </div>
+                )}
               </div>
 
               {/* Gợi ý thêm nhanh */}
@@ -533,7 +550,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
           {/* Footer Actions */}
           <div className="flex items-center justify-between pt-3 border-t border-[#EAF2F8] shrink-0">
             <div className="text-[11px] text-[#7A92AB] font-medium hidden sm:block">
-              Định mức: <b className="text-[#253F5B]">{occupantsCount} người</b> • <b className="text-[#253F5B]">{vehiclesCount} xe</b> • <b className="text-[#253F5B]">{services.length} dịch vụ</b>
+              Định mức: <b className="text-[#253F5B]">{occupantsCount || 0} người</b> • <b className="text-[#253F5B]">{vehiclesCount || 0} xe</b> • <b className="text-[#253F5B]">{services.length} dịch vụ</b>
             </div>
 
             <div className="flex items-center gap-2.5 ml-auto">
