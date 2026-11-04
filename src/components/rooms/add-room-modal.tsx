@@ -9,9 +9,11 @@ import {
   Trash2,
   Sparkles,
   Layers,
-  Phone,
-  User,
-  DollarSign,
+  Users,
+  Bike,
+  CheckCircle2,
+  Wrench,
+  ShieldAlert,
 } from "lucide-react";
 import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
 
@@ -42,6 +44,10 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
   const [price, setPrice] = React.useState("2700000");
   const [status, setStatus] = React.useState<RoomStatus>("available");
   const [area, setArea] = React.useState("20");
+
+  // People & Vehicles in Room
+  const [occupantsCount, setOccupantsCount] = React.useState<number>(1);
+  const [vehiclesCount, setVehiclesCount] = React.useState<number>(1);
 
   // Contract Details (when status === "rented")
   const [tenantName, setTenantName] = React.useState("");
@@ -99,7 +105,11 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
     // Build backward-compatible RoomServices object from list
     const elec = validServices.find((s) => s.name.toLowerCase().includes("điện"));
     const water = validServices.find((s) => s.name.toLowerCase().includes("nước"));
-    const wifi = validServices.find((s) => s.name.toLowerCase().includes("wifi") || s.name.toLowerCase().includes("mạng"));
+    const wifi = validServices.find(
+      (s) =>
+        s.name.toLowerCase().includes("wifi") ||
+        s.name.toLowerCase().includes("mạng")
+    );
     const general = validServices.find(
       (s) =>
         s.name.toLowerCase().includes("cầu thang") ||
@@ -130,6 +140,8 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
       endDate: status === "rented" && endDate.trim() ? endDate.trim() : "---",
       deposit: status === "rented" ? Number(deposit) || Number(price) : undefined,
       area: Number(area) || 20,
+      occupantsCount,
+      vehiclesCount,
       services: legacyServices,
       customServices: validServices,
     });
@@ -142,302 +154,357 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto animate-fadeIn">
-      {/* Modal Container: Rộng ngang (max-w-[880px] / xl:max-w-[940px]) cho vừa mắt và dễ thao tác */}
-      <div className="bg-white rounded-3xl w-full max-w-[880px] xl:max-w-[940px] max-h-[92vh] flex flex-col shadow-2xl border border-[#E3EDF6] animate-scaleUp overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
+      {/* Modal Container: Cố định kích thước chuẩn (w: 920px, h: 560px) để khi bấm Đang Thuê không bao giờ bị nhảy/giật hay nở to form */}
+      <div className="bg-white rounded-3xl w-full max-w-[920px] h-[580px] flex flex-col shadow-2xl border border-[#E3EDF6] animate-scaleUp overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 xl:px-8 py-4 border-b border-[#EAF2F8] bg-white shrink-0">
+        <div className="flex items-center justify-between px-6 xl:px-8 py-3.5 border-b border-[#EAF2F8] bg-white shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shadow-inner">
               <Building2 className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
-              <h3 className="text-xl font-extrabold text-[#253F5B] tracking-tight">
+              <h3 className="text-lg xl:text-xl font-extrabold text-[#253F5B] tracking-tight">
                 Thêm Phòng Mới
               </h3>
-              <p className="text-xs text-[#7A92AB] font-medium">
-                Cấu hình thông tin phòng, hợp đồng và các khoản dịch vụ linh hoạt
+              <p className="text-[11px] text-[#7A92AB] font-medium">
+                Cấu hình thông tin phòng, số người/xe và bảng giá dịch vụ
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Form Body - 2 Columns Side by Side */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 xl:p-8 space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 items-start">
-            {/* CỘT TRÁI (5 cột): Thông tin phòng & Hợp đồng */}
-            <div className="lg:col-span-5 space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-[#253F5B] uppercase tracking-wider pb-1 border-b border-[#EEF4FA]">
-                <Layers className="w-4 h-4 text-[#5C84BE]" />
-                <span>1. Thông tin phòng</span>
-              </div>
-
-              {/* Số Phòng & Loại Phòng */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#253F5B]">Số Phòng *</label>
-                  <input
-                    type="text"
-                    placeholder="VD: P102"
-                    value={roomNumber}
-                    onChange={(e) => setRoomNumber(e.target.value)}
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B] font-semibold"
-                    required
-                  />
+        {/* Form Body - 2 Columns cố định chiều cao, không bị phình to */}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between p-6 xl:p-7 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-[410px]">
+            {/* CỘT TRÁI (5.5 cột): Thông tin phòng, số người/xe & Hợp đồng */}
+            <div className="lg:col-span-6 flex flex-col justify-between h-full pr-1">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-[11px] font-bold text-[#253F5B] uppercase tracking-wider pb-1 border-b border-[#EEF4FA]">
+                  <Layers className="w-3.5 h-3.5 text-[#5C84BE]" />
+                  <span>1. Thông tin căn phòng</span>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#253F5B]">Loại Phòng</label>
-                  <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value as RoomType)}
-                    className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer"
-                  >
-                    <option value="Phòng Đơn">Phòng Đơn</option>
-                    <option value="Phòng Đôi">Phòng Đôi</option>
-                    <option value="Phòng Ba">Phòng Ba</option>
-                  </select>
-                </div>
-              </div>
+                {/* Hàng 1: Số Phòng & Loại Phòng */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-[#253F5B]">Số Phòng *</label>
+                    <input
+                      type="text"
+                      placeholder="VD: P102"
+                      value={roomNumber}
+                      onChange={(e) => setRoomNumber(e.target.value)}
+                      className="w-full h-8.5 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-semibold"
+                      required
+                    />
+                  </div>
 
-              {/* Giá Thuê & Diện Tích */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#253F5B]">Giá Thuê (đ/tháng) *</label>
-                  <input
-                    type="number"
-                    placeholder="2.700.000"
-                    value={price}
-                    onChange={(e) => {
-                      setPrice(e.target.value);
-                      if (!deposit || deposit === price) {
-                        setDeposit(e.target.value);
-                      }
-                    }}
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B] font-bold"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#253F5B]">Diện Tích (m²)</label>
-                  <input
-                    type="number"
-                    placeholder="20"
-                    value={area}
-                    onChange={(e) => setArea(e.target.value)}
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B]"
-                  />
-                </div>
-              </div>
-
-              {/* Trạng Thái Ban Đầu */}
-              <div className="space-y-1.5 pt-1">
-                <label className="text-xs font-bold text-[#253F5B]">Trạng Thái Ban Đầu</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { key: "available", label: "Trống" },
-                    { key: "rented", label: "Đang Thuê" },
-                    { key: "maintenance", label: "Đang sửa" },
-                  ].map((st) => (
-                    <button
-                      type="button"
-                      key={st.key}
-                      onClick={() => setStatus(st.key as RoomStatus)}
-                      className={`h-9 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
-                        status === st.key
-                          ? "bg-[#5C84BE] text-white border-[#5C84BE] shadow-xs"
-                          : "bg-[#F4F9FD] text-[#4A6482] border-[#D9E6F2] hover:bg-[#E9F3FC]"
-                      }`}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-[#253F5B]">Loại Phòng</label>
+                    <select
+                      value={type}
+                      onChange={(e) => setType(e.target.value as RoomType)}
+                      className="w-full h-8.5 px-2.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer"
                     >
-                      {st.label}
-                    </button>
-                  ))}
+                      <option value="Phòng Đơn">Phòng Đơn</option>
+                      <option value="Phòng Đôi">Phòng Đôi</option>
+                      <option value="Phòng Ba">Phòng Ba</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
 
-              {/* Thông tin Hợp đồng & Khách thuê khi Đang Thuê */}
-              {status === "rented" && (
-                <div className="p-3.5 rounded-2xl bg-[#F6F9FD] border border-[#DEEBF5] space-y-3 animate-fadeIn">
-                  <div className="flex items-center gap-2 text-xs font-bold text-[#253F5B]">
-                    <Calendar className="w-4 h-4 text-[#5C84BE]" />
-                    <span>Hợp đồng & Người thuê</span>
+                {/* Hàng 2: Giá Thuê & Diện Tích (Bỏ 2 mũi tên lên xuống bằng CSS & textfield) */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-[#253F5B]">Giá Thuê (đ/tháng) *</label>
+                    <input
+                      type="number"
+                      placeholder="2.700.000"
+                      value={price}
+                      onChange={(e) => {
+                        setPrice(e.target.value);
+                        if (!deposit || deposit === price) {
+                          setDeposit(e.target.value);
+                        }
+                      }}
+                      className="w-full h-8.5 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      required
+                    />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-bold text-[#506A88]">Tên Người Thuê *</label>
-                      <input
-                        type="text"
-                        placeholder="VD: Quý Bình"
-                        value={tenantName}
-                        onChange={(e) => setTenantName(e.target.value)}
-                        className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE]"
-                        required={status === "rented"}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-bold text-[#506A88]">Số Điện Thoại</label>
-                      <input
-                        type="tel"
-                        placeholder="0987.654.321"
-                        value={tenantPhone}
-                        onChange={(e) => setTenantPhone(e.target.value)}
-                        className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
-                      />
-                    </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-[#253F5B]">Diện Tích (m²)</label>
+                    <input
+                      type="number"
+                      placeholder="20"
+                      value={area}
+                      onChange={(e) => setArea(e.target.value)}
+                      className="w-full h-8.5 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-bold text-[#506A88]">Ngày Bắt Đầu HĐ</label>
-                      <input
-                        type="text"
-                        placeholder="01/01/2026"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="w-full h-9 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-bold text-[#506A88]">Hạn Hợp Đồng</label>
-                      <input
-                        type="text"
-                        placeholder="01/01/2027"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="w-full h-9 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
-                      />
+                {/* Hàng 3: Trạng Thái Ban Đầu */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-[#253F5B]">Trạng Thái Ban Đầu</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { key: "available", label: "Trống" },
+                      { key: "rented", label: "Đang Thuê" },
+                      { key: "maintenance", label: "Đang sửa" },
+                    ].map((st) => (
+                      <button
+                        type="button"
+                        key={st.key}
+                        onClick={() => setStatus(st.key as RoomStatus)}
+                        className={`h-8 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                          status === st.key
+                            ? "bg-[#5C84BE] text-white border-[#5C84BE] shadow-xs"
+                            : "bg-[#F4F9FD] text-[#4A6482] border-[#D9E6F2] hover:bg-[#E9F3FC]"
+                        }`}
+                      >
+                        {st.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Hàng 4: Số Người Thuê & Số Xe Máy (Bổ sung theo yêu cầu) */}
+                <div className="grid grid-cols-2 gap-3 pt-0.5">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
+                      <Users className="w-3.5 h-3.5 text-[#5C84BE]" />
+                      <span>Số người ở</span>
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      {[1, 2, 3, 4].map((num) => (
+                        <button
+                          type="button"
+                          key={num}
+                          onClick={() => setOccupantsCount(num)}
+                          className={`flex-1 h-7.5 rounded-lg text-xs font-bold transition-all border cursor-pointer ${
+                            occupantsCount === num
+                              ? "bg-[#5C84BE] text-white border-[#5C84BE] shadow-2xs"
+                              : "bg-white text-[#4A6482] border-[#D9E6F2] hover:bg-[#F2F7FC]"
+                          }`}
+                        >
+                          {num}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-[#506A88]">Tiền Đặt Cọc (đ)</label>
-                    <input
-                      type="number"
-                      placeholder="2.700.000"
-                      value={deposit}
-                      onChange={(e) => setDeposit(e.target.value)}
-                      className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-bold outline-none focus:border-[#5C84BE]"
-                    />
+                    <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
+                      <Bike className="w-3.5 h-3.5 text-[#5C84BE]" />
+                      <span>Số xe máy</span>
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      {[0, 1, 2, 3].map((num) => (
+                        <button
+                          type="button"
+                          key={num}
+                          onClick={() => setVehiclesCount(num)}
+                          className={`flex-1 h-7.5 rounded-lg text-xs font-bold transition-all border cursor-pointer ${
+                            vehiclesCount === num
+                              ? "bg-[#5C84BE] text-white border-[#5C84BE] shadow-2xs"
+                              : "bg-white text-[#4A6482] border-[#D9E6F2] hover:bg-[#F2F7FC]"
+                          }`}
+                        >
+                          {num}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* CỘT PHẢI (7 cột): Bảng Dịch Vụ Linh Hoạt (Tên dịch vụ, Đơn giá, Đơn vị tính) */}
-            <div className="lg:col-span-7 space-y-3.5 bg-[#F9FBFE] p-4 xl:p-5 rounded-2xl border border-[#DEEBF5]">
-              <div className="flex items-center justify-between pb-2 border-b border-[#E4EFF8]">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#5C84BE]" />
-                  <div>
-                    <h4 className="text-xs font-bold text-[#253F5B] uppercase tracking-wider">
-                      2. Các khoản Dịch vụ của phòng
-                    </h4>
-                    <p className="text-[11px] text-[#7B92AC]">
-                      Nhập tên & giá tùy biến theo từng trọ / cơ sở
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleAddService()}
-                  className="px-3 py-1.5 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-95 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                  <span>Thêm dịch vụ</span>
-                </button>
               </div>
 
-              {/* Service Rows List */}
-              <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
-                {services.map((service, idx) => (
-                  <div
-                    key={service.id}
-                    className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-[#DCE8F4] shadow-2xs group hover:border-[#5C84BE] transition-colors"
-                  >
-                    {/* Tên dịch vụ (Text input tự gõ) */}
-                    <div className="flex-1 min-w-[140px]">
+              {/* KHỐI CỐ ĐỊNH CHIỀU CAO (h-[128px]): Đảm bảo khi chọn Đang Thuê / Trống / Đang Sửa form không bao giờ bị phình to */}
+              <div className="h-[128px] mt-2">
+                {status === "rented" ? (
+                  <div className="h-full p-2.5 rounded-2xl bg-[#F6F9FD] border border-[#DEEBF5] flex flex-col justify-between animate-fadeIn">
+                    <div className="grid grid-cols-2 gap-2">
                       <input
                         type="text"
-                        placeholder="Tên dịch vụ (VD: Điện, Nước...)"
-                        value={service.name}
-                        onChange={(e) =>
-                          handleUpdateService(service.id, "name", e.target.value)
-                        }
-                        className="w-full h-8 px-2.5 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-semibold"
+                        placeholder="Họ tên người thuê *"
+                        value={tenantName}
+                        onChange={(e) => setTenantName(e.target.value)}
+                        className="w-full h-7.5 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE]"
+                        required={status === "rented"}
+                      />
+                      <input
+                        type="tel"
+                        placeholder="Số điện thoại"
+                        value={tenantPhone}
+                        onChange={(e) => setTenantPhone(e.target.value)}
+                        className="w-full h-7.5 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
                       />
                     </div>
 
-                    {/* Đơn giá */}
-                    <div className="w-[100px] xl:w-[110px]">
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        placeholder="Ngày bắt đầu (01/01/2026)"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="w-full h-7.5 px-2 rounded-lg border border-[#D0DFEE] bg-white text-[11px] text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Hạn hợp đồng (01/01/2027)"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="w-full h-7.5 px-2 rounded-lg border border-[#D0DFEE] bg-white text-[11px] text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                      />
+                    </div>
+
+                    <div className="relative">
                       <input
                         type="number"
-                        placeholder="Đơn giá"
-                        value={service.price || ""}
-                        onChange={(e) =>
-                          handleUpdateService(
-                            service.id,
-                            "price",
-                            Number(e.target.value) || 0
-                          )
-                        }
-                        className="w-full h-8 px-2 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-bold text-right"
+                        placeholder="Tiền đặt cọc (đ)"
+                        value={deposit}
+                        onChange={(e) => setDeposit(e.target.value)}
+                        className="w-full h-7.5 px-2.5 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-bold outline-none focus:border-[#5C84BE] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
+                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-medium">
+                        VNĐ cọc
+                      </span>
                     </div>
-
-                    {/* Đơn vị tính */}
-                    <div className="w-[85px] xl:w-[95px]">
-                      <select
-                        value={service.unit}
-                        onChange={(e) =>
-                          handleUpdateService(service.id, "unit", e.target.value)
-                        }
-                        className="w-full h-8 px-1.5 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-[11px] font-bold text-[#4B6584] bg-white cursor-pointer"
-                      >
-                        <option value="đ/kWh">đ/kWh</option>
-                        <option value="đ/khối">đ/khối</option>
-                        <option value="đ/người">đ/người</option>
-                        <option value="đ/phòng">đ/phòng</option>
-                        <option value="đ/xe">đ/xe</option>
-                        <option value="đ/tháng">đ/tháng</option>
-                      </select>
-                    </div>
-
-                    {/* Nút Xóa */}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveService(service.id)}
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                      title="Xóa dịch vụ này"
-                      aria-label="Xóa dịch vụ"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                   </div>
-                ))}
-
-                {services.length === 0 && (
-                  <div className="py-6 text-center text-xs text-[#7A93AD] border border-dashed border-[#CFDFEE] rounded-xl bg-white">
-                    Chưa có khoản dịch vụ nào. Bấm <b>"+ Thêm dịch vụ"</b> để thêm.
+                ) : status === "available" ? (
+                  <div className="h-full rounded-2xl border border-dashed border-[#CFDFEE] bg-[#F8FBFE] flex flex-col items-center justify-center p-3 text-center">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 mb-1" />
+                    <p className="text-xs font-bold text-[#253F5B]">Phòng trống sẵn sàng đón khách</p>
+                    <p className="text-[10px] text-[#7B92AC] mt-0.5">
+                      Bấm nút "Đang Thuê" ở trên nếu phòng đã có khách vào ở
+                    </p>
+                  </div>
+                ) : (
+                  <div className="h-full rounded-2xl border border-dashed border-[#F3E2A8] bg-[#FFFDF5] flex flex-col items-center justify-center p-3 text-center">
+                    <Wrench className="w-5 h-5 text-amber-500 mb-1" />
+                    <p className="text-xs font-bold text-[#7A5A00]">Phòng đang bảo trì / sửa chữa</p>
+                    <p className="text-[10px] text-[#9A7D2C] mt-0.5">
+                      Tạm thời không nhận người thuê cho đến khi hoàn tất
+                    </p>
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Gợi ý thêm nhanh dịch vụ phổ biến */}
+            {/* CỘT PHẢI (6 cột): Bảng Dịch Vụ Linh Hoạt (Không có spin button lên xuống) */}
+            <div className="lg:col-span-6 flex flex-col justify-between h-full bg-[#F9FBFE] p-4 rounded-2xl border border-[#DEEBF5]">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-[#E4EFF8]">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-[#5C84BE]" />
+                    <div>
+                      <h4 className="text-[11px] font-bold text-[#253F5B] uppercase tracking-wider">
+                        2. Các khoản Dịch vụ phòng
+                      </h4>
+                      <p className="text-[10px] text-[#7B92AC]">
+                        Tự gõ tên dịch vụ & đơn giá riêng theo từng trọ
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleAddService()}
+                    className="px-2.5 py-1 rounded-lg bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-95 text-white text-[11px] font-bold flex items-center gap-1 shadow-2xs transition-all cursor-pointer"
+                  >
+                    <Plus className="w-3 h-3 stroke-[3]" />
+                    <span>Thêm dòng</span>
+                  </button>
+                </div>
+
+                {/* Service Rows List (Scrollable, không có spin buttons) */}
+                <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                  {services.map((service) => (
+                    <div
+                      key={service.id}
+                      className="flex items-center gap-1.5 bg-white p-2 rounded-xl border border-[#DCE8F4] shadow-2xs group hover:border-[#5C84BE] transition-colors"
+                    >
+                      {/* Tên dịch vụ */}
+                      <div className="flex-1 min-w-[120px]">
+                        <input
+                          type="text"
+                          placeholder="Tên dịch vụ..."
+                          value={service.name}
+                          onChange={(e) =>
+                            handleUpdateService(service.id, "name", e.target.value)
+                          }
+                          className="w-full h-7 px-2 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-semibold"
+                        />
+                      </div>
+
+                      {/* Đơn giá (Bỏ spinner 2 mũi tên lên xuống) */}
+                      <div className="w-[85px] xl:w-[95px]">
+                        <input
+                          type="number"
+                          placeholder="Đơn giá"
+                          value={service.price || ""}
+                          onChange={(e) =>
+                            handleUpdateService(
+                              service.id,
+                              "price",
+                              Number(e.target.value) || 0
+                            )
+                          }
+                          className="w-full h-7 px-2 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs text-[#253F5B] font-bold text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                      </div>
+
+                      {/* Đơn vị tính */}
+                      <div className="w-[80px] xl:w-[88px]">
+                        <select
+                          value={service.unit}
+                          onChange={(e) =>
+                            handleUpdateService(service.id, "unit", e.target.value)
+                          }
+                          className="w-full h-7 px-1 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-[10px] font-bold text-[#4B6584] bg-white cursor-pointer"
+                        >
+                          <option value="đ/kWh">đ/kWh</option>
+                          <option value="đ/khối">đ/khối</option>
+                          <option value="đ/người">đ/người</option>
+                          <option value="đ/phòng">đ/phòng</option>
+                          <option value="đ/xe">đ/xe</option>
+                          <option value="đ/tháng">đ/tháng</option>
+                        </select>
+                      </div>
+
+                      {/* Nút Xóa */}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveService(service.id)}
+                        className="p-1 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                        title="Xóa"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+
+                  {services.length === 0 && (
+                    <div className="py-4 text-center text-xs text-[#7A93AD] border border-dashed border-[#CFDFEE] rounded-xl bg-white">
+                      Chưa có dịch vụ nào. Bấm <b>"+ Thêm dòng"</b> để tạo.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Gợi ý thêm nhanh */}
               <div className="pt-2 border-t border-[#E4EFF8]">
-                <p className="text-[11px] font-bold text-[#7A93AD] mb-1.5">
-                  Gợi ý thêm nhanh:
+                <p className="text-[10px] font-bold text-[#7A93AD] mb-1">
+                  Thêm nhanh 1 chạm:
                 </p>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1">
                   {serviceSuggestions.map((sug) => {
                     const isAdded = services.some(
                       (s) => s.name.toLowerCase() === sug.name.toLowerCase()
@@ -448,13 +515,13 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                         type="button"
                         onClick={() => handleAddService(sug)}
                         disabled={isAdded}
-                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                        className={`px-2 py-0.5 rounded-md text-[9.5px] font-bold transition-all ${
                           isAdded
                             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                             : "bg-white hover:bg-[#EAF2F8] text-[#5C84BE] border border-[#D5E4F2] shadow-2xs cursor-pointer active:scale-95"
                         }`}
                       >
-                        + {sug.name} ({sug.price.toLocaleString("vi-VN")} {sug.unit})
+                        + {sug.name} ({sug.price.toLocaleString("vi-VN")})
                       </button>
                     );
                   })}
@@ -463,25 +530,25 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-[#EAF2F8]">
-            <div className="text-xs text-[#7A92AB] font-medium hidden sm:block">
-              Đã cấu hình <b className="text-[#253F5B]">{services.length}</b> khoản dịch vụ cho phòng này
+          {/* Footer Actions */}
+          <div className="flex items-center justify-between pt-3 border-t border-[#EAF2F8] shrink-0">
+            <div className="text-[11px] text-[#7A92AB] font-medium hidden sm:block">
+              Định mức: <b className="text-[#253F5B]">{occupantsCount} người</b> • <b className="text-[#253F5B]">{vehiclesCount} xe</b> • <b className="text-[#253F5B]">{services.length} dịch vụ</b>
             </div>
 
-            <div className="flex items-center gap-3 ml-auto">
+            <div className="flex items-center gap-2.5 ml-auto">
               <button
                 type="button"
                 onClick={onClose}
-                className="h-10 px-5 rounded-xl border border-[#D9E6F2] text-xs font-semibold text-[#5C728C] hover:bg-gray-50 cursor-pointer"
+                className="h-9 px-4 rounded-xl border border-[#D9E6F2] text-xs font-semibold text-[#5C728C] hover:bg-gray-50 cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 type="submit"
-                className="h-10 px-6 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-[#5C84BE]/20 cursor-pointer active:scale-95 transition-all"
+                className="h-9 px-5 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-[#5C84BE]/20 cursor-pointer active:scale-95 transition-all"
               >
-                <Plus className="w-4 h-4 stroke-[3]" />
+                <Plus className="w-3.5 h-3.5 stroke-[3]" />
                 <span>Tạo Phòng</span>
               </button>
             </div>

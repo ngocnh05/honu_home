@@ -214,7 +214,9 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                           {room.tenantName}
                         </h4>
                         <p className="text-xs font-semibold text-[#7A93AD] mt-0.5">
-                          {room.tenantRole || "Sv năm 1 - ĐH Mở"}
+                          {room.tenantRole || "Khách thuê căn hộ"}
+                          {room.occupantsCount ? ` • ${room.occupantsCount} người` : ""}
+                          {room.vehiclesCount !== undefined ? ` • ${room.vehiclesCount} xe máy` : ""}
                         </p>
                       </div>
                     </div>

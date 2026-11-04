@@ -31,6 +31,8 @@ export interface Room {
   startDate?: string;
   endDate?: string;
   deposit?: number; // Tiền đặt cọc
+  occupantsCount?: number; // Số người ở (VD: 1, 2, 3...)
+  vehiclesCount?: number; // Số xe máy gửi (VD: 0, 1, 2...)
   services?: RoomServices;
   customServices?: CustomService[];
   tenantRole?: string;
