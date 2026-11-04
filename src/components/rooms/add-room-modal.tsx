@@ -16,6 +16,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
   const [price, setPrice] = React.useState("2700000");
   const [status, setStatus] = React.useState<RoomStatus>("available");
   const [tenantName, setTenantName] = React.useState("");
+  const [endDate, setEndDate] = React.useState("01/01/2027");
   const [area, setArea] = React.useState("20");
 
   if (!isOpen) return null;
@@ -33,6 +34,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
       price: Number(price) || 2500000,
       status,
       tenantName: status === "rented" && tenantName.trim() ? tenantName.trim() : "---",
+      endDate: status === "rented" && endDate.trim() ? endDate.trim() : "---",
       area: Number(area) || 20,
     });
 
@@ -143,15 +145,27 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
           </div>
 
           {status === "rented" && (
-            <div className="space-y-1.5 pt-1 animate-fadeIn">
-              <label className="text-xs font-bold text-[#253F5B]">Tên Người Thuê</label>
-              <input
-                type="text"
-                placeholder="Nhập họ và tên người thuê"
-                value={tenantName}
-                onChange={(e) => setTenantName(e.target.value)}
-                className="w-full h-11 px-4 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-sm text-[#253F5B]"
-              />
+            <div className="grid grid-cols-2 gap-3 pt-1 animate-fadeIn">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#253F5B]">Tên Người Thuê</label>
+                <input
+                  type="text"
+                  placeholder="Nhập họ và tên"
+                  value={tenantName}
+                  onChange={(e) => setTenantName(e.target.value)}
+                  className="w-full h-11 px-4 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-sm text-[#253F5B]"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#253F5B]">Hạn Hợp Đồng</label>
+                <input
+                  type="text"
+                  placeholder="VD: 01/01/2027"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full h-11 px-4 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-sm text-[#253F5B]"
+                />
+              </div>
             </div>
           )}
 

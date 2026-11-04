@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   DoorOpen,
   Filter,
+  Calendar,
 } from "lucide-react";
 import {
   EditActionIcon,
@@ -69,6 +70,9 @@ export function RoomsTable() {
         newRoomData.price
       )} đ`,
       statusLabel: statusLabels[newRoomData.status],
+      endDate:
+        newRoomData.endDate ||
+        (newRoomData.status === "rented" ? "01/01/2027" : "---"),
     };
 
     setRooms((prev) => [newRoom, ...prev]);
@@ -153,13 +157,14 @@ export function RoomsTable() {
           {/* Header */}
           <thead>
             <tr className="bg-[#F8FBFE] border-b border-[#EAF1F8] text-[13px] font-bold text-[#6B85A1] uppercase tracking-wider h-[58px]">
-              <th className="pl-7 w-[70px]">STT</th>
-              <th className="px-5 w-[140px]">Số Phòng</th>
-              <th className="px-5 w-[160px]">Loại Phòng</th>
-              <th className="px-5 w-[170px]">Giá Thuê</th>
-              <th className="px-5 w-[160px]">Trạng Thái</th>
-              <th className="px-5">Người Thuê</th>
-              <th className="pr-7 text-center w-[140px]">Thao Tác</th>
+              <th className="pl-7 w-[60px]">STT</th>
+              <th className="px-5 w-[130px]">Số Phòng</th>
+              <th className="px-5 w-[140px]">Loại Phòng</th>
+              <th className="px-5 w-[150px]">Giá Thuê</th>
+              <th className="px-5 w-[140px]">Trạng Thái</th>
+              <th className="px-5 w-[160px]">Người Thuê</th>
+              <th className="px-5 w-[160px]">Hạn Hợp Đồng</th>
+              <th className="pr-7 text-center w-[130px]">Thao Tác</th>
             </tr>
           </thead>
 
@@ -246,16 +251,32 @@ export function RoomsTable() {
                     <td className="px-5">
                       {room.tenantName !== "---" ? (
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-[#E5EEF7] text-[#5C84BE] font-bold text-xs flex items-center justify-center">
+                          <div className="w-7 h-7 rounded-full bg-[#E5EEF7] text-[#5C84BE] font-bold text-xs flex items-center justify-center shrink-0">
                             {room.tenantName.charAt(0)}
                           </div>
-                          <span className="font-bold text-[#253F5B]">
+                          <span className="font-bold text-[#253F5B] truncate max-w-[120px]">
                             {room.tenantName}
                           </span>
                         </div>
                       ) : (
                         <span className="text-xs font-medium text-[#A2B5CA] italic">
                           Chưa có khách
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Hạn Hợp Đồng (Ngày kết thúc hợp đồng) */}
+                    <td className="px-5">
+                      {room.status === "rented" && room.endDate && room.endDate !== "---" ? (
+                        <div className="flex items-center gap-1.5 bg-[#F2F7FC] px-2.5 py-1 rounded-lg w-fit border border-[#DCE8F3]">
+                          <Calendar className="w-3.5 h-3.5 text-[#5C84BE] shrink-0" />
+                          <span className="font-bold text-[#253F5B] text-xs font-mono">
+                            {room.endDate}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xs font-medium text-[#A2B5CA] italic">
+                          ---
                         </span>
                       )}
                     </td>
@@ -310,7 +331,7 @@ export function RoomsTable() {
                   className="h-[68px] border-b border-[#F7FAFD]/80 pointer-events-none select-none"
                   aria-hidden="true"
                 >
-                  <td colSpan={7} className="px-5 text-transparent">
+                  <td colSpan={8} className="px-5 text-transparent">
                     &nbsp;
                   </td>
                 </tr>
@@ -319,7 +340,7 @@ export function RoomsTable() {
             {paginatedRooms.length === 0 && (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={8}
                   className="h-[476px] text-center text-sm font-medium text-[#8EA3BA]"
                 >
                   Không tìm thấy phòng nào phù hợp với bộ lọc hiện tại.

@@ -13,6 +13,7 @@ export const initialRooms: Room[] = [
     tenantName: "Quý Bình",
     floor: 1,
     area: 20,
+    endDate: "15/12/2026",
   },
   {
     id: "r2",
@@ -25,6 +26,7 @@ export const initialRooms: Room[] = [
     tenantName: "---",
     floor: 1,
     area: 30,
+    endDate: "---",
   },
   {
     id: "r3",
@@ -37,6 +39,7 @@ export const initialRooms: Room[] = [
     tenantName: "---",
     floor: 1,
     area: 45,
+    endDate: "---",
   },
   {
     id: "r4",
@@ -49,6 +52,7 @@ export const initialRooms: Room[] = [
     tenantName: "Phan Tài",
     floor: 1,
     area: 20,
+    endDate: "01/03/2026",
   },
   {
     id: "r5",
@@ -61,6 +65,7 @@ export const initialRooms: Room[] = [
     tenantName: "---",
     floor: 2,
     area: 32,
+    endDate: "---",
   },
   {
     id: "r6",
@@ -73,6 +78,7 @@ export const initialRooms: Room[] = [
     tenantName: "Trường Văn",
     floor: 2,
     area: 22,
+    endDate: "20/08/2026",
   },
   {
     id: "r7",
@@ -85,6 +91,7 @@ export const initialRooms: Room[] = [
     tenantName: "Nguyễn Văn A",
     floor: 2,
     area: 20,
+    endDate: "01/01/2026",
   },
   {
     id: "r8",
@@ -97,6 +104,7 @@ export const initialRooms: Room[] = [
     tenantName: "---",
     floor: 2,
     area: 28,
+    endDate: "---",
   },
   {
     id: "r9",
@@ -109,6 +117,7 @@ export const initialRooms: Room[] = [
     tenantName: "Đình Tuân",
     floor: 2,
     area: 42,
+    endDate: "30/06/2026",
   },
   {
     id: "r10",
@@ -121,6 +130,7 @@ export const initialRooms: Room[] = [
     tenantName: "Hải Ly",
     floor: 2,
     area: 21,
+    endDate: "---",
   },
 
   // --- Trang 2 (10 phòng) ---
@@ -135,6 +145,7 @@ export const initialRooms: Room[] = [
     tenantName: "Đại Bảo",
     floor: 3,
     area: 22,
+    endDate: "---",
   },
   {
     id: "r12",
@@ -147,6 +158,7 @@ export const initialRooms: Room[] = [
     tenantName: "---",
     floor: 3,
     area: 32,
+    endDate: "10/05/2026",
   },
   {
     id: "r13",
@@ -159,6 +171,7 @@ export const initialRooms: Room[] = [
     tenantName: "Lê Hoàng",
     floor: 3,
     area: 46,
+    endDate: "---",
   },
   {
     id: "r14",
@@ -171,6 +184,7 @@ export const initialRooms: Room[] = [
     tenantName: "---",
     floor: 3,
     area: 20,
+    endDate: "25/09/2026",
   },
   {
     id: "r15",
@@ -183,6 +197,7 @@ export const initialRooms: Room[] = [
     tenantName: "---",
     floor: 3,
     area: 20,
+    endDate: "---",
   },
   {
     id: "r16",
@@ -195,6 +210,7 @@ export const initialRooms: Room[] = [
     tenantName: "Trần Minh",
     floor: 4,
     area: 30,
+    endDate: "05/04/2026",
   },
   {
     id: "r17",
@@ -207,6 +223,7 @@ export const initialRooms: Room[] = [
     tenantName: "---",
     floor: 4,
     area: 21,
+    endDate: "---",
   },
   {
     id: "r18",
@@ -219,6 +236,7 @@ export const initialRooms: Room[] = [
     tenantName: "Vũ Phong",
     floor: 4,
     area: 44,
+    endDate: "12/12/2026",
   },
   {
     id: "r19",
@@ -231,6 +249,7 @@ export const initialRooms: Room[] = [
     tenantName: "Ngô Quyền",
     floor: 4,
     area: 20,
+    endDate: "---",
   },
   {
     id: "r20",
@@ -243,6 +262,7 @@ export const initialRooms: Room[] = [
     tenantName: "---",
     floor: 4,
     area: 31,
+    endDate: "18/07/2026",
   },
 
   // --- Trang 3 (5 phòng) ---
@@ -257,6 +277,7 @@ export const initialRooms: Room[] = [
     tenantName: "Phạm Hùng",
     floor: 5,
     area: 23,
+    endDate: "---",
   },
   {
     id: "r22",
@@ -269,6 +290,7 @@ export const initialRooms: Room[] = [
     tenantName: "---",
     floor: 5,
     area: 34,
+    endDate: "30/01/2026",
   },
   {
     id: "r23",
@@ -281,6 +303,7 @@ export const initialRooms: Room[] = [
     tenantName: "---",
     floor: 5,
     area: 48,
+    endDate: "---",
   },
   {
     id: "r24",
@@ -293,6 +316,7 @@ export const initialRooms: Room[] = [
     tenantName: "Bùi Tiến",
     floor: 5,
     area: 21,
+    endDate: "22/10/2026",
   },
   {
     id: "r25",
@@ -305,6 +329,7 @@ export const initialRooms: Room[] = [
     tenantName: "---",
     floor: 5,
     area: 33,
+    endDate: "---",
   },
 ];
 
