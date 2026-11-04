@@ -11,7 +11,6 @@ import {
   Filter,
   Calendar,
   Building2,
-  Search,
   Users,
   Bike,
   Video,
@@ -37,7 +36,6 @@ export function RoomsTable() {
   const [buildingFilter, setBuildingFilter] = React.useState("ALL");
   const [typeFilter, setTypeFilter] = React.useState("ALL");
   const [statusFilter, setStatusFilter] = React.useState("ALL");
-  const [searchTerm, setSearchTerm] = React.useState("");
   const [currentPage, setCurrentPage] = React.useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
   const [editingRoom, setEditingRoom] = React.useState<Room | null>(null);
@@ -45,25 +43,17 @@ export function RoomsTable() {
 
   const itemsPerPage = 7;
 
-  // Filter logic based on Building, Search, Type, Status
+  // Filter logic based on Building, Type, Status
   const filteredRooms = React.useMemo(() => {
     return rooms.filter((r) => {
       const matchBuilding =
         buildingFilter === "ALL" || r.buildingId === buildingFilter;
-
-      const matchSearch =
-        searchTerm.trim() === "" ||
-        r.roomNumber.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
-        r.tenantName.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
-        (r.tenantPhone && r.tenantPhone.includes(searchTerm.trim())) ||
-        (r.buildingName && r.buildingName.toLowerCase().includes(searchTerm.toLowerCase().trim()));
-
       const matchType = typeFilter === "ALL" || r.type === typeFilter;
       const matchStatus = statusFilter === "ALL" || r.status === statusFilter;
 
-      return matchBuilding && matchSearch && matchType && matchStatus;
+      return matchBuilding && matchType && matchStatus;
     });
-  }, [rooms, buildingFilter, searchTerm, typeFilter, statusFilter]);
+  }, [rooms, buildingFilter, typeFilter, statusFilter]);
 
   // Compute aggregate stats based on active building filter
   const stats = React.useMemo(() => {
@@ -145,8 +135,8 @@ export function RoomsTable() {
 
   return (
     <div className="w-full space-y-5 animate-fadeIn pb-12 select-none">
-      {/* 1. Top Bar: Tiêu đề trang & Nút Thêm Phòng */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white px-7 py-4.5 rounded-3xl border border-[#E3EDF6] shadow-sm w-full">
+      {/* 1. Top Bar: Tiêu đề trang, 3 Bộ Lọc (Cơ sở, Loại phòng, Trạng thái) & Nút Thêm Phòng */}
+      <div className="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-4 bg-white px-7 py-4.5 rounded-3xl border border-[#E3EDF6] shadow-sm w-full">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shadow-inner">
             <DoorOpen className="w-6 h-6 stroke-[2.2]" />
@@ -166,82 +156,10 @@ export function RoomsTable() {
           </div>
         </div>
 
-        <Link
-          href="/rooms/create"
-          className="h-10 px-5 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-[0.98] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm shadow-[#5C84BE]/25 transition-all cursor-pointer shrink-0"
-        >
-          <Plus className="w-4 h-4 stroke-[3]" />
-          <span>Thêm phòng mới</span>
-        </Link>
-      </div>
-
-      {/* 2. Thống Kê Nhanh (KPIs đồng bộ theo Cơ sở) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 w-full">
-        <div className="bg-white p-4 rounded-2xl border border-[#E3EDF6] shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#5C84BE] flex items-center justify-center shrink-0">
-            <DoorOpen className="w-5 h-5 stroke-[2.2]" />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold text-slate-400">Tổng quy mô</p>
-            <p className="text-xl font-extrabold text-[#253F5B]">{stats.totalRooms} phòng</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-[#E3EDF6] shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <TrendingUp className="w-5 h-5 stroke-[2.2]" />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold text-slate-400">Đang cho thuê</p>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-extrabold text-[#253F5B]">{stats.rentedRooms}</span>
-              <span className="text-xs font-bold text-emerald-600">({stats.occupancyRate}%)</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-[#E3EDF6] shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
-            <DoorOpen className="w-5 h-5 stroke-[2.2]" />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold text-slate-400">Phòng trống</p>
-            <p className="text-xl font-extrabold text-sky-600">{stats.availableRooms} phòng</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-[#E3EDF6] shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <AlertCircle className="w-5 h-5 stroke-[2.2]" />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold text-slate-400">Đang sửa chữa</p>
-            <p className="text-xl font-extrabold text-amber-600">{stats.maintenanceRooms} phòng</p>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Thanh Công Cụ Bộ Lọc & Tìm Kiếm Tinh Gọn */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-[#E3EDF6] shadow-sm">
-        {/* Tìm kiếm nhanh */}
-        <div className="relative w-full lg:w-80">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="Tìm theo số phòng, người thuê, SĐT..."
-            className="w-full h-10 pl-9 pr-4 rounded-xl bg-[#F6FAFD] border border-[#DEEBF5] focus:border-[#5C84BE] focus:bg-white text-xs font-medium text-[#253F5B] outline-none transition-all placeholder:text-[#A4B3C6]"
-          />
-          <Search className="w-4 h-4 text-[#7A93B0] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-        </div>
-
-        {/* 3 Bộ lọc: Cơ sở, Loại phòng, Trạng thái */}
+        {/* 3 Bộ lọc đặt cạnh Nút Thêm phòng */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Lọc cơ sở / tòa nhà */}
-          <div className="relative min-w-[170px]">
+          <div className="relative min-w-[155px]">
             <select
               value={buildingFilter}
               onChange={(e) => {
@@ -292,6 +210,61 @@ export function RoomsTable() {
               <option value="maintenance">Đang sửa</option>
             </select>
             <Filter className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5C84BE] pointer-events-none" />
+          </div>
+
+          {/* Nút Thêm phòng mới */}
+          <Link
+            href="/rooms/create"
+            className="h-10 px-5 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-[0.98] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm shadow-[#5C84BE]/25 transition-all cursor-pointer shrink-0"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>Thêm phòng mới</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* 2. Thống Kê Nhanh (KPIs đồng bộ theo Cơ sở) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 w-full">
+        <div className="bg-white p-4 rounded-2xl border border-[#E3EDF6] shadow-sm flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#5C84BE] flex items-center justify-center shrink-0">
+            <DoorOpen className="w-5 h-5 stroke-[2.2]" />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold text-slate-400">Tổng quy mô</p>
+            <p className="text-xl font-extrabold text-[#253F5B]">{stats.totalRooms} phòng</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-[#E3EDF6] shadow-sm flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <TrendingUp className="w-5 h-5 stroke-[2.2]" />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold text-slate-400">Đang cho thuê</p>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-extrabold text-[#253F5B]">{stats.rentedRooms}</span>
+              <span className="text-xs font-bold text-emerald-600">({stats.occupancyRate}%)</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-[#E3EDF6] shadow-sm flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+            <DoorOpen className="w-5 h-5 stroke-[2.2]" />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold text-slate-400">Phòng trống</p>
+            <p className="text-xl font-extrabold text-sky-600">{stats.availableRooms} phòng</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-[#E3EDF6] shadow-sm flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <AlertCircle className="w-5 h-5 stroke-[2.2]" />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold text-slate-400">Đang sửa chữa</p>
+            <p className="text-xl font-extrabold text-amber-600">{stats.maintenanceRooms} phòng</p>
           </div>
         </div>
       </div>
