@@ -19,6 +19,8 @@ import {
   Wifi,
   ShieldCheck,
   BadgeDollarSign,
+  Video,
+  Building2,
 } from "lucide-react";
 import type { Room } from "@/types/room";
 
@@ -86,10 +88,16 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
           </span>
 
           {/* Room Title */}
-          <div className="flex items-baseline gap-3">
+          <div className="flex items-center flex-wrap gap-2.5">
             <h1 className="text-2xl font-black text-[#253F5B] tracking-tight">
               Phòng - {room.roomNumber}
             </h1>
+            {room.buildingName && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5C84BE] bg-[#EAF2F8] px-2.5 py-1 rounded-lg border border-[#D8E6F3]">
+                <Building2 className="w-3.5 h-3.5" />
+                {room.buildingName}
+              </span>
+            )}
             {room.floor && (
               <span className="text-xs font-bold text-[#7A93AD] bg-[#EAF2F8] px-2.5 py-1 rounded-lg">
                 Tầng {room.floor}
@@ -127,6 +135,19 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                 </p>
               </div>
             </div>
+
+            {/* Video preview / link if available */}
+            {room.videoUrl && (
+              <a
+                href={room.videoUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3.5 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 text-xs font-bold transition-all shadow-xs cursor-pointer group"
+              >
+                <Video className="w-4 h-4 text-rose-500 group-hover:scale-110 transition-transform" />
+                <span>Xem Video quay phòng trực tiếp</span>
+              </a>
+            )}
           </div>
 
           {/* Right Column: Bảng thông số chi tiết (Figma 37:278 - 37:285) */}
