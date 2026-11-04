@@ -137,20 +137,20 @@ export function AddBuildingModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div
-        className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border border-[#DCE8F2] overflow-hidden"
+        className="bg-white rounded-3xl w-full max-w-4xl xl:max-w-5xl max-h-[92vh] flex flex-col shadow-2xl border border-[#DCE8F2] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8EFF6] bg-[#F7FAFD]">
+        <div className="flex items-center justify-between px-7 py-4.5 border-b border-[#E8EFF6] bg-[#F7FAFD]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shadow-inner">
-              <Building2 className="w-5 h-5 stroke-[2.2]" />
+            <div className="w-11 h-11 rounded-xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shadow-inner">
+              <Building2 className="w-6 h-6 stroke-[2.2]" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[#253F5B]">
+              <h2 className="text-xl font-extrabold text-[#253F5B]">
                 {editingBuilding ? "Chỉnh sửa Cơ sở / Tòa nhà" : "Thêm Cơ sở / Tòa nhà Mới"}
               </h2>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 font-medium">
                 Cấu hình thông tin cơ sở, quản lý phụ trách và biểu giá dịch vụ mặc định
               </p>
             </div>
@@ -158,254 +158,292 @@ export function AddBuildingModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto max-h-[calc(90vh-140px)]">
-          {/* 1. Tên & Mã cơ sở */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="sm:col-span-2 space-y-1.5">
-              <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-[#5C84BE]" />
-                Tên Cơ sở / Tòa nhà <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="VD: HonuHome Cầu Giấy, CCMN Duy Tân"
-                className="w-full h-10 px-3.5 rounded-xl border border-[#D2E2F0] focus:border-[#5C84BE] focus:ring-2 focus:ring-[#5C84BE]/20 text-sm font-medium text-[#253F5B] outline-none transition-all"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#253F5B]">Mã cơ sở</label>
-              <input
-                type="text"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="VD: HN-CG01"
-                className="w-full h-10 px-3.5 rounded-xl border border-[#D2E2F0] focus:border-[#5C84BE] focus:ring-2 focus:ring-[#5C84BE]/20 text-sm font-medium text-[#253F5B] outline-none transition-all"
-              />
-            </div>
-          </div>
+        {/* Modal Body - 2 COLUMNS LAYOUT */}
+        <form onSubmit={handleSubmit} className="p-7 overflow-y-auto max-h-[calc(92vh-140px)] space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-7">
+            {/* CỘT 1: THÔNG TIN CƠ SỞ & BIỂU GIÁ VẬN HÀNH */}
+            <div className="space-y-4">
+              {/* Tên & Mã cơ sở */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2 space-y-1.5">
+                  <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5 text-[#5C84BE]" />
+                    Tên Cơ sở / Tòa nhà <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="VD: HonuHome Cầu Giấy, CCMN Duy Tân"
+                    className="w-full h-10 px-3.5 rounded-xl border border-[#D2E2F0] focus:border-[#5C84BE] focus:ring-2 focus:ring-[#5C84BE]/20 text-sm font-medium text-[#253F5B] outline-none transition-all"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#253F5B]">Mã cơ sở</label>
+                  <input
+                    type="text"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    placeholder="VD: HN-CG01"
+                    className="w-full h-10 px-3.5 rounded-xl border border-[#D2E2F0] focus:border-[#5C84BE] focus:ring-2 focus:ring-[#5C84BE]/20 text-sm font-medium text-[#253F5B] outline-none transition-all"
+                  />
+                </div>
+              </div>
 
-          {/* 2. Địa chỉ chi tiết */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-[#5C84BE]" />
-              Địa chỉ chi tiết <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="VD: Số 18, Ngõ 86 Duy Tân, Dịch Vọng Hậu, Cầu Giấy, Hà Nội"
-              className="w-full h-10 px-3.5 rounded-xl border border-[#D2E2F0] focus:border-[#5C84BE] focus:ring-2 focus:ring-[#5C84BE]/20 text-sm font-medium text-[#253F5B] outline-none transition-all"
-            />
-          </div>
-
-          {/* 3. Quy mô (Số tầng & Số phòng) */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-[#5C84BE]" />
-                Tổng số tầng
-              </label>
-              <input
-                type="number"
-                min="1"
-                value={totalFloors}
-                onChange={(e) => setTotalFloors(e.target.value)}
-                className="w-full h-10 px-3.5 rounded-xl border border-[#D2E2F0] focus:border-[#5C84BE] focus:ring-2 focus:ring-[#5C84BE]/20 text-sm font-medium text-[#253F5B] outline-none transition-all"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-[#5C84BE]" />
-                Tổng số phòng thiết kế
-              </label>
-              <input
-                type="number"
-                min="1"
-                value={totalRooms}
-                onChange={(e) => setTotalRooms(e.target.value)}
-                className="w-full h-10 px-3.5 rounded-xl border border-[#D2E2F0] focus:border-[#5C84BE] focus:ring-2 focus:ring-[#5C84BE]/20 text-sm font-medium text-[#253F5B] outline-none transition-all"
-              />
-            </div>
-          </div>
-
-          {/* 4. Quản lý phụ trách */}
-          <div className="p-4 rounded-2xl bg-[#F8FAFD] border border-[#E4EDF5] space-y-3">
-            <div className="text-xs font-bold text-[#5C84BE] uppercase tracking-wider flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5" />
-              Thông tin Người quản lý cơ sở
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#253F5B]">Họ và tên Quản lý</label>
+              {/* Địa chỉ chi tiết */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#5C84BE]" />
+                  Địa chỉ chi tiết <span className="text-rose-500">*</span>
+                </label>
                 <input
                   type="text"
-                  value={managerName}
-                  onChange={(e) => setManagerName(e.target.value)}
-                  placeholder="VD: Trần Anh Tuấn"
-                  className="w-full h-9 px-3 rounded-lg border border-[#D2E2F0] focus:border-[#5C84BE] bg-white text-xs font-medium text-[#253F5B] outline-none transition-all"
+                  required
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="VD: Số 18, Ngõ 86 Duy Tân, Dịch Vọng Hậu, Cầu Giấy, Hà Nội"
+                  className="w-full h-10 px-3.5 rounded-xl border border-[#D2E2F0] focus:border-[#5C84BE] focus:ring-2 focus:ring-[#5C84BE]/20 text-sm font-medium text-[#253F5B] outline-none transition-all"
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#253F5B]">Số điện thoại liên hệ</label>
-                <input
-                  type="tel"
-                  value={managerPhone}
-                  onChange={(e) => setManagerPhone(e.target.value)}
-                  placeholder="VD: 0987.654.321"
-                  className="w-full h-9 px-3 rounded-lg border border-[#D2E2F0] focus:border-[#5C84BE] bg-white text-xs font-medium text-[#253F5B] outline-none transition-all"
-                />
-              </div>
-            </div>
-          </div>
 
-          {/* 5. Cấu hình bảng giá dịch vụ mặc định của cơ sở */}
-          <div className="p-4 rounded-2xl bg-[#F8FAFD] border border-[#E4EDF5] space-y-3">
-            <div className="text-xs font-bold text-[#5C84BE] uppercase tracking-wider flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5" />
-              Đơn giá Điện / Nước áp dụng mặc định cho cơ sở này
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#253F5B] flex items-center gap-1">
-                  <Zap className="w-3 h-3 text-amber-500" />
-                  Đơn giá Điện (đ/kWh)
-                </label>
-                <div className="relative">
+              {/* Quy mô (Số tầng & Số phòng) - ĐÃ BỎ HOÀN TOÀN MŨI TÊN LÊN XUỐNG */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5 text-[#5C84BE]" />
+                    Tổng số tầng
+                  </label>
                   <input
                     type="text"
                     inputMode="numeric"
-                    value={electricityPriceDisplay}
-                    onChange={(e) => handlePriceChange(e.target.value, setElectricityPriceDisplay)}
-                    className="w-full h-9 pl-3 pr-14 rounded-lg border border-[#D2E2F0] focus:border-[#5C84BE] bg-white text-xs font-semibold text-[#253F5B] outline-none transition-all"
+                    value={totalFloors}
+                    onChange={(e) => setTotalFloors(e.target.value.replace(/\D/g, ""))}
+                    placeholder="6"
+                    className="w-full h-10 px-3.5 rounded-xl border border-[#D2E2F0] focus:border-[#5C84BE] focus:ring-2 focus:ring-[#5C84BE]/20 text-sm font-medium text-[#253F5B] outline-none transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-medium text-slate-400">
-                    đ/kWh
-                  </span>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5 text-[#5C84BE]" />
+                    Tổng số phòng thiết kế
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={totalRooms}
+                    onChange={(e) => setTotalRooms(e.target.value.replace(/\D/g, ""))}
+                    placeholder="20"
+                    className="w-full h-10 px-3.5 rounded-xl border border-[#D2E2F0] focus:border-[#5C84BE] focus:ring-2 focus:ring-[#5C84BE]/20 text-sm font-medium text-[#253F5B] outline-none transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#253F5B] flex items-center gap-1">
-                  <Droplets className="w-3 h-3 text-sky-500" />
-                  Đơn giá Nước
-                </label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
+              {/* Thông tin Quản lý cơ sở */}
+              <div className="p-3.5 rounded-2xl bg-[#F8FAFD] border border-[#E4EDF5] space-y-2.5">
+                <div className="text-xs font-bold text-[#5C84BE] uppercase tracking-wider flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5" />
+                  Thông tin Người quản lý cơ sở
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#253F5B]">Họ và tên Quản lý</label>
                     <input
                       type="text"
-                      inputMode="numeric"
-                      value={waterPriceDisplay}
-                      onChange={(e) => handlePriceChange(e.target.value, setWaterPriceDisplay)}
-                      className="w-full h-9 pl-3 pr-8 rounded-lg border border-[#D2E2F0] focus:border-[#5C84BE] bg-white text-xs font-semibold text-[#253F5B] outline-none transition-all"
+                      value={managerName}
+                      onChange={(e) => setManagerName(e.target.value)}
+                      placeholder="VD: Trần Anh Tuấn"
+                      className="w-full h-9 px-3 rounded-lg border border-[#D2E2F0] focus:border-[#5C84BE] bg-white text-xs font-medium text-[#253F5B] outline-none transition-all"
                     />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-medium text-slate-400">
-                      đ
-                    </span>
                   </div>
-                  <select
-                    value={waterUnit}
-                    onChange={(e) => setWaterUnit(e.target.value as "m3" | "person" | "room")}
-                    className="h-9 px-2.5 rounded-lg border border-[#D2E2F0] bg-white text-xs font-medium text-[#253F5B] outline-none"
-                  >
-                    <option value="m3">đ/khối (m³)</option>
-                    <option value="person">đ/người/tháng</option>
-                    <option value="room">đ/phòng/tháng</option>
-                  </select>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#253F5B]">Số điện thoại liên hệ</label>
+                    <input
+                      type="tel"
+                      value={managerPhone}
+                      onChange={(e) => setManagerPhone(e.target.value)}
+                      placeholder="VD: 0987.654.321"
+                      className="w-full h-9 px-3 rounded-lg border border-[#D2E2F0] focus:border-[#5C84BE] bg-white text-xs font-medium text-[#253F5B] outline-none transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Đơn giá Điện / Nước áp dụng */}
+              <div className="p-3.5 rounded-2xl bg-[#F8FAFD] border border-[#E4EDF5] space-y-2.5">
+                <div className="text-xs font-bold text-[#5C84BE] uppercase tracking-wider flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5" />
+                  Đơn giá Điện / Nước mặc định của cơ sở này
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#253F5B] flex items-center gap-1">
+                      <Zap className="w-3 h-3 text-amber-500" />
+                      Đơn giá Điện (đ/kWh)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={electricityPriceDisplay}
+                        onChange={(e) => handlePriceChange(e.target.value, setElectricityPriceDisplay)}
+                        className="w-full h-9 pl-3 pr-14 rounded-lg border border-[#D2E2F0] focus:border-[#5C84BE] bg-white text-xs font-semibold text-[#253F5B] outline-none transition-all"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-medium text-slate-400">
+                        đ/kWh
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#253F5B] flex items-center gap-1">
+                      <Droplets className="w-3 h-3 text-sky-500" />
+                      Đơn giá Nước
+                    </label>
+                    <div className="flex gap-1.5">
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={waterPriceDisplay}
+                          onChange={(e) => handlePriceChange(e.target.value, setWaterPriceDisplay)}
+                          className="w-full h-9 pl-2.5 pr-6 rounded-lg border border-[#D2E2F0] focus:border-[#5C84BE] bg-white text-xs font-semibold text-[#253F5B] outline-none transition-all"
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-slate-400">
+                          đ
+                        </span>
+                      </div>
+                      <select
+                        value={waterUnit}
+                        onChange={(e) => setWaterUnit(e.target.value as "m3" | "person" | "room")}
+                        className="h-9 px-2 rounded-lg border border-[#D2E2F0] bg-white text-xs font-medium text-[#253F5B] outline-none"
+                      >
+                        <option value="m3">/m³</option>
+                        <option value="person">/người</option>
+                        <option value="room">/phòng</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* 6. Ảnh đại diện & Ghi chú */}
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                  <Camera className="w-3.5 h-3.5 text-[#5C84BE]" />
-                  Ảnh đại diện tòa nhà
-                </label>
-                {image && (
-                  <button
-                    type="button"
-                    onClick={() => setImage("")}
-                    className="text-[11px] font-semibold text-rose-500 hover:text-rose-700 flex items-center gap-1 cursor-pointer"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                    Xóa ảnh
-                  </button>
+            {/* CỘT 2: ẢNH ĐẠI DIỆN & TIỆN ÍCH QUY ĐỊNH */}
+            <div className="space-y-4 flex flex-col justify-between">
+              {/* Upload ảnh đại diện */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                    <Camera className="w-3.5 h-3.5 text-[#5C84BE]" />
+                    Ảnh đại diện tòa nhà
+                  </label>
+                  {image && (
+                    <button
+                      type="button"
+                      onClick={() => setImage("")}
+                      className="text-[11px] font-semibold text-rose-500 hover:text-rose-700 flex items-center gap-1 cursor-pointer"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      Xóa ảnh
+                    </button>
+                  )}
+                </div>
+
+                {image ? (
+                  <div className="relative w-full h-[200px] rounded-2xl overflow-hidden border border-[#D2E2F0] bg-slate-100 group shadow-inner">
+                    <img
+                      src={image}
+                      alt="Xem trước ảnh tòa nhà"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <label className="px-4 py-2 rounded-xl bg-white/95 hover:bg-white text-xs font-bold text-[#253F5B] shadow-md cursor-pointer flex items-center gap-1.5 transition-all active:scale-95">
+                        <UploadCloud className="w-4 h-4 text-[#5C84BE]" />
+                        Đổi ảnh khác
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="w-full h-[200px] rounded-2xl border-2 border-dashed border-[#CFDFEE] hover:border-[#5C84BE] hover:bg-[#F4F9FD] flex flex-col items-center justify-center text-[#5C84BE] transition-colors cursor-pointer group">
+                    <div className="w-12 h-12 rounded-2xl bg-[#EAF2F8] group-hover:bg-white flex items-center justify-center transition-colors shadow-xs">
+                      <UploadCloud className="w-6 h-6 text-[#5C84BE]" />
+                    </div>
+                    <span className="text-sm font-bold text-[#253F5B] mt-3">
+                      Bấm để tải ảnh tòa nhà từ thiết bị
+                    </span>
+                    <span className="text-xs text-slate-400 font-medium mt-1">
+                      Hỗ trợ định dạng PNG, JPG, WEBP
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </label>
                 )}
               </div>
 
-              {image ? (
-                <div className="relative w-full h-36 rounded-2xl overflow-hidden border border-[#D2E2F0] bg-slate-100 group">
-                  <img
-                    src={image}
-                    alt="Xem trước ảnh tòa nhà"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <label className="px-3.5 py-1.5 rounded-xl bg-white/95 hover:bg-white text-xs font-bold text-[#253F5B] shadow-md cursor-pointer flex items-center gap-1.5 transition-all active:scale-95">
-                      <UploadCloud className="w-4 h-4 text-[#5C84BE]" />
-                      Đổi ảnh khác
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                </div>
-              ) : (
-                <label className="w-full h-28 rounded-2xl border-2 border-dashed border-[#CFDFEE] hover:border-[#5C84BE] hover:bg-[#F4F9FD] flex flex-col items-center justify-center text-[#5C84BE] transition-colors cursor-pointer group">
-                  <div className="w-10 h-10 rounded-xl bg-[#EAF2F8] group-hover:bg-white flex items-center justify-center transition-colors">
-                    <UploadCloud className="w-5 h-5 text-[#5C84BE]" />
-                  </div>
-                  <span className="text-xs font-bold text-[#253F5B] mt-2">
-                    Bấm để tải ảnh tòa nhà từ thiết bị
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-medium mt-0.5">
-                    Hỗ trợ định dạng PNG, JPG, WEBP
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
+              {/* Ghi chú & tiện ích */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-[#5C84BE]" />
+                  Ghi chú / Tiện ích chung & Quy định tòa nhà
                 </label>
-              )}
-            </div>
+                <textarea
+                  rows={3}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="VD: Thang máy thẻ từ, giờ giấc tự do không chung chủ, có camera 24/7, hầm để xe rộng..."
+                  className="w-full p-3 rounded-xl border border-[#D2E2F0] focus:border-[#5C84BE] text-xs font-medium text-[#253F5B] outline-none resize-none transition-all"
+                />
+              </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-[#5C84BE]" />
-                Ghi chú / Tiện ích chung của tòa nhà
-              </label>
-              <textarea
-                rows={2}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="VD: Thang máy thẻ từ, giờ giấc tự do không chung chủ, có camera 24/7..."
-                className="w-full p-3 rounded-xl border border-[#D2E2F0] focus:border-[#5C84BE] text-xs font-medium text-[#253F5B] outline-none resize-none"
-              />
+              {/* Trạng thái hoạt động ban đầu */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#253F5B]">Trạng thái ban đầu</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setStatus("active")}
+                    className={`h-10 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                      status === "active"
+                        ? "bg-emerald-50 border-emerald-500 text-emerald-800 shadow-xs"
+                        : "bg-[#F8FAFD] border-[#D2E2F0] text-slate-500 hover:bg-slate-100"
+                    }`}
+                  >
+                    ✓ Đang vận hành
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStatus("maintenance")}
+                    className={`h-10 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                      status === "maintenance"
+                        ? "bg-amber-50 border-amber-500 text-amber-800 shadow-xs"
+                        : "bg-[#F8FAFD] border-[#D2E2F0] text-slate-500 hover:bg-slate-100"
+                    }`}
+                  >
+                    ⚠️ Đang bảo trì
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Modal Footer Actions */}
-          <div className="pt-3 border-t border-[#E8EFF6] flex items-center justify-end gap-3">
+          <div className="pt-4 border-t border-[#E8EFF6] flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
