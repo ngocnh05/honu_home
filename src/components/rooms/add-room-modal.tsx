@@ -173,19 +173,19 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
-      {/* Modal Container: Dài rộng ngang tối đa (w: 1180px - 1240px, h: 640px) rất thoáng, không bị cắt chữ */}
-      <div className="bg-white rounded-3xl w-full max-w-[1160px] xl:max-w-[1240px] h-[640px] flex flex-col shadow-2xl border border-[#E3EDF6] animate-scaleUp overflow-hidden">
+      {/* Modal Container: Dài height rộng rãi (w: 960px, h: 740px - max-h 94vh) thoáng đãng, sang trọng */}
+      <div className="bg-white rounded-3xl w-full max-w-[960px] h-[740px] max-h-[94vh] flex flex-col shadow-2xl border border-[#E3EDF6] animate-scaleUp overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-7 xl:px-9 py-4 border-b border-[#EAF2F8] bg-white shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shadow-inner">
-              <Building2 className="w-5 h-5 stroke-[2.2]" />
+        <div className="flex items-center justify-between px-6 xl:px-8 py-4.5 border-b border-[#EAF2F8] bg-white shrink-0">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shadow-inner">
+              <Building2 className="w-6 h-6 stroke-[2.2]" />
             </div>
             <div>
               <h3 className="text-xl font-extrabold text-[#253F5B] tracking-tight">
                 Thêm Phòng Mới
               </h3>
-              <p className="text-xs text-[#7A92AB] font-medium">
+              <p className="text-xs text-[#7A92AB] font-medium mt-0.5">
                 Cấu hình thông tin phòng, hợp đồng và bảng giá dịch vụ
               </p>
             </div>
@@ -199,37 +199,37 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
           </button>
         </div>
 
-        {/* Form Body - 2 Cột song song rộng rãi cố định */}
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between p-7 xl:p-9 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start h-[475px]">
-            {/* CỘT TRÁI (6 cột): Thông tin phòng & Hợp đồng (Cố định, không xê dịch) */}
-            <div className="lg:col-span-6 flex flex-col justify-between h-full pr-2">
-              <div className="space-y-3.5">
-                <div className="flex items-center gap-2 text-xs font-bold text-[#253F5B] uppercase tracking-wider pb-1.5 border-b border-[#EEF4FA]">
+        {/* Form Body - 2 Cột song song thoáng đãng với chiều cao h-[570px] */}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between p-6 xl:p-8 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 xl:gap-8 items-start h-[560px]">
+            {/* CỘT TRÁI (6 cột): Thông tin phòng & Hợp đồng */}
+            <div className="lg:col-span-6 flex flex-col justify-between h-full pr-1">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#253F5B] uppercase tracking-wider pb-2 border-b border-[#EEF4FA]">
                   <Layers className="w-4 h-4 text-[#5C84BE]" />
                   <span>1. Thông tin căn phòng</span>
                 </div>
 
                 {/* Hàng 1: Số Phòng & Loại Phòng */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-bold text-[#253F5B]">Số Phòng *</label>
                     <input
                       type="text"
                       placeholder="VD: P102"
                       value={roomNumber}
                       onChange={(e) => setRoomNumber(e.target.value)}
-                      className="w-full h-9 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-semibold"
+                      className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B] font-semibold transition-all"
                       required
                     />
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-bold text-[#253F5B]">Loại Phòng</label>
                     <select
                       value={type}
                       onChange={(e) => setType(e.target.value as RoomType)}
-                      className="w-full h-9 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer"
+                      className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer transition-all"
                     >
                       <option value="Phòng Đơn">Phòng Đơn</option>
                       <option value="Phòng Đôi">Phòng Đôi</option>
@@ -239,8 +239,8 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                 </div>
 
                 {/* Hàng 2: Giá Thuê & Diện Tích */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-bold text-[#253F5B]">Giá Thuê (đ/tháng) *</label>
                     <div className="relative">
                       <input
@@ -255,16 +255,16 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                             setDeposit(formatted);
                           }
                         }}
-                        className="w-full h-9 pl-3.5 pr-9 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-bold text-right"
+                        className="w-full h-10 pl-3.5 pr-10 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B] font-bold text-right transition-all"
                         required
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-semibold pointer-events-none">
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-bold pointer-events-none">
                         đ
                       </span>
                     </div>
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-bold text-[#253F5B]">Diện Tích (m²)</label>
                     <div className="relative">
                       <input
@@ -272,9 +272,9 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                         placeholder="20"
                         value={area}
                         onChange={(e) => setArea(e.target.value)}
-                        className="w-full h-9 pl-3.5 pr-10 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full h-10 pl-3.5 pr-10 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-semibold pointer-events-none">
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-bold pointer-events-none">
                         m²
                       </span>
                     </div>
@@ -282,7 +282,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                 </div>
 
                 {/* Hàng 3: Trạng Thái Ban Đầu */}
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <label className="text-xs font-bold text-[#253F5B]">Trạng Thái Ban Đầu</label>
                   <div className="grid grid-cols-3 gap-2.5">
                     {[
@@ -294,7 +294,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                         type="button"
                         key={st.key}
                         onClick={() => setStatus(st.key as RoomStatus)}
-                        className={`h-9 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                        className={`h-9.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                           status === st.key
                             ? "bg-[#5C84BE] text-white border-[#5C84BE] shadow-xs"
                             : "bg-[#F4F9FD] text-[#4A6482] border-[#D9E6F2] hover:bg-[#E9F3FC]"
@@ -307,10 +307,10 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                 </div>
 
                 {/* Hàng 4: Ô NHẬP Số Người Thuê & Số Xe Máy */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-[#5C84BE]" />
+                      <Users className="w-4 h-4 text-[#5C84BE]" />
                       <span>Số người ở</span>
                     </label>
                     <div className="relative">
@@ -319,17 +319,17 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                         placeholder="1"
                         value={occupantsCount}
                         onChange={(e) => setOccupantsCount(e.target.value)}
-                        className="w-full h-9 px-3.5 pr-14 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full h-10 px-3.5 pr-14 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-medium pointer-events-none">
+                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-medium pointer-events-none">
                         người
                       </span>
                     </div>
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                      <Bike className="w-3.5 h-3.5 text-[#5C84BE]" />
+                      <Bike className="w-4 h-4 text-[#5C84BE]" />
                       <span>Số xe máy</span>
                     </label>
                     <div className="relative">
@@ -338,9 +338,9 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                         placeholder="1"
                         value={vehiclesCount}
                         onChange={(e) => setVehiclesCount(e.target.value)}
-                        className="w-full h-9 px-3.5 pr-12 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full h-10 px-3.5 pr-12 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-medium pointer-events-none">
+                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-medium pointer-events-none">
                         xe
                       </span>
                     </div>
@@ -348,10 +348,10 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                 </div>
               </div>
 
-              {/* KHỐI CỐ ĐỊNH CHIỀU CAO (h-[185px]) */}
-              <div className="h-[185px] pt-1">
+              {/* KHỐI CỐ ĐỊNH CHIỀU CAO (h-[220px]): Thoáng đãng, không bao giờ bị xê dịch khi chuyển đổi trạng thái */}
+              <div className="h-[220px] pt-1">
                 {status === "rented" ? (
-                  <div className="h-full p-3.5 rounded-2xl bg-[#F6F9FD] border border-[#DEEBF5] flex flex-col justify-between animate-fadeIn shadow-2xs">
+                  <div className="h-full p-4 rounded-2xl bg-[#F6F9FD] border border-[#DEEBF5] flex flex-col justify-between animate-fadeIn shadow-2xs">
                     {/* Hàng 1: Người thuê & SĐT */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
@@ -363,7 +363,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                           placeholder="VD: Nguyễn Văn A"
                           value={tenantName}
                           onChange={(e) => setTenantName(e.target.value)}
-                          className="w-full h-8 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE]"
+                          className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-semibold outline-none focus:border-[#5C84BE]"
                           required={status === "rented"}
                         />
                       </div>
@@ -376,7 +376,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                           placeholder="0987.654.321"
                           value={tenantPhone}
                           onChange={(e) => setTenantPhone(e.target.value)}
-                          className="w-full h-8 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                          className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
                         />
                       </div>
                     </div>
@@ -384,7 +384,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                     {/* Hàng 2: 2 cái DATE CÓ TIÊU ĐỀ RÕ RÀNG */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
+                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1.5">
                           <Calendar className="w-3.5 h-3.5 text-[#5C84BE]" />
                           <span>Ngày bắt đầu HĐ</span>
                         </label>
@@ -393,11 +393,11 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                           placeholder="01/01/2026"
                           value={startDate}
                           onChange={(e) => setStartDate(e.target.value)}
-                          className="w-full h-8 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                          className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1">
+                        <label className="text-[11px] font-bold text-[#506A88] flex items-center gap-1.5">
                           <Calendar className="w-3.5 h-3.5 text-[#5C84BE]" />
                           <span>Hạn hợp đồng</span>
                         </label>
@@ -406,7 +406,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                           placeholder="01/01/2027"
                           value={endDate}
                           onChange={(e) => setEndDate(e.target.value)}
-                          className="w-full h-8 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
+                          className="w-full h-9 px-3 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] outline-none focus:border-[#5C84BE]"
                         />
                       </div>
                     </div>
@@ -423,25 +423,25 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                           placeholder="2.700.000"
                           value={deposit}
                           onChange={(e) => setDeposit(formatPrice(e.target.value))}
-                          className="w-full h-8 pl-3 pr-14 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-bold outline-none focus:border-[#5C84BE] text-right"
+                          className="w-full h-9 pl-3.5 pr-14 rounded-lg border border-[#D0DFEE] bg-white text-xs text-[#253F5B] font-bold outline-none focus:border-[#5C84BE] text-right"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-semibold pointer-events-none">
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-bold pointer-events-none">
                           VNĐ
                         </span>
                       </div>
                     </div>
                   </div>
                 ) : status === "available" ? (
-                  <div className="h-full rounded-2xl border border-dashed border-[#CFDFEE] bg-[#F8FBFE] flex flex-col items-center justify-center p-4 text-center">
-                    <CheckCircle2 className="w-7 h-7 text-emerald-500 mb-1.5" />
+                  <div className="h-full rounded-2xl border border-dashed border-[#CFDFEE] bg-[#F8FBFE] flex flex-col items-center justify-center p-5 text-center">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-500 mb-2" />
                     <p className="text-sm font-bold text-[#253F5B]">Phòng trống sẵn sàng đón khách</p>
                     <p className="text-xs text-[#7B92AC] mt-1 max-w-[280px]">
                       Chọn nút <b>"Đang Thuê"</b> ở trên nếu phòng đã có khách vào ở để nhập hợp đồng và tiền cọc
                     </p>
                   </div>
                 ) : (
-                  <div className="h-full rounded-2xl border border-dashed border-[#F3E2A8] bg-[#FFFDF5] flex flex-col items-center justify-center p-4 text-center">
-                    <Wrench className="w-7 h-7 text-amber-500 mb-1.5" />
+                  <div className="h-full rounded-2xl border border-dashed border-[#F3E2A8] bg-[#FFFDF5] flex flex-col items-center justify-center p-5 text-center">
+                    <Wrench className="w-8 h-8 text-amber-500 mb-2" />
                     <p className="text-sm font-bold text-[#7A5A00]">Phòng đang bảo trì / sửa chữa</p>
                     <p className="text-xs text-[#9A7D2C] mt-1 max-w-[280px]">
                       Tạm thời không nhận người thuê cho đến khi hoàn tất sửa chữa
@@ -451,7 +451,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
               </div>
             </div>
 
-            {/* CỘT PHẢI (6 cột): Bảng Dịch Vụ Linh Hoạt (Rộng rãi, không bị cắt chữ) */}
+            {/* CỘT PHẢI (6 cột): Bảng Dịch Vụ Linh Hoạt */}
             <div className="lg:col-span-6 flex flex-col justify-between h-full bg-[#F9FBFE] p-5 rounded-2xl border border-[#DEEBF5]">
               <div className="space-y-3.5">
                 <div className="flex items-center justify-between pb-2.5 border-b border-[#E4EFF8]">
@@ -477,15 +477,15 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                   </button>
                 </div>
 
-                {/* Service Rows List (Rộng rãi: Tên min-w 220px không bị cắt chữ) */}
-                <div className="space-y-2.5 max-h-[290px] overflow-y-auto pr-1">
+                {/* Service Rows List (Thoáng đãng max-h-[360px]) */}
+                <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
                   {services.map((service) => (
                     <div
                       key={service.id}
                       className="flex items-center gap-2.5 bg-white p-2.5 rounded-xl border border-[#DCE8F4] shadow-2xs group hover:border-[#5C84BE] transition-colors"
                     >
-                      {/* Tên dịch vụ - Rộng rãi, không bị cụt chữ */}
-                      <div className="flex-1 min-w-[200px] xl:min-w-[230px]">
+                      {/* Tên dịch vụ */}
+                      <div className="flex-1 min-w-[130px]">
                         <input
                           type="text"
                           placeholder="Tên dịch vụ..."
@@ -497,8 +497,8 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                         />
                       </div>
 
-                      {/* Đơn giá (Format mỗi 3 số có dấu chấm: 3.500, 30.000, 100.000) */}
-                      <div className="w-[110px] xl:w-[125px]">
+                      {/* Đơn giá (Format mỗi 3 số có dấu chấm: 3.500, 30.000) */}
+                      <div className="w-[100px] xl:w-[110px]">
                         <input
                           type="text"
                           inputMode="numeric"
@@ -516,13 +516,13 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                       </div>
 
                       {/* Đơn vị tính */}
-                      <div className="w-[95px] xl:w-[105px]">
+                      <div className="w-[88px] xl:w-[96px]">
                         <select
                           value={service.unit}
                           onChange={(e) =>
                             handleUpdateService(service.id, "unit", e.target.value)
                           }
-                          className="w-full h-8.5 px-2 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#4B6584] bg-white cursor-pointer"
+                          className="w-full h-8.5 px-2 rounded-lg border border-[#E1ECF6] focus:border-[#5C84BE] outline-none text-[11px] font-bold text-[#4B6584] bg-white cursor-pointer"
                         >
                           <option value="đ/kWh">đ/kWh</option>
                           <option value="đ/khối">đ/khối</option>
@@ -537,7 +537,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                       <button
                         type="button"
                         onClick={() => handleRemoveService(service.id)}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                        className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                         title="Xóa dịch vụ này"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -546,7 +546,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                   ))}
 
                   {services.length === 0 && (
-                    <div className="py-6 text-center text-xs text-[#7A93AD] border border-dashed border-[#CFDFEE] rounded-xl bg-white">
+                    <div className="py-8 text-center text-xs text-[#7A93AD] border border-dashed border-[#CFDFEE] rounded-xl bg-white">
                       Chưa có dịch vụ nào. Bấm <b>"+ Thêm dòng"</b> để tạo.
                     </div>
                   )}
@@ -554,11 +554,11 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
               </div>
 
               {/* Gợi ý thêm nhanh */}
-              <div className="pt-2.5 border-t border-[#E4EFF8]">
-                <p className="text-[11px] font-bold text-[#7A93AD] mb-1.5">
+              <div className="pt-3 border-t border-[#E4EFF8]">
+                <p className="text-xs font-bold text-[#7A93AD] mb-2">
                   Thêm nhanh 1 chạm:
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {serviceSuggestions.map((sug) => {
                     const isAdded = services.some(
                       (s) => s.name.toLowerCase() === sug.name.toLowerCase()
@@ -569,7 +569,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
                         type="button"
                         onClick={() => handleAddService(sug)}
                         disabled={isAdded}
-                        className={`px-3 py-1 rounded-lg text-[10.5px] font-bold transition-all ${
+                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
                           isAdded
                             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                             : "bg-white hover:bg-[#EAF2F8] text-[#5C84BE] border border-[#D5E4F2] shadow-2xs cursor-pointer active:scale-95"
@@ -594,13 +594,13 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
               <button
                 type="button"
                 onClick={onClose}
-                className="h-10 px-6 rounded-xl border border-[#D9E6F2] text-xs font-semibold text-[#5C728C] hover:bg-gray-50 cursor-pointer"
+                className="h-10.5 px-6 rounded-xl border border-[#D9E6F2] text-xs font-semibold text-[#5C728C] hover:bg-gray-50 cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 type="submit"
-                className="h-10 px-7 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-[#5C84BE]/20 cursor-pointer active:scale-95 transition-all"
+                className="h-10.5 px-7 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-[#5C84BE]/20 cursor-pointer active:scale-95 transition-all"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
                 <span>Tạo Phòng</span>
