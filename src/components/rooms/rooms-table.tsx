@@ -140,14 +140,14 @@ export function RoomsTable() {
             <Filter className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5C84BE] pointer-events-none" />
           </div>
 
-          {/* Nút Thêm phòng */}
-          <button
-            onClick={() => setIsAddModalOpen(true)}
+          {/* Nút Thêm phòng: Chuyển hướng sang trang riêng /rooms/create */}
+          <Link
+            href="/rooms/create"
             className="h-11 px-5 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-[0.98] text-white font-bold text-xs flex items-center gap-2 shadow-sm shadow-[#5C84BE]/25 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>Thêm phòng</span>
-          </button>
+          </Link>
         </div>
       </div>
 

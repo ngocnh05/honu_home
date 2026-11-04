@@ -12,6 +12,7 @@ interface TopHeaderProps {
 const routeNames: Record<string, string> = {
   dashboard: "Trang chủ",
   rooms: "Quản lí phòng",
+  create: "Thêm phòng mới",
   tenants: "Người thuê",
   contracts: "Hợp đồng",
   invoices: "Hóa đơn",

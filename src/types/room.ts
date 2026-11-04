@@ -28,6 +28,8 @@ export interface Room {
   floor?: number;
   area?: number; // m2
   description?: string;
+  image?: string; // Ảnh đại diện chính
+  galleryImages?: string[]; // Các ảnh nhỏ / góc phòng
   startDate?: string;
   endDate?: string;
   deposit?: number; // Tiền đặt cọc
