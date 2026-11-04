@@ -21,8 +21,10 @@ import type { Room, RoomStatus } from "@/types/room";
 import { initialRooms } from "@/lib/mock-data/rooms";
 import { AddRoomModal } from "@/components/rooms/add-room-modal";
 import { DeleteConfirmDialog } from "@/components/common/delete-confirm-dialog";
+import { useSnackbar } from "@/components/common/snackbar";
 
 export function RoomsTable() {
+  const { success, error, warning } = useSnackbar();
   const [rooms, setRooms] = React.useState<Room[]>(initialRooms);
   const [buildingFilter, setBuildingFilter] = React.useState("ALL");
   const [typeFilter, setTypeFilter] = React.useState("ALL");
@@ -63,6 +65,7 @@ export function RoomsTable() {
   const handleConfirmDeleteRoom = () => {
     if (deleteTarget) {
       setRooms((prev) => prev.filter((r) => r.id !== deleteTarget.id));
+      error("Đã xóa phòng!", `Phòng ${deleteTarget.roomNumber} đã được gỡ bỏ khỏi hệ thống.`);
       setDeleteTarget(null);
     }
   };
@@ -89,6 +92,7 @@ export function RoomsTable() {
     };
 
     setRooms((prev) => [newRoom, ...prev]);
+    success("Thêm phòng mới thành công!", `Phòng ${newRoom.roomNumber} đã được thêm vào danh sách.`);
   };
 
   return (

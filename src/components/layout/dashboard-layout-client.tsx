@@ -4,6 +4,7 @@ import * as React from "react";
 import { SidebarProvider, useSidebar } from "./sidebar-context";
 import { Sidebar } from "./sidebar";
 import { TopHeader } from "./top-header";
+import { SnackbarProvider } from "@/components/common/snackbar";
 
 function DashboardLayoutContent({
   children,
@@ -46,9 +47,11 @@ export function DashboardLayoutClient({
 }) {
   return (
     <SidebarProvider>
-      <DashboardLayoutContent unreadCount={unreadCount}>
-        {children}
-      </DashboardLayoutContent>
+      <SnackbarProvider>
+        <DashboardLayoutContent unreadCount={unreadCount}>
+          {children}
+        </DashboardLayoutContent>
+      </SnackbarProvider>
     </SidebarProvider>
   );
 }

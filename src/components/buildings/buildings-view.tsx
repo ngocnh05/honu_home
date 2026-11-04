@@ -22,8 +22,10 @@ import type { Building, NewBuildingInput } from "@/types/building";
 import { initialBuildings } from "@/lib/mock-data/buildings";
 import { AddBuildingModal } from "./add-building-modal";
 import { DeleteConfirmDialog } from "@/components/common/delete-confirm-dialog";
+import { useSnackbar } from "@/components/common/snackbar";
 
 export function BuildingsView() {
+  const { success, error, warning } = useSnackbar();
   const [buildings, setBuildings] = React.useState<Building[]>(initialBuildings);
   const [statusFilter, setStatusFilter] = React.useState<string>("ALL");
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -67,6 +69,7 @@ export function BuildingsView() {
             : b
         )
       );
+      success("Cập nhật thành công!", `Thông tin cơ sở "${data.name}" đã được cập nhật.`);
       setEditingBuilding(null);
     } else {
       const newBuilding: Building = {
@@ -79,6 +82,7 @@ export function BuildingsView() {
         createdAt: new Intl.DateTimeFormat("vi-VN").format(new Date()),
       };
       setBuildings((prev) => [newBuilding, ...prev]);
+      success("Tạo cơ sở mới thành công!", `Cơ sở "${data.name}" đã được thêm vào hệ thống.`);
     }
   };
 
@@ -94,6 +98,7 @@ export function BuildingsView() {
   const handleConfirmDelete = () => {
     if (deleteTarget) {
       setBuildings((prev) => prev.filter((b) => b.id !== deleteTarget.id));
+      error("Đã xóa cơ sở!", `Cơ sở "${deleteTarget.name}" đã được xóa vĩnh viễn khỏi hệ thống.`);
       setDeleteTarget(null);
     }
   };

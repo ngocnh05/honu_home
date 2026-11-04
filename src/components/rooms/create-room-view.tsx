@@ -29,6 +29,7 @@ import {
   Video,
 } from "lucide-react";
 import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
+import { useSnackbar } from "@/components/common/snackbar";
 
 // Format 2700000 -> "2.700.000"
 const formatPrice = (val: string | number | undefined): string => {
@@ -66,6 +67,7 @@ const availableAmenitiesList = [
 
 export function CreateRoomView() {
   const router = useRouter();
+  const { success } = useSnackbar();
 
   // Basic Info
   const [buildingId, setBuildingId] = React.useState("bld_cg");
@@ -213,11 +215,14 @@ export function CreateRoomView() {
 
     console.log("New Room Created:", newRoom);
 
-    // Navigate back to rooms page
+    // Navigate back to rooms page with toast
+    success(
+      "Thêm phòng mới thành công!",
+      `Căn hộ phòng ${newRoom.roomNumber} đã được lưu và cập nhật vào danh sách.`
+    );
     setTimeout(() => {
-      alert(`Đã thêm thành công phòng ${newRoom.roomNumber}!`);
       router.push("/rooms");
-    }, 300);
+    }, 400);
   };
 
   return (
