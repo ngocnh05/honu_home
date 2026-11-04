@@ -26,7 +26,6 @@ import {
 import type { Room, RoomStatus } from "@/types/room";
 import { initialRooms } from "@/lib/mock-data/rooms";
 import { AddRoomModal } from "@/components/rooms/add-room-modal";
-import { EditRoomModal } from "@/components/rooms/edit-room-modal";
 import { DeleteConfirmDialog } from "@/components/common/delete-confirm-dialog";
 import { useSnackbar } from "@/components/common/snackbar";
 
@@ -38,7 +37,6 @@ export function RoomsTable() {
   const [statusFilter, setStatusFilter] = React.useState("ALL");
   const [currentPage, setCurrentPage] = React.useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
-  const [editingRoom, setEditingRoom] = React.useState<Room | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; roomNumber: string } | null>(null);
 
   const itemsPerPage = 7;
@@ -98,14 +96,6 @@ export function RoomsTable() {
       error(`Đã xóa phòng ${deleteTarget.roomNumber}`);
       setDeleteTarget(null);
     }
-  };
-
-  const handleSaveEditedRoom = (updatedRoom: Room) => {
-    setRooms((prev) =>
-      prev.map((r) => (r.id === updatedRoom.id ? updatedRoom : r))
-    );
-    success(`Đã lưu phòng ${updatedRoom.roomNumber}`);
-    setEditingRoom(null);
   };
 
   const handleAddRoom = (
@@ -441,18 +431,17 @@ export function RoomsTable() {
                         )}
                       </td>
 
-                      {/* Thao Tác (1. Sửa, 2. Xóa, 3. Chi tiết) */}
+                      {/* Thao Tác (1. Sửa riêng page, 2. Xóa, 3. Chi tiết riêng page) */}
                       <td className="pr-6">
                         <div className="flex items-center justify-center gap-2 text-[#757575]">
-                          {/* 1. Chỉnh sửa */}
-                          <button
-                            type="button"
-                            onClick={() => setEditingRoom(room)}
+                          {/* 1. Chỉnh sửa riêng page */}
+                          <Link
+                            href={`/rooms/${room.roomNumber}/edit`}
                             className="p-1.5 rounded-lg text-[#757575] hover:text-[#5C84BE] hover:bg-[#EBF3FB] transition-all cursor-pointer"
-                            title="Chỉnh sửa phòng"
+                            title="Chỉnh sửa thông tin phòng (Trang riêng)"
                           >
                             <EditActionIcon className="w-4 h-4" />
-                          </button>
+                          </Link>
 
                           {/* 2. Xóa phòng */}
                           <button
@@ -464,11 +453,11 @@ export function RoomsTable() {
                             <DeleteActionIcon className="w-4 h-4" />
                           </button>
 
-                          {/* 3. Xem chi tiết */}
+                          {/* 3. Xem chi tiết riêng page */}
                           <Link
                             href={`/rooms/${room.roomNumber}`}
-                            className="p-1.5 rounded-lg text-[#757575] hover:text-[#5C84BE] hover:bg-[#EBF3FB] transition-all"
-                            title="Xem chi tiết phòng"
+                            className="p-1.5 rounded-lg text-[#757575] hover:text-[#5C84BE] hover:bg-[#EBF3FB] transition-all cursor-pointer"
+                            title="Xem chi tiết phòng (Trang riêng)"
                           >
                             <ViewActionIcon className="w-4 h-4" />
                           </Link>
@@ -565,14 +554,6 @@ export function RoomsTable() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAddRoom={handleAddRoom}
-      />
-
-      {/* Edit Room Modal (Data mới) */}
-      <EditRoomModal
-        isOpen={editingRoom !== null}
-        onClose={() => setEditingRoom(null)}
-        room={editingRoom}
-        onSave={handleSaveEditedRoom}
       />
 
       {/* Delete Confirmation Dialog */}

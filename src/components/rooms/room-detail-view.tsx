@@ -32,9 +32,20 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
   const [activeTab, setActiveTab] = React.useState<"general" | "history" | "notes">(
     "general"
   );
-  const [showEditToast, setShowEditToast] = React.useState(false);
   const [showRenewModal, setShowRenewModal] = React.useState(false);
   const [showTenantModal, setShowTenantModal] = React.useState(false);
+
+  const galleryList = React.useMemo(() => {
+    const list = [room.image || "/images/rooms/room-demo.png"];
+    if (room.galleryImages) {
+      room.galleryImages.forEach((img) => {
+        if (!list.includes(img)) list.push(img);
+      });
+    }
+    return list;
+  }, [room.image, room.galleryImages]);
+
+  const [activeImage, setActiveImage] = React.useState(galleryList[0]);
 
   // Status Badge styles matching Figma
   const statusBadgeConfig = {
@@ -57,12 +68,26 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
 
   const currentStatus = statusBadgeConfig[room.status] || statusBadgeConfig.rented;
 
-  const amenities = [
-    { name: "Giường", icon: "/icons/amenities/bed.svg" },
-    { name: "Tủ", icon: "/icons/amenities/wardrobe.svg" },
-    { name: "Wifi", icon: "/icons/amenities/wifi.svg" },
-    { name: "Máy lạnh", icon: "/icons/amenities/ac.svg" },
-  ];
+  const amenities = React.useMemo(() => {
+    if (room.amenities && room.amenities.length > 0) {
+      return room.amenities.map((name) => ({
+        name,
+        icon: name.includes("Giường")
+          ? "/icons/amenities/bed.svg"
+          : name.includes("Tủ")
+          ? "/icons/amenities/wardrobe.svg"
+          : name.includes("Wifi")
+          ? "/icons/amenities/wifi.svg"
+          : "/icons/amenities/ac.svg",
+      }));
+    }
+    return [
+      { name: "Giường", icon: "/icons/amenities/bed.svg" },
+      { name: "Tủ", icon: "/icons/amenities/wardrobe.svg" },
+      { name: "Wifi", icon: "/icons/amenities/wifi.svg" },
+      { name: "Máy lạnh", icon: "/icons/amenities/ac.svg" },
+    ];
+  }, [room.amenities]);
 
   return (
     <div className="w-full space-y-5 animate-fadeIn pb-12 select-none">
@@ -107,6 +132,13 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
         </div>
 
         <div className="flex items-center gap-3">
+          <Link
+            href={`/rooms/${room.roomNumber}/edit`}
+            className="h-10 px-4 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-95 text-white font-bold text-xs flex items-center gap-2 shadow-sm shadow-[#5C84BE]/25 transition-all cursor-pointer"
+          >
+            <Edit className="w-3.5 h-3.5" />
+            <span>Sửa thông tin</span>
+          </Link>
           <span className="text-xs font-semibold text-[#7A93AD]">Mã phòng:</span>
           <span className="font-mono font-bold text-xs text-[#253F5B] bg-[#F2F8FC] px-3 py-1.5 rounded-lg border border-[#DCE8F3]">
             {room.id}
@@ -116,13 +148,13 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
 
       {/* 3. Main Detail Card (Chuẩn Figma 37:171) */}
       <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-sm p-8 space-y-8 w-full">
-        {/* Top Info Section: Ảnh phòng (245x377) + Thông số chi tiết */}
+        {/* Top Info Section: Ảnh phòng + Gallery + Thông số chi tiết */}
         <div className="grid grid-cols-12 gap-8 items-start">
           {/* Left Column: Ảnh phòng (Figma node 37:218) */}
           <div className="col-span-12 lg:col-span-4 flex flex-col items-center">
-            <div className="relative w-[245px] h-[377px] rounded-[30px] overflow-hidden shadow-md border-2 border-[#E3EDF6] group">
+            <div className="relative w-[260px] h-[360px] rounded-[30px] overflow-hidden shadow-md border-2 border-[#E3EDF6] group bg-[#F8FBFE]">
               <Image
-                src="/images/rooms/room-demo.png"
+                src={activeImage}
                 alt={`Ảnh phòng ${room.roomNumber}`}
                 fill
                 priority
@@ -135,6 +167,31 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                 </p>
               </div>
             </div>
+
+            {/* Gallery Thumbnails */}
+            {galleryList.length > 1 && (
+              <div className="flex items-center gap-2 mt-3 overflow-x-auto max-w-[260px] p-1">
+                {galleryList.map((img, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveImage(img)}
+                    className={`relative w-12 h-12 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                      activeImage === img
+                        ? "border-[#5C84BE] shadow-xs scale-105"
+                        : "border-slate-200 opacity-70 hover:opacity-100"
+                    }`}
+                  >
+                    <Image
+                      src={img}
+                      alt={`Góc ${idx + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Video preview / link if available */}
             {room.videoUrl && (
@@ -231,10 +288,21 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                         />
                       </div>
                       <div>
-                        <h4 className="text-lg font-black text-[#253F5B]">
-                          {room.tenantName}
-                        </h4>
-                        <p className="text-xs font-semibold text-[#7A93AD] mt-0.5">
+                        <div className="flex items-center gap-2.5">
+                          <h4 className="text-lg font-black text-[#253F5B]">
+                            {room.tenantName}
+                          </h4>
+                          {room.tenantPhone && (
+                            <a
+                              href={`tel:${room.tenantPhone}`}
+                              className="text-xs font-bold text-[#5C84BE] hover:underline flex items-center gap-1 bg-[#EAF2F8] px-2 py-0.5 rounded-md"
+                            >
+                              <Phone className="w-3 h-3" />
+                              <span>{room.tenantPhone}</span>
+                            </a>
+                          )}
+                        </div>
+                        <p className="text-xs font-semibold text-[#7A93AD] mt-1">
                           {room.tenantRole || "Khách thuê căn hộ"}
                           {room.tenantAge ? ` • ${room.tenantAge} tuổi` : ""}
                           {room.tenantHometown ? ` • Quê ${room.tenantHometown}` : ""}
@@ -478,13 +546,13 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
 
               {/* Action Buttons (Figma 38:186 & 38:188) */}
               <div className="flex items-center justify-end gap-4 pt-4 border-t border-[#E8F1FA]">
-                <button
-                  type="button"
-                  onClick={() => setShowEditToast(true)}
-                  className="px-6 py-2.5 rounded-[15px] border border-[#0D99FF] text-[#0D99FF] hover:bg-[#EBF6FF] active:scale-98 font-black text-sm transition-all cursor-pointer"
+                <Link
+                  href={`/rooms/${room.roomNumber}/edit`}
+                  className="px-6 py-2.5 rounded-[15px] border border-[#0D99FF] text-[#0D99FF] hover:bg-[#EBF6FF] active:scale-98 font-black text-sm transition-all cursor-pointer inline-flex items-center gap-2"
                 >
-                  Chỉnh sửa
-                </button>
+                  <Edit className="w-4 h-4" />
+                  <span>Chỉnh sửa phòng</span>
+                </Link>
 
                 <button
                   type="button"
@@ -591,22 +659,6 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
           )}
         </div>
       </div>
-
-      {/* Edit Toast / Notification */}
-      {showEditToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#253F5B] text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 animate-slideUp">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-          <span className="text-xs font-bold">
-            Chức năng chỉnh sửa thông tin phòng {room.roomNumber} đang sẵn sàng!
-          </span>
-          <button
-            onClick={() => setShowEditToast(false)}
-            className="ml-3 text-white/70 hover:text-white text-xs font-bold cursor-pointer"
-          >
-            Đóng
-          </button>
-        </div>
-      )}
 
       {/* Renew Modal Demo */}
       {showRenewModal && (
