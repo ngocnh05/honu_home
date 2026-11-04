@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   Building2,
   Plus,
-  Search,
   MapPin,
   Layers,
   DoorOpen,
@@ -25,7 +24,6 @@ import { AddBuildingModal } from "./add-building-modal";
 
 export function BuildingsView() {
   const [buildings, setBuildings] = React.useState<Building[]>(initialBuildings);
-  const [searchTerm, setSearchTerm] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("ALL");
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingBuilding, setEditingBuilding] = React.useState<Building | null>(null);
@@ -50,18 +48,9 @@ export function BuildingsView() {
   // Filtered buildings
   const filteredBuildings = React.useMemo(() => {
     return buildings.filter((b) => {
-      const matchSearch =
-        b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.managerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.code.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchStatus =
-        statusFilter === "ALL" || b.status === statusFilter;
-
-      return matchSearch && matchStatus;
+      return statusFilter === "ALL" || b.status === statusFilter;
     });
-  }, [buildings, searchTerm, statusFilter]);
+  }, [buildings, statusFilter]);
 
   const handleAddBuilding = (data: NewBuildingInput) => {
     if (editingBuilding) {
@@ -125,17 +114,56 @@ export function BuildingsView() {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            setEditingBuilding(null);
-            setIsModalOpen(true);
-          }}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] text-white font-semibold text-xs transition-all shadow-md shadow-[#5C84BE]/25 cursor-pointer active:scale-95 shrink-0"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          Thêm Cơ Sở Mới
-        </button>
+        {/* Right Toolbar: Lọc trạng thái + Nút Thêm Cơ Sở */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1.5 p-1 bg-[#F1F6FB] rounded-xl border border-[#DEEBF5]">
+            <button
+              type="button"
+              onClick={() => setStatusFilter("ALL")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                statusFilter === "ALL"
+                  ? "bg-white text-[#253F5B] shadow-sm"
+                  : "text-[#627D98] hover:text-[#253F5B]"
+              }`}
+            >
+              Tất cả ({buildings.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("active")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                statusFilter === "active"
+                  ? "bg-white text-emerald-700 shadow-sm"
+                  : "text-[#627D98] hover:text-[#253F5B]"
+              }`}
+            >
+              Đang vận hành
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("maintenance")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                statusFilter === "maintenance"
+                  ? "bg-white text-amber-700 shadow-sm"
+                  : "text-[#627D98] hover:text-[#253F5B]"
+              }`}
+            >
+              Bảo trì
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setEditingBuilding(null);
+              setIsModalOpen(true);
+            }}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] text-white font-semibold text-xs transition-all shadow-md shadow-[#5C84BE]/25 cursor-pointer active:scale-95 shrink-0"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            Thêm Cơ Sở Mới
+          </button>
+        </div>
       </div>
 
       {/* 2. Aggregate KPI Cards */}
@@ -188,60 +216,7 @@ export function BuildingsView() {
         </div>
       </div>
 
-      {/* 3. Search and Status Filter */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-[#E3EDF6] shadow-sm">
-        <div className="relative w-full sm:w-80">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Tìm theo tên cơ sở, địa chỉ, quản lý..."
-            className="w-full h-10 pl-10 pr-4 rounded-xl bg-[#F6FAFD] border border-[#DEEBF5] focus:border-[#5C84BE] focus:bg-white text-xs font-medium text-[#253F5B] outline-none transition-all placeholder:text-[#A4B3C6]"
-          />
-          <Search className="w-4 h-4 text-[#7A93B0] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-        </div>
-
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-xs font-bold text-[#7A93B0] whitespace-nowrap hidden sm:inline">Trạng thái:</span>
-          <div className="flex items-center gap-1.5 p-1 bg-[#F1F6FB] rounded-xl w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={() => setStatusFilter("ALL")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                statusFilter === "ALL"
-                  ? "bg-white text-[#253F5B] shadow-sm"
-                  : "text-[#627D98] hover:text-[#253F5B]"
-              }`}
-            >
-              Tất cả ({buildings.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setStatusFilter("active")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                statusFilter === "active"
-                  ? "bg-white text-emerald-700 shadow-sm"
-                  : "text-[#627D98] hover:text-[#253F5B]"
-              }`}
-            >
-              Đang vận hành
-            </button>
-            <button
-              type="button"
-              onClick={() => setStatusFilter("maintenance")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                statusFilter === "maintenance"
-                  ? "bg-white text-amber-700 shadow-sm"
-                  : "text-[#627D98] hover:text-[#253F5B]"
-              }`}
-            >
-              Bảo trì
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Buildings Cards Grid */}
+      {/* 3. Buildings Cards Grid */}
       {filteredBuildings.length === 0 ? (
         <div className="bg-white rounded-3xl p-12 text-center border border-[#E3EDF6] space-y-3">
           <Building2 className="w-12 h-12 text-slate-300 mx-auto" />

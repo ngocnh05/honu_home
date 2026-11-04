@@ -13,6 +13,9 @@ import {
   FileText,
   UploadCloud,
   Check,
+  Camera,
+  Trash2,
+  ImageIcon,
 } from "lucide-react";
 import type { Building, NewBuildingInput } from "@/types/building";
 
@@ -80,6 +83,14 @@ export function AddBuildingModal({
   }, [editingBuilding, isOpen]);
 
   if (!isOpen) return null;
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setImage(url);
+    }
+  };
 
   const handlePriceChange = (
     value: string,
@@ -320,17 +331,62 @@ export function AddBuildingModal({
           {/* 6. Ảnh đại diện & Ghi chú */}
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                <UploadCloud className="w-3.5 h-3.5 text-[#5C84BE]" />
-                Đường dẫn ảnh đại diện tòa nhà (URL)
-              </label>
-              <input
-                type="url"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-                placeholder="https://images.unsplash.com/..."
-                className="w-full h-10 px-3.5 rounded-xl border border-[#D2E2F0] focus:border-[#5C84BE] text-xs font-medium text-[#253F5B] outline-none"
-              />
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                  <Camera className="w-3.5 h-3.5 text-[#5C84BE]" />
+                  Ảnh đại diện tòa nhà
+                </label>
+                {image && (
+                  <button
+                    type="button"
+                    onClick={() => setImage("")}
+                    className="text-[11px] font-semibold text-rose-500 hover:text-rose-700 flex items-center gap-1 cursor-pointer"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Xóa ảnh
+                  </button>
+                )}
+              </div>
+
+              {image ? (
+                <div className="relative w-full h-36 rounded-2xl overflow-hidden border border-[#D2E2F0] bg-slate-100 group">
+                  <img
+                    src={image}
+                    alt="Xem trước ảnh tòa nhà"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <label className="px-3.5 py-1.5 rounded-xl bg-white/95 hover:bg-white text-xs font-bold text-[#253F5B] shadow-md cursor-pointer flex items-center gap-1.5 transition-all active:scale-95">
+                      <UploadCloud className="w-4 h-4 text-[#5C84BE]" />
+                      Đổi ảnh khác
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <label className="w-full h-28 rounded-2xl border-2 border-dashed border-[#CFDFEE] hover:border-[#5C84BE] hover:bg-[#F4F9FD] flex flex-col items-center justify-center text-[#5C84BE] transition-colors cursor-pointer group">
+                  <div className="w-10 h-10 rounded-xl bg-[#EAF2F8] group-hover:bg-white flex items-center justify-center transition-colors">
+                    <UploadCloud className="w-5 h-5 text-[#5C84BE]" />
+                  </div>
+                  <span className="text-xs font-bold text-[#253F5B] mt-2">
+                    Bấm để tải ảnh tòa nhà từ thiết bị
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-medium mt-0.5">
+                    Hỗ trợ định dạng PNG, JPG, WEBP
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+              )}
             </div>
 
             <div className="space-y-1.5">
