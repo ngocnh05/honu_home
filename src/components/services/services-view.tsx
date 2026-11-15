@@ -445,235 +445,272 @@ export function ServicesView() {
       {/* Modal Thêm / Chỉnh Sửa Dịch Vụ */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col p-6 space-y-4 animate-scaleUp overflow-hidden">
-            <div className="flex items-center justify-between pb-3 border-b border-[#F0F5FA] shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-                  <Zap className="w-4 h-4" />
+          <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-2xl w-full max-w-4xl lg:max-w-5xl max-h-[94vh] flex flex-col p-6 sm:p-7 space-y-5 animate-scaleUp overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-[#F0F5FA] shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold border border-amber-200">
+                  <Zap className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-[#253F5B]">
-                    {editingService ? "Chỉnh Sửa Dịch Vụ & Mức Giá" : "Thêm Dịch Vụ Phòng Mới"}
+                  <h3 className="text-lg font-black text-[#253F5B]">
+                    {editingService ? "Chỉnh Sửa Dịch Vụ & Bảng Mức Giá" : "Thêm Dịch Vụ Phòng Mới"}
                   </h3>
-                  <p className="text-[11px] text-[#7A93AD]">
-                    Thiết lập dịch vụ cơ sở và các tùy chọn giá cho từng loại phòng
+                  <p className="text-xs text-[#7A93AD]">
+                    Thiết lập thông tin dịch vụ cơ sở và các tùy chọn giá linh hoạt cho từng phòng
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="w-8 h-8 rounded-xl bg-[#F0F5FA] text-[#7A93AD] hover:text-[#253F5B] flex items-center justify-center cursor-pointer transition-colors shrink-0"
+                className="w-9 h-9 rounded-xl bg-[#F0F5FA] text-[#7A93AD] hover:text-[#253F5B] flex items-center justify-center cursor-pointer transition-colors shrink-0"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-1 flex-1">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#253F5B]">Tên dịch vụ *</label>
-                <input
-                  type="text"
-                  required
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  placeholder="Ví dụ: Tiền điện, Nước sinh hoạt, Gửi xe..."
-                  className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
-                />
-              </div>
+            {/* Modal Form: 2-Column Wide Layout (No scrolling needed) */}
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                {/* Cột 1: Thông tin cơ bản dịch vụ */}
+                <div className="md:col-span-5 space-y-3.5">
+                  <div className="flex items-center gap-2 pb-1 border-b border-[#F0F5FA]">
+                    <span className="text-xs font-black text-[#253F5B] uppercase tracking-wider">
+                      1. Thông Tin Cơ Bản
+                    </span>
+                  </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#253F5B]">Cơ sở áp dụng</label>
-                <select
-                  value={formBuildingId}
-                  onChange={(e) => setFormBuildingId(e.target.value)}
-                  className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-semibold text-[#253F5B]"
-                >
-                  <option value="all">Áp dụng cho tất cả cơ sở</option>
-                  {initialBuildings.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#253F5B]">Tên dịch vụ *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formName}
+                      onChange={(e) => setFormName(e.target.value)}
+                      placeholder="Ví dụ: Tiền điện, Nước sinh hoạt, Gửi xe..."
+                      className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
+                    />
+                  </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Hình thức mặc định</label>
-                  <select
-                    value={formType}
-                    onChange={(e) => handleTypeChange(e.target.value as ServiceBillingType)}
-                    className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-semibold text-[#253F5B]"
-                  >
-                    <option value="meter">Theo chỉ số (Điện/Nước)</option>
-                    <option value="per_person">Theo đầu người</option>
-                    <option value="per_vehicle">Theo số xe</option>
-                    <option value="per_room">Theo phòng</option>
-                    <option value="fixed">Cố định hàng tháng</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Đơn vị tính mặc định</label>
-                  <input
-                    type="text"
-                    required
-                    value={formUnit}
-                    onChange={(e) => setFormUnit(e.target.value)}
-                    placeholder="đ/kWh, đ/khối..."
-                    className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-semibold text-[#253F5B]"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#253F5B]">Đơn giá mặc định (VNĐ) *</label>
-                <input
-                  type="text"
-                  required
-                  value={formPrice}
-                  onChange={(e) => setFormPrice(e.target.value)}
-                  placeholder="Ví dụ: 3500, 30000..."
-                  className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
-                />
-              </div>
-
-              {/* 4. Section: Các mức giá / Gói cước có thể lựa chọn cho phòng */}
-              <div className="space-y-2.5 p-3.5 rounded-2xl bg-[#F8FBFE] border border-[#DEEAF4]">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                    <Layers className="w-4 h-4 text-[#5C84BE]" />
-                    <span>Các mức giá có thể chọn cho phòng ({formPriceOptions.length})</span>
-                  </span>
-                  <span className="text-[10px] text-[#7A93AD]">Tích chọn mức làm mặc định</span>
-                </div>
-
-                {/* Danh sách các options đã tạo */}
-                <div className="space-y-1.5">
-                  {formPriceOptions.map((opt) => (
-                    <div
-                      key={opt.id}
-                      className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-[#E3EDF6] text-xs"
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#253F5B]">Cơ sở áp dụng</label>
+                    <select
+                      value={formBuildingId}
+                      onChange={(e) => setFormBuildingId(e.target.value)}
+                      className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-semibold text-[#253F5B]"
                     >
-                      <div className="flex items-center gap-2 min-w-0">
+                      <option value="all">Áp dụng cho tất cả cơ sở</option>
+                      {initialBuildings.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Hình thức mặc định</label>
+                      <select
+                        value={formType}
+                        onChange={(e) => handleTypeChange(e.target.value as ServiceBillingType)}
+                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-semibold text-[#253F5B]"
+                      >
+                        <option value="meter">Theo chỉ số (Điện/Nước)</option>
+                        <option value="per_person">Theo đầu người</option>
+                        <option value="per_vehicle">Theo số xe</option>
+                        <option value="per_room">Theo phòng</option>
+                        <option value="fixed">Cố định hàng tháng</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Đơn vị tính</label>
+                      <input
+                        type="text"
+                        required
+                        value={formUnit}
+                        onChange={(e) => setFormUnit(e.target.value)}
+                        placeholder="đ/kWh, đ/khối..."
+                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-semibold text-[#253F5B]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#253F5B]">Đơn giá mặc định (VNĐ) *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formPrice}
+                      onChange={(e) => setFormPrice(e.target.value)}
+                      placeholder="Ví dụ: 3500, 30000..."
+                      className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#253F5B]">Mô tả cách tính</label>
+                    <textarea
+                      rows={2}
+                      value={formDescription}
+                      onChange={(e) => setFormDescription(e.target.value)}
+                      placeholder="Ghi chú chi tiết cách tính hoặc chu kỳ thanh toán..."
+                      className="w-full p-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] transition-all resize-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Cột 2: Các mức giá / Gói cước có thể lựa chọn cho phòng */}
+                <div className="md:col-span-7 flex flex-col space-y-3.5">
+                  <div className="flex items-center justify-between pb-1 border-b border-[#F0F5FA]">
+                    <span className="text-xs font-black text-[#253F5B] uppercase tracking-wider flex items-center gap-1.5">
+                      <Layers className="w-3.5 h-3.5 text-[#5C84BE]" />
+                      <span>2. Các Mức Giá Lựa Chọn Cho Phòng ({formPriceOptions.length})</span>
+                    </span>
+                    <span className="text-[10px] text-[#7A93AD]">Tích radio để đặt làm mức mặc định</span>
+                  </div>
+
+                  {/* Danh sách các mức giá đã thiết lập */}
+                  <div className="p-3.5 rounded-2xl bg-[#F8FBFE] border border-[#DEEAF4] flex-1 flex flex-col justify-between space-y-3">
+                    <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                      {formPriceOptions.map((opt) => (
+                        <div
+                          key={opt.id}
+                          className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-[#E3EDF6] text-xs hover:border-[#5C84BE]/50 transition-colors shadow-2xs"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <input
+                              type="radio"
+                              name="defaultOption"
+                              checked={opt.isDefault}
+                              onChange={() => handleSetDefaultOption(opt.id)}
+                              className="w-4 h-4 text-[#5C84BE] cursor-pointer"
+                              title="Tích để chọn làm giá mặc định"
+                            />
+                            <div className="min-w-0">
+                              <span className="font-bold text-[#253F5B] block truncate">{opt.label}</span>
+                              <span className="text-[10px] text-[#7A93AD] font-medium">
+                                {opt.type === "meter"
+                                  ? "Theo chỉ số công tơ"
+                                  : opt.type === "per_person"
+                                  ? "Khoán theo người"
+                                  : opt.type === "per_vehicle"
+                                  ? "Theo số lượng xe"
+                                  : "Trọn gói phòng"}
+                              </span>
+                            </div>
+                            {opt.isDefault && (
+                              <span className="text-[9px] font-extrabold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md shrink-0">
+                                Mặc định
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2.5 shrink-0">
+                            <span className="font-black text-[#5C84BE] text-sm">
+                              {opt.price.toLocaleString("vi-VN")} {opt.unit}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePriceOption(opt.id)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer"
+                              title="Xóa mức giá này"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {formPriceOptions.length === 0 && (
+                        <div className="text-center py-4 bg-white rounded-xl border border-dashed border-[#D9E6F2]">
+                          <p className="text-xs text-[#7A93AD] font-medium">
+                            Chưa có mức giá riêng biệt. Sẽ áp dụng đơn giá mặc định ở cột bên trái.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Khung thêm nhanh mức giá / gói mới */}
+                    <div className="pt-3 border-t border-[#EAF2F8] space-y-2 bg-white p-3 rounded-xl border border-[#E3EDF6]">
+                      <span className="text-[11px] font-bold text-[#253F5B] block">
+                        + Thêm mức giá / Gói tính tiền khác:
+                      </span>
+                      <div className="grid grid-cols-12 gap-2">
                         <input
-                          type="radio"
-                          name="defaultOption"
-                          checked={opt.isDefault}
-                          onChange={() => handleSetDefaultOption(opt.id)}
-                          className="w-3.5 h-3.5 text-[#5C84BE] cursor-pointer"
-                          title="Đặt làm mặc định"
+                          type="text"
+                          placeholder="Tên gói (VD: Khoán theo người)"
+                          value={newOptLabel}
+                          onChange={(e) => setNewOptLabel(e.target.value)}
+                          className="col-span-5 h-8 px-2.5 rounded-lg border border-[#D9E6F2] bg-[#F9FBFE] focus:bg-white focus:border-[#5C84BE] text-xs font-semibold text-[#253F5B] outline-none transition-all"
                         />
-                        <span className="font-bold text-[#253F5B] truncate">{opt.label}</span>
-                        {opt.isDefault && (
-                          <span className="text-[9px] font-extrabold text-amber-700 bg-amber-100 px-1.5 py-0.2 rounded">
-                            Mặc định
-                          </span>
-                        )}
+                        <input
+                          type="text"
+                          placeholder="Đơn giá (VD: 100000)"
+                          value={newOptPrice}
+                          onChange={(e) => setNewOptPrice(e.target.value)}
+                          className="col-span-4 h-8 px-2.5 rounded-lg border border-[#D9E6F2] bg-[#F9FBFE] focus:bg-white focus:border-[#5C84BE] text-xs font-bold text-[#253F5B] outline-none transition-all"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Đơn vị (đ/người)"
+                          value={newOptUnit}
+                          onChange={(e) => setNewOptUnit(e.target.value)}
+                          className="col-span-3 h-8 px-2 rounded-lg border border-[#D9E6F2] bg-[#F9FBFE] focus:bg-white focus:border-[#5C84BE] text-xs font-medium text-[#253F5B] outline-none transition-all"
+                        />
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="font-extrabold text-[#5C84BE]">
-                          {opt.price.toLocaleString("vi-VN")} {opt.unit}
-                        </span>
+                      <div className="flex items-center justify-between gap-2 pt-1">
+                        <div className="flex items-center gap-1.5 text-xs text-[#7A93AD]">
+                          <span className="text-[11px] font-semibold">Hình thức:</span>
+                          <select
+                            value={newOptType}
+                            onChange={(e) => handleNewOptTypeChange(e.target.value as ServiceBillingType)}
+                            className="h-7 px-2 rounded-lg border border-[#D9E6F2] bg-white text-[11px] font-semibold text-[#253F5B]"
+                          >
+                            <option value="meter">Chỉ số (Điện/Nước)</option>
+                            <option value="per_person">Theo người</option>
+                            <option value="per_vehicle">Theo xe</option>
+                            <option value="per_room">Theo phòng</option>
+                            <option value="fixed">Cố định</option>
+                          </select>
+                        </div>
                         <button
                           type="button"
-                          onClick={() => handleRemovePriceOption(opt.id)}
-                          className="p-1 rounded text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer"
-                          title="Xóa mức giá này"
+                          onClick={handleAddPriceOption}
+                          className="h-7 px-3.5 rounded-lg bg-[#253F5B] hover:bg-[#1B2F44] text-white text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 shadow-xs"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Thêm mức này</span>
                         </button>
                       </div>
                     </div>
-                  ))}
-                  {formPriceOptions.length === 0 && (
-                    <p className="text-[11px] text-[#7A93AD] italic text-center py-1">
-                      Chưa có mức giá riêng biệt. Sẽ dùng đơn giá mặc định ở trên.
-                    </p>
-                  )}
-                </div>
-
-                {/* Form thêm mức giá mới */}
-                <div className="pt-2 border-t border-[#EAF2F8] space-y-2">
-                  <span className="text-[11px] font-bold text-[#5C84BE] block">
-                    + Thêm mức giá / Gói tính tiền khác:
-                  </span>
-                  <div className="grid grid-cols-12 gap-2">
-                    <input
-                      type="text"
-                      placeholder="Tên gói (VD: Khoán theo người)"
-                      value={newOptLabel}
-                      onChange={(e) => setNewOptLabel(e.target.value)}
-                      className="col-span-6 h-8 px-2.5 rounded-lg border border-[#D9E6F2] bg-white text-xs text-[#253F5B] outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Đơn giá (VD: 100000)"
-                      value={newOptPrice}
-                      onChange={(e) => setNewOptPrice(e.target.value)}
-                      className="col-span-3 h-8 px-2 rounded-lg border border-[#D9E6F2] bg-white text-xs text-[#253F5B] outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Đơn vị (đ/người)"
-                      value={newOptUnit}
-                      onChange={(e) => setNewOptUnit(e.target.value)}
-                      className="col-span-3 h-8 px-2 rounded-lg border border-[#D9E6F2] bg-white text-xs text-[#253F5B] outline-none"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between gap-2 pt-1">
-                    <div className="flex items-center gap-1.5 text-xs text-[#7A93AD]">
-                      <span>Hình thức:</span>
-                      <select
-                        value={newOptType}
-                        onChange={(e) => handleNewOptTypeChange(e.target.value as ServiceBillingType)}
-                        className="h-7 px-2 rounded-lg border border-[#D9E6F2] bg-white text-[11px] font-medium text-[#253F5B]"
-                      >
-                        <option value="meter">Chỉ số (Điện/Nước)</option>
-                        <option value="per_person">Theo người</option>
-                        <option value="per_vehicle">Theo xe</option>
-                        <option value="per_room">Theo phòng</option>
-                        <option value="fixed">Cố định</option>
-                      </select>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleAddPriceOption}
-                      className="h-7 px-3 rounded-lg bg-[#253F5B] hover:bg-[#1B2F44] text-white text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1"
-                    >
-                      <Plus className="w-3 h-3" />
-                      <span>Thêm mức</span>
-                    </button>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#253F5B]">Mô tả cách tính</label>
-                <textarea
-                  rows={2}
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                  placeholder="Ghi chú chi tiết cách tính hoặc chu kỳ thanh toán..."
-                  className="w-full p-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] transition-all resize-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#F0F5FA] shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#526579] hover:bg-[#F0F5FA] cursor-pointer"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white text-xs font-bold shadow-md cursor-pointer transition-all"
-                >
-                  {editingService ? "Lưu Thay Đổi" : "Tạo Dịch Vụ"}
-                </button>
+              {/* Bottom Actions Bar */}
+              <div className="flex items-center justify-between pt-4 mt-4 border-t border-[#F0F5FA] shrink-0">
+                <p className="text-xs text-[#7A93AD] hidden sm:block">
+                  💡 Các mức giá này sẽ hiển thị trong dropdown chọn gói giá tại trang Thêm / Sửa phòng.
+                </p>
+                <div className="flex items-center gap-3 ml-auto">
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="h-10 px-5 rounded-xl text-xs font-bold text-[#526579] hover:bg-[#F0F5FA] cursor-pointer transition-colors"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    className="h-10 px-6 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white text-xs font-bold shadow-md hover:shadow-lg cursor-pointer transition-all flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{editingService ? "Lưu Thay Đổi Dịch Vụ" : "Tạo Dịch Vụ Mới"}</span>
+                  </button>
+                </div>
               </div>
             </form>
           </div>
