@@ -1225,30 +1225,33 @@ export function CreateRoomView() {
               return (
                 <div
                   key={srv.id}
-                  onClick={() => toggleRoomService(srv.id)}
-                  className={`p-4 sm:p-4.5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                  className={`p-4 sm:p-5 rounded-2xl border-2 transition-all flex flex-col justify-between gap-3.5 ${
                     srv.selected
                       ? "border-[#5C84BE] bg-gradient-to-br from-[#F8FBFE] to-white shadow-xs ring-1 ring-[#5C84BE]/20"
                       : "border-[#EAF0F6] bg-white opacity-60 hover:opacity-100 hover:border-slate-300"
                   }`}
                 >
-                  {/* Hàng 1: Nút Checkbox to, Icon to, Tên dịch vụ & Đơn vị tính */}
+                  {/* Hàng 1: Nút Checkbox to (chỉ click vào nút này hoặc icon/tiêu đề để bật/tắt), Tên dịch vụ & Giá phòng */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3.5 min-w-0">
-                      {/* Checkbox to rõ */}
-                      <div
-                        className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all shrink-0 ${
+                      {/* Nút Checkbox to rõ: Bấm trực tiếp vào đây để bật/tắt dịch vụ */}
+                      <button
+                        type="button"
+                        onClick={() => toggleRoomService(srv.id)}
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all shrink-0 cursor-pointer ${
                           srv.selected
-                            ? "bg-[#5C84BE] text-white shadow-xs ring-2 ring-[#5C84BE]/25"
-                            : "border-2 border-slate-300 bg-white hover:border-[#5C84BE]"
+                            ? "bg-[#5C84BE] text-white shadow-xs ring-4 ring-[#5C84BE]/20 scale-105"
+                            : "border-2 border-slate-300 bg-white hover:border-[#5C84BE] hover:scale-105"
                         }`}
+                        title={srv.selected ? "Bỏ chọn dịch vụ này" : "Áp dụng dịch vụ này cho phòng"}
                       >
-                        {srv.selected && <Check className="w-4.5 h-4.5 stroke-[3]" />}
-                      </div>
+                        {srv.selected && <Check className="w-5 h-5 stroke-[3]" />}
+                      </button>
 
-                      {/* Icon Dịch vụ */}
+                      {/* Icon Dịch vụ (Click để toggle nhanh) */}
                       <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${
+                        onClick={() => toggleRoomService(srv.id)}
+                        className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-2xs cursor-pointer select-none transition-transform hover:scale-105 ${
                           isElec
                             ? "bg-amber-100/80 text-amber-600 border border-amber-200"
                             : isWater
@@ -1271,8 +1274,11 @@ export function CreateRoomView() {
                         )}
                       </div>
 
-                      <div className="min-w-0">
-                        <span className="text-sm font-black text-[#253F5B] block truncate">
+                      <div
+                        onClick={() => toggleRoomService(srv.id)}
+                        className="min-w-0 cursor-pointer select-none"
+                      >
+                        <span className="text-sm sm:text-base font-black text-[#253F5B] block truncate hover:text-[#5C84BE] transition-colors">
                           {srv.name}
                         </span>
                         <span className="text-[11px] text-[#7A93AD] font-bold inline-flex items-center gap-1 mt-0.5">
@@ -1294,7 +1300,7 @@ export function CreateRoomView() {
                       </span>
                       <div className="flex items-baseline gap-1">
                         <span
-                          className={`text-lg sm:text-xl font-black font-mono tracking-tight ${
+                          className={`text-lg sm:text-2xl font-black font-mono tracking-tight ${
                             srv.selected ? "text-[#5C84BE]" : "text-slate-400"
                           }`}
                         >
@@ -1311,53 +1317,47 @@ export function CreateRoomView() {
                     </div>
                   </div>
 
-                  {/* Hàng 2: COMBOBOX Chọn Gói Giá & Dẫn sang Menu Dịch vụ */}
+                  {/* Hàng 2: COMBOBOX Chọn Gói Giá To Rõ & Nút Sang Menu Dịch vụ */}
                   {srv.selected && srv.priceOptions && srv.priceOptions.length > 0 ? (
-                    <div
-                      className="pt-2.5 border-t border-[#EDF4FA] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="pt-3 border-t border-[#EDF4FA] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-1.5 text-xs font-bold text-[#526579] shrink-0">
-                        <Layers className="w-3.5 h-3.5 text-[#5C84BE]" />
+                        <Layers className="w-4 h-4 text-[#5C84BE]" />
                         <span>Mức giá áp dụng:</span>
                       </div>
 
                       <div className="flex items-center gap-2 flex-1 sm:justify-end">
-                        {/* Combobox hiện đại, sang trọng, không bị lặp giá */}
-                        <div className="relative flex-1 sm:max-w-xs">
+                        {/* Combobox TO, RỘNG, DỄ NHÌN VÀ DỄ BẤM */}
+                        <div className="relative flex-1 sm:max-w-md">
                           <select
                             value={srv.selectedOptionId || srv.priceOptions[0]?.id}
                             onChange={(e) => handleServiceOptionChange(srv.id, e.target.value)}
-                            className="w-full h-9 pl-3.5 pr-8 rounded-xl border-2 border-[#D5E3F0] bg-white text-xs font-bold text-[#253F5B] hover:border-[#5C84BE] focus:border-[#5C84BE] focus:ring-2 focus:ring-[#5C84BE]/20 outline-none transition-all cursor-pointer shadow-2xs appearance-none truncate"
+                            className="w-full h-11 pl-4 pr-10 rounded-xl border-2 border-[#D5E3F0] bg-white text-xs sm:text-sm font-bold text-[#253F5B] hover:border-[#5C84BE] focus:border-[#5C84BE] focus:ring-3 focus:ring-[#5C84BE]/20 outline-none transition-all cursor-pointer shadow-xs appearance-none truncate"
                           >
                             {srv.priceOptions.map((opt) => (
-                              <option key={opt.id} value={opt.id}>
+                              <option key={opt.id} value={opt.id} className="py-1">
                                 {opt.label} • {opt.price.toLocaleString("vi-VN")} {opt.unit}
                               </option>
                             ))}
                           </select>
-                          <ChevronDown className="w-4 h-4 text-[#7A93AD] pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2" />
+                          <ChevronDown className="w-5 h-5 text-[#5C84BE] pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" />
                         </div>
 
                         {/* Nút sang Menu Dịch Vụ */}
                         <Link
                           href="/services"
                           target="_blank"
-                          className="h-9 px-2.5 rounded-xl border border-[#D5E3F0] bg-[#F8FBFE] hover:bg-[#EDF4FA] text-[#5C84BE] text-xs font-bold shrink-0 flex items-center gap-1 transition-colors"
+                          className="h-11 px-3.5 rounded-xl border border-[#D5E3F0] bg-[#F8FBFE] hover:bg-[#EDF4FA] text-[#5C84BE] text-xs font-bold shrink-0 flex items-center gap-1.5 transition-colors shadow-2xs"
                           title="Quản lý và thêm mức giá mới tại Menu Dịch vụ"
                         >
                           <span className="hidden sm:inline">Menu Dịch vụ</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
+                          <ExternalLink className="w-4 h-4" />
                         </Link>
                       </div>
                     </div>
                   ) : srv.selected ? (
-                    <div
-                      className="pt-2 border-t border-[#EDF4FA] flex items-center justify-between text-xs text-[#7A93AD]"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <span className="text-[11px] flex items-center gap-1 font-semibold text-slate-500">
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    <div className="pt-2.5 border-t border-[#EDF4FA] flex items-center justify-between text-xs text-[#7A93AD]">
+                      <span className="text-[11px] flex items-center gap-1.5 font-semibold text-slate-500">
+                        <Check className="w-4 h-4 text-emerald-600" />
                         <span>Áp dụng mức giá mặc định của cơ sở</span>
                       </span>
                       <Link
@@ -1366,7 +1366,7 @@ export function CreateRoomView() {
                         className="text-[11px] text-[#5C84BE] hover:underline font-bold flex items-center gap-1"
                       >
                         <span>Sửa tại Menu Dịch vụ</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink className="w-3.5 h-3.5" />
                       </Link>
                     </div>
                   ) : null}
