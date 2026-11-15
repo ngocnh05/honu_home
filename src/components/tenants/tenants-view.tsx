@@ -19,6 +19,10 @@ import {
   BadgeCheck,
   CheckCircle2,
   Filter,
+  KeyRound,
+  ShieldCheck,
+  Send,
+  Smartphone,
 } from "lucide-react";
 import type { Tenant, TenantRole, TenantStatus } from "@/types/tenant";
 import { initialTenants } from "@/lib/mock-data/tenants";
@@ -50,6 +54,10 @@ export function TenantsView() {
   const [formVehiclePlate, setFormVehiclePlate] = React.useState("");
   const [formStartDate, setFormStartDate] = React.useState("01/01/2026");
   const [formNotes, setFormNotes] = React.useState("");
+  const [formPortalAccount, setFormPortalAccount] = React.useState(true);
+
+  // Portal Account Filter
+  const [selectedPortalFilter, setSelectedPortalFilter] = React.useState<"all" | "active" | "inactive">("all");
 
   // Available rooms for selected building
   const availableRooms = React.useMemo(() => {
@@ -64,12 +72,35 @@ export function TenantsView() {
     }
   };
 
+  const handleGrantPortal = (tenantId: string, name: string, phone: string) => {
+    setTenants((prev) =>
+      prev.map((t) =>
+        t.id === tenantId
+          ? { ...t, portalAccountStatus: "active", portalUsername: phone, lastLoginAt: "Vừa kích hoạt" }
+          : t
+      )
+    );
+    success(`Đã cấp tài khoản Cổng Khách Thuê cho "${name}" (Tên đăng nhập: ${phone})`);
+  };
+
+  const handleResetPortalPassword = (tenant: Tenant) => {
+    const tempPass = `Honu@${tenant.phone.slice(-4)}`;
+    navigator.clipboard.writeText(
+      `HonuHome thông báo: Thông tin tài khoản Cổng Khách Thuê phòng ${tenant.roomNumber}. Link: portal.honuhome.vn, Đăng nhập: ${tenant.phone}, Mật khẩu tạm: ${tempPass}`
+    );
+    success(`Đã tạo mật khẩu mới (${tempPass}) và copy thông báo gửi Zalo cho khách!`);
+  };
+
   // Filtered tenants
   const filteredTenants = React.useMemo(() => {
     return tenants.filter((t) => {
       const matchBuilding =
         selectedBuildingId === "all" || t.buildingId === selectedBuildingId;
       const matchRole = selectedRole === "all" || t.role === selectedRole;
+      const matchPortal =
+        selectedPortalFilter === "all" ||
+        (selectedPortalFilter === "active" && t.portalAccountStatus === "active") ||
+        (selectedPortalFilter === "inactive" && t.portalAccountStatus !== "active");
       const q = searchQuery.toLowerCase();
       const matchQuery =
         t.fullName.toLowerCase().includes(q) ||
@@ -77,9 +108,9 @@ export function TenantsView() {
         t.idCardNumber.includes(q) ||
         t.roomNumber.toLowerCase().includes(q) ||
         t.hometown.toLowerCase().includes(q);
-      return matchBuilding && matchRole && matchQuery;
+      return matchBuilding && matchRole && matchPortal && matchQuery;
     });
-  }, [tenants, selectedBuildingId, selectedRole, searchQuery]);
+  }, [tenants, selectedBuildingId, selectedRole, selectedPortalFilter, searchQuery]);
 
   // Open Create Modal
   const openCreateModal = () => {
@@ -96,6 +127,7 @@ export function TenantsView() {
     setFormVehiclePlate("");
     setFormStartDate("01/01/2026");
     setFormNotes("");
+    setFormPortalAccount(true);
     setShowModal(true);
   };
 
@@ -114,6 +146,7 @@ export function TenantsView() {
     setFormVehiclePlate(t.vehiclePlate || "");
     setFormStartDate(t.startDate);
     setFormNotes(t.notes || "");
+    setFormPortalAccount(t.portalAccountStatus === "active");
     setShowModal(true);
   };
 
@@ -151,6 +184,8 @@ export function TenantsView() {
                 vehiclePlate: formVehiclePlate.trim() || undefined,
                 startDate: formStartDate,
                 notes: formNotes,
+                portalAccountStatus: formPortalAccount ? "active" : "inactive",
+                portalUsername: formPortalAccount ? formPhone.trim() : undefined,
               }
             : item
         )
@@ -173,9 +208,11 @@ export function TenantsView() {
         startDate: formStartDate,
         status: "active",
         notes: formNotes,
+        portalAccountStatus: formPortalAccount ? "active" : "inactive",
+        portalUsername: formPortalAccount ? formPhone.trim() : undefined,
       };
       setTenants((prev) => [newTenant, ...prev]);
-      success(`Đã thêm khách thuê "${formFullName}"`);
+      success(`Đã thêm khách thuê "${formFullName}"${formPortalAccount ? " & kích hoạt tài khoản web" : ""}`);
     }
 
     setShowModal(false);
@@ -280,34 +317,74 @@ export function TenantsView() {
           </div>
         </div>
 
-        {/* Building Filter Pills */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#F0F5FA]">
-          <span className="text-xs font-bold text-[#7A93AD] mr-1">Cơ sở:</span>
-          <button
-            type="button"
-            onClick={() => setSelectedBuildingId("all")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all ${
-              selectedBuildingId === "all"
-                ? "bg-[#5C84BE] text-white"
-                : "bg-[#F4F8FC] text-[#526579] hover:bg-[#EAF2F8]"
-            }`}
-          >
-            Tất cả
-          </button>
-          {initialBuildings.map((b) => (
+        {/* Building & Portal Filter Pills */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#F0F5FA]">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-[#7A93AD] mr-1">Tài khoản Web:</span>
             <button
-              key={b.id}
               type="button"
-              onClick={() => setSelectedBuildingId(b.id)}
+              onClick={() => setSelectedPortalFilter("all")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+                selectedPortalFilter === "all"
+                  ? "bg-[#253F5B] text-white shadow-xs"
+                  : "bg-[#F4F8FC] text-[#526579] hover:bg-[#EAF2F8]"
+              }`}
+            >
+              Tất cả
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedPortalFilter("active")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-1 ${
+                selectedPortalFilter === "active"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "bg-[#F4F8FC] text-emerald-700 hover:bg-emerald-50"
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Đã có tài khoản</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedPortalFilter("inactive")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-1 ${
+                selectedPortalFilter === "inactive"
+                  ? "bg-amber-600 text-white shadow-xs"
+                  : "bg-[#F4F8FC] text-amber-700 hover:bg-amber-50"
+              }`}
+            >
+              <span>Chưa cấp tài khoản</span>
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-xs font-bold text-[#7A93AD] mr-1">Cơ sở:</span>
+            <button
+              type="button"
+              onClick={() => setSelectedBuildingId("all")}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all ${
-                selectedBuildingId === b.id
+                selectedBuildingId === "all"
                   ? "bg-[#5C84BE] text-white"
                   : "bg-[#F4F8FC] text-[#526579] hover:bg-[#EAF2F8]"
               }`}
             >
-              {b.name}
+              Tất cả
             </button>
-          ))}
+            {initialBuildings.map((b) => (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => setSelectedBuildingId(b.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all ${
+                  selectedBuildingId === b.id
+                    ? "bg-[#5C84BE] text-white"
+                    : "bg-[#F4F8FC] text-[#526579] hover:bg-[#EAF2F8]"
+                }`}
+              >
+                {b.name}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -320,6 +397,7 @@ export function TenantsView() {
                 <th className="py-4 px-6">Họ & Tên khách</th>
                 <th className="py-4 px-4">Vai trò</th>
                 <th className="py-4 px-4">Phòng & Cơ sở</th>
+                <th className="py-4 px-4">Tài khoản Cổng Khách</th>
                 <th className="py-4 px-4">Số điện thoại</th>
                 <th className="py-4 px-4">CCCD / Định danh</th>
                 <th className="py-4 px-4">Quê quán & Tuổi</th>
@@ -330,7 +408,7 @@ export function TenantsView() {
             <tbody className="divide-y divide-[#F0F5FA]">
               {filteredTenants.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400">
+                  <td colSpan={9} className="py-12 text-center text-slate-400">
                     Không tìm thấy khách thuê phù hợp với bộ lọc
                   </td>
                 </tr>
@@ -388,6 +466,40 @@ export function TenantsView() {
                           {t.buildingName}
                         </span>
                       </div>
+                    </td>
+
+                    {/* Tài khoản Cổng Khách */}
+                    <td className="py-4 px-4">
+                      {t.portalAccountStatus === "active" ? (
+                        <div className="flex flex-col gap-1">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md w-fit">
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Đã kích hoạt</span>
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-[#7A93AD] font-mono">TK: {t.portalUsername || t.phone}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleResetPortalPassword(t)}
+                              className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-0.5 cursor-pointer"
+                              title="Tạo lại mật khẩu & copy nội dung gửi Zalo cho khách"
+                            >
+                              <KeyRound className="w-2.5 h-2.5" />
+                              <span>Gửi MK</span>
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleGrantPortal(t.id, t.fullName, t.phone)}
+                          className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 border border-slate-200 px-2 py-1 rounded-md cursor-pointer transition-all"
+                          title="Cấp quyền đăng nhập Cổng khách thuê"
+                        >
+                          <KeyRound className="w-3 h-3" />
+                          <span>Cấp tài khoản</span>
+                        </button>
+                      )}
                     </td>
 
                     {/* SĐT */}
@@ -663,6 +775,28 @@ export function TenantsView() {
                       placeholder="Ghi chú về thói quen, công việc hoặc giấy tờ tạm trú..."
                       className="w-full p-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] transition-all resize-none"
                     />
+                  </div>
+
+                  {/* Kích hoạt tài khoản Cổng Khách Thuê */}
+                  <div className="p-3 rounded-2xl bg-gradient-to-r from-indigo-50/70 to-sky-50/70 border border-indigo-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <Smartphone className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-[#253F5B]">Cấp Tài Khoản Cổng Khách Thuê</div>
+                        <div className="text-[10px] text-[#7A93AD]">Tài khoản đăng nhập: Số điện thoại của khách (Xem bill & gửi sự cố)</div>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formPortalAccount}
+                        onChange={(e) => setFormPortalAccount(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                    </label>
                   </div>
                 </div>
               </div>

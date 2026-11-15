@@ -20,6 +20,9 @@ export const initialTenants: Tenant[] = [
     status: "active",
     notes: "Kỹ sư phần mềm, đại diện ký hợp đồng phòng P001.",
     roommatesCount: 2,
+    portalAccountStatus: "active",
+    portalUsername: "0918.137.153",
+    lastLoginAt: "15/11/2026 10:24",
   },
   {
     id: "ten_02",
@@ -37,6 +40,8 @@ export const initialTenants: Tenant[] = [
     startDate: "15/12/2025",
     status: "active",
     notes: "Bạn cùng phòng với Quý Bình, đi xe máy Sirius.",
+    portalAccountStatus: "inactive",
+    portalUsername: "0978.224.551",
   },
 
   // --- Phòng P091 (HonuHome Cầu Giấy) ---
@@ -58,6 +63,9 @@ export const initialTenants: Tenant[] = [
     status: "active",
     notes: "Nhân viên văn phòng, đóng tiền cọc đầy đủ.",
     roommatesCount: 1,
+    portalAccountStatus: "active",
+    portalUsername: "0981.445.678",
+    lastLoginAt: "14/11/2026 19:15",
   },
 
   // --- Phòng P044 (HonuHome Cầu Giấy) ---
@@ -79,6 +87,9 @@ export const initialTenants: Tenant[] = [
     status: "active",
     notes: "Trưởng phòng kinh doanh, thanh toán đúng hạn ngày 28.",
     roommatesCount: 2,
+    portalAccountStatus: "active",
+    portalUsername: "0942.333.112",
+    lastLoginAt: "13/11/2026 08:45",
   },
   {
     id: "ten_05",
@@ -96,6 +107,8 @@ export const initialTenants: Tenant[] = [
     startDate: "20/02/2026",
     status: "active",
     notes: "Vợ anh Tuấn ở cùng.",
+    portalAccountStatus: "inactive",
+    portalUsername: "0934.556.778",
   },
 
   // --- Phòng P201 (HonuHome Mỹ Đình) ---
@@ -117,5 +130,8 @@ export const initialTenants: Tenant[] = [
     status: "active",
     notes: "Thuê ngắn hạn 6 tháng.",
     roommatesCount: 1,
+    portalAccountStatus: "active",
+    portalUsername: "0904.778.991",
+    lastLoginAt: "15/11/2026 07:10",
   },
 ];

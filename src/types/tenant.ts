@@ -1,5 +1,6 @@
 export type TenantRole = "representative" | "member"; // Người đại diện hợp đồng | Khách ở cùng
 export type TenantStatus = "active" | "temporary_leave" | "moved_out";
+export type PortalAccountStatus = "active" | "inactive" | "locked";
 
 export interface Tenant {
   id: string;
@@ -22,4 +23,9 @@ export interface Tenant {
   avatar?: string;
   notes?: string;
   roommatesCount?: number;      // Số người ở cùng phòng
+
+  // Quản lý tài khoản web / app Cổng Khách Thuê (Tenant Portal)
+  portalAccountStatus?: PortalAccountStatus; // "active" | "inactive" | "locked"
+  portalUsername?: string;                  // Mặc định là SĐT của khách
+  lastLoginAt?: string;                     // Ví dụ: "14/11/2026 18:30"
 }
