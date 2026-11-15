@@ -92,9 +92,9 @@ export const initialServices: ServiceItem[] = [
     isMandatory: false,
     appliedRoomsCount: 38,
     priceOptions: [
-      { id: "opt_cg_xe_1", label: "Xe số / Xe ga thường (100.000 đ/xe)", price: 100000, unit: "đ/xe", type: "per_vehicle", isDefault: true },
-      { id: "opt_cg_xe_2", label: "Xe điện có sạc qua đêm (150.000 đ/xe)", price: 150000, unit: "đ/xe", type: "per_vehicle" },
-      { id: "opt_cg_xe_3", label: "Xe thứ 2 ưu đãi (80.000 đ/xe)", price: 80000, unit: "đ/xe", type: "per_vehicle" },
+      { id: "opt_cg_xe_1", label: "Xe số / Xe ga thường", price: 100000, unit: "đ/xe", type: "per_vehicle", isDefault: true },
+      { id: "opt_cg_xe_2", label: "Xe điện có sạc qua đêm", price: 150000, unit: "đ/xe", type: "per_vehicle" },
+      { id: "opt_cg_xe_3", label: "Xe thứ 2 ưu đãi", price: 80000, unit: "đ/xe", type: "per_vehicle" },
     ],
   },
 
@@ -113,9 +113,9 @@ export const initialServices: ServiceItem[] = [
     isMandatory: true,
     appliedRoomsCount: 30,
     priceOptions: [
-      { id: "opt_md_dien_1", label: "Tiêu chuẩn (3.800 đ/kWh)", price: 3800, unit: "đ/kWh", type: "meter", isDefault: true },
-      { id: "opt_md_dien_2", label: "Ưu đãi dài hạn (3.500 đ/kWh)", price: 3500, unit: "đ/kWh", type: "meter" },
-      { id: "opt_md_dien_3", label: "Khoán trọn gói (400.000 đ/phòng)", price: 400000, unit: "đ/phòng", type: "per_room" },
+      { id: "opt_md_dien_1", label: "Tiêu chuẩn", price: 3800, unit: "đ/kWh", type: "meter", isDefault: true },
+      { id: "opt_md_dien_2", label: "Ưu đãi dài hạn", price: 3500, unit: "đ/kWh", type: "meter" },
+      { id: "opt_md_dien_3", label: "Khoán trọn gói", price: 400000, unit: "đ/phòng", type: "per_room" },
     ],
   },
   {
@@ -132,8 +132,8 @@ export const initialServices: ServiceItem[] = [
     isMandatory: true,
     appliedRoomsCount: 30,
     priceOptions: [
-      { id: "opt_md_nuoc_1", label: "Theo đồng hồ (35.000 đ/khối)", price: 35000, unit: "đ/khối", type: "meter", isDefault: true },
-      { id: "opt_md_nuoc_2", label: "Khoán theo người (120.000 đ/người)", price: 120000, unit: "đ/người", type: "per_person" },
+      { id: "opt_md_nuoc_1", label: "Theo đồng hồ", price: 35000, unit: "đ/khối", type: "meter", isDefault: true },
+      { id: "opt_md_nuoc_2", label: "Khoán theo người", price: 120000, unit: "đ/người", type: "per_person" },
     ],
   },
   {
@@ -150,8 +150,8 @@ export const initialServices: ServiceItem[] = [
     isMandatory: true,
     appliedRoomsCount: 30,
     priceOptions: [
-      { id: "opt_md_wifi_1", label: "Gói Tiêu chuẩn (60.000 đ/phòng)", price: 60000, unit: "đ/phòng", type: "per_room", isDefault: true },
-      { id: "opt_md_wifi_2", label: "Miễn phí (Ưu đãi)", price: 0, unit: "đ/phòng", type: "per_room" },
+      { id: "opt_md_wifi_1", label: "Gói Tiêu chuẩn", price: 60000, unit: "đ/phòng", type: "per_room", isDefault: true },
+      { id: "opt_md_wifi_2", label: "Miễn phí (Ưu đãi hợp đồng)", price: 0, unit: "đ/phòng", type: "per_room" },
     ],
   },
   {
@@ -168,8 +168,8 @@ export const initialServices: ServiceItem[] = [
     isMandatory: true,
     appliedRoomsCount: 30,
     priceOptions: [
-      { id: "opt_md_vs_1", label: "Theo đầu người (60.000 đ/người)", price: 60000, unit: "đ/người", type: "per_person", isDefault: true },
-      { id: "opt_md_vs_2", label: "Trọn gói phòng (120.000 đ/phòng)", price: 120000, unit: "đ/phòng", type: "per_room" },
+      { id: "opt_md_vs_1", label: "Theo đầu người", price: 60000, unit: "đ/người", type: "per_person", isDefault: true },
+      { id: "opt_md_vs_2", label: "Trọn gói phòng", price: 120000, unit: "đ/phòng", type: "per_room" },
     ],
   },
   {
@@ -186,8 +186,8 @@ export const initialServices: ServiceItem[] = [
     isMandatory: false,
     appliedRoomsCount: 18,
     priceOptions: [
-      { id: "opt_md_mg_1", label: "Không giới hạn lượt (70.000 đ/người)", price: 70000, unit: "đ/người", type: "per_person", isDefault: true },
-      { id: "opt_md_mg_2", label: "Trọn gói phòng (120.000 đ/phòng)", price: 120000, unit: "đ/phòng", type: "per_room" },
+      { id: "opt_md_mg_1", label: "Không giới hạn lượt", price: 70000, unit: "đ/người", type: "per_person", isDefault: true },
+      { id: "opt_md_mg_2", label: "Trọn gói phòng", price: 120000, unit: "đ/phòng", type: "per_room" },
     ],
   },
   {
@@ -204,8 +204,8 @@ export const initialServices: ServiceItem[] = [
     isMandatory: false,
     appliedRoomsCount: 25,
     priceOptions: [
-      { id: "opt_md_xe_1", label: "Xe máy tiêu chuẩn (120.000 đ/xe)", price: 120000, unit: "đ/xe", type: "per_vehicle", isDefault: true },
-      { id: "opt_md_xe_2", label: "Xe máy điện sạc (160.000 đ/xe)", price: 160000, unit: "đ/xe", type: "per_vehicle" },
+      { id: "opt_md_xe_1", label: "Xe máy tiêu chuẩn", price: 120000, unit: "đ/xe", type: "per_vehicle", isDefault: true },
+      { id: "opt_md_xe_2", label: "Xe máy điện sạc", price: 160000, unit: "đ/xe", type: "per_vehicle" },
     ],
   },
   {
@@ -222,8 +222,8 @@ export const initialServices: ServiceItem[] = [
     isMandatory: false,
     appliedRoomsCount: 4,
     priceOptions: [
-      { id: "opt_md_oto_1", label: "Xe 4-5 chỗ (1.200.000 đ/tháng)", price: 1200000, unit: "đ/xe", type: "per_vehicle", isDefault: true },
-      { id: "opt_md_oto_2", label: "Xe 7 chỗ / Bán tải (1.500.000 đ/tháng)", price: 1500000, unit: "đ/xe", type: "per_vehicle" },
+      { id: "opt_md_oto_1", label: "Xe 4-5 chỗ", price: 1200000, unit: "đ/xe", type: "per_vehicle", isDefault: true },
+      { id: "opt_md_oto_2", label: "Xe 7 chỗ / Bán tải", price: 1500000, unit: "đ/xe", type: "per_vehicle" },
     ],
   },
 
@@ -242,8 +242,8 @@ export const initialServices: ServiceItem[] = [
     isMandatory: true,
     appliedRoomsCount: 20,
     priceOptions: [
-      { id: "opt_cl_dien_1", label: "Tiêu chuẩn (4.000 đ/kWh)", price: 4000, unit: "đ/kWh", type: "meter", isDefault: true },
-      { id: "opt_cl_dien_2", label: "Ưu đãi dài hạn (3.800 đ/kWh)", price: 3800, unit: "đ/kWh", type: "meter" },
+      { id: "opt_cl_dien_1", label: "Tiêu chuẩn", price: 4000, unit: "đ/kWh", type: "meter", isDefault: true },
+      { id: "opt_cl_dien_2", label: "Ưu đãi dài hạn", price: 3800, unit: "đ/kWh", type: "meter" },
     ],
   },
   {
@@ -260,8 +260,8 @@ export const initialServices: ServiceItem[] = [
     isMandatory: true,
     appliedRoomsCount: 20,
     priceOptions: [
-      { id: "opt_cl_nuoc_1", label: "Khoán theo người (100.000 đ/người)", price: 100000, unit: "đ/người", type: "per_person", isDefault: true },
-      { id: "opt_cl_nuoc_2", label: "Trọn gói phòng (150.000 đ/phòng)", price: 150000, unit: "đ/phòng", type: "per_room" },
+      { id: "opt_cl_nuoc_1", label: "Khoán theo người", price: 100000, unit: "đ/người", type: "per_person", isDefault: true },
+      { id: "opt_cl_nuoc_2", label: "Trọn gói phòng", price: 150000, unit: "đ/phòng", type: "per_room" },
     ],
   },
   {
@@ -278,8 +278,8 @@ export const initialServices: ServiceItem[] = [
     isMandatory: true,
     appliedRoomsCount: 20,
     priceOptions: [
-      { id: "opt_cl_wifi_1", label: "Gói Tiêu chuẩn (50.000 đ/phòng)", price: 50000, unit: "đ/phòng", type: "per_room", isDefault: true },
-      { id: "opt_cl_wifi_2", label: "Miễn phí (0 đ)", price: 0, unit: "đ/phòng", type: "per_room" },
+      { id: "opt_cl_wifi_1", label: "Gói Tiêu chuẩn", price: 50000, unit: "đ/phòng", type: "per_room", isDefault: true },
+      { id: "opt_cl_wifi_2", label: "Miễn phí", price: 0, unit: "đ/phòng", type: "per_room" },
     ],
   },
   {
@@ -296,8 +296,8 @@ export const initialServices: ServiceItem[] = [
     isMandatory: true,
     appliedRoomsCount: 20,
     priceOptions: [
-      { id: "opt_cl_vs_1", label: "Theo người (50.000 đ/người)", price: 50000, unit: "đ/người", type: "per_person", isDefault: true },
-      { id: "opt_cl_vs_2", label: "Trọn gói phòng (100.000 đ/phòng)", price: 100000, unit: "đ/phòng", type: "per_room" },
+      { id: "opt_cl_vs_1", label: "Theo người", price: 50000, unit: "đ/người", type: "per_person", isDefault: true },
+      { id: "opt_cl_vs_2", label: "Trọn gói phòng", price: 100000, unit: "đ/phòng", type: "per_room" },
     ],
   },
   {
@@ -314,8 +314,8 @@ export const initialServices: ServiceItem[] = [
     isMandatory: false,
     appliedRoomsCount: 16,
     priceOptions: [
-      { id: "opt_cl_xe_1", label: "Xe máy tiêu chuẩn (100.000 đ/xe)", price: 100000, unit: "đ/xe", type: "per_vehicle", isDefault: true },
-      { id: "opt_cl_xe_2", label: "Xe điện có sạc (150.000 đ/xe)", price: 150000, unit: "đ/xe", type: "per_vehicle" },
+      { id: "opt_cl_xe_1", label: "Xe máy tiêu chuẩn", price: 100000, unit: "đ/xe", type: "per_vehicle", isDefault: true },
+      { id: "opt_cl_xe_2", label: "Xe điện có sạc", price: 150000, unit: "đ/xe", type: "per_vehicle" },
     ],
   },
 ];

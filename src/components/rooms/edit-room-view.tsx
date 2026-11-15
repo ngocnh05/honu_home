@@ -1275,14 +1275,14 @@ export function EditRoomView({ room }: EditRoomViewProps) {
               return (
                 <div
                   key={srv.id}
-                  className={`p-4 sm:p-5 rounded-2xl border-2 transition-all flex flex-col justify-between gap-3.5 ${
+                  className={`p-4 sm:p-4.5 rounded-2xl border-2 transition-all flex flex-col justify-between gap-3.5 ${
                     srv.selected
                       ? "border-[#5C84BE] bg-gradient-to-br from-[#F8FBFE] to-white shadow-xs ring-1 ring-[#5C84BE]/20"
                       : "border-[#EAF0F6] bg-white opacity-60 hover:opacity-100 hover:border-slate-300"
                   }`}
                 >
-                  {/* Hàng 1: Nút Checkbox to (chỉ click vào nút này hoặc icon/tiêu đề để bật/tắt), Tên dịch vụ & Giá phòng */}
-                  <div className="flex items-center justify-between gap-3">
+                  {/* Hàng 1: Nút Checkbox to, Icon to, Tên dịch vụ, và Chọn mức giá dạng Combobox to */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
                     <div className="flex items-center gap-3.5 min-w-0">
                       {/* Nút Checkbox to rõ: Bấm trực tiếp vào đây để bật/tắt dịch vụ */}
                       <button
@@ -1343,41 +1343,11 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                       </div>
                     </div>
 
-                    {/* Hiển thị Giá tiền Đang Áp Dụng (To, Đậm, Sắc Nét, Không lặp thừa) */}
-                    <div className="flex flex-col items-end text-right shrink-0 bg-[#F4F8FC] px-3.5 py-1.5 rounded-xl border border-[#E3EDF6]">
-                      <span className="text-[9px] font-extrabold text-[#7A93AD] uppercase tracking-wider">
-                        Đơn giá phòng
-                      </span>
-                      <div className="flex items-baseline gap-1">
-                        <span
-                          className={`text-lg sm:text-2xl font-black font-mono tracking-tight ${
-                            srv.selected ? "text-[#5C84BE]" : "text-slate-400"
-                          }`}
-                        >
-                          {formatPrice(srv.price)}
-                        </span>
-                        <span
-                          className={`text-xs font-black ${
-                            srv.selected ? "text-[#253F5B]" : "text-slate-400"
-                          }`}
-                        >
-                          {srv.unit}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Hàng 2: COMBOBOX Chọn Gói Giá To Rõ & Nút Sang Menu Dịch vụ */}
-                  {srv.selected && srv.priceOptions && srv.priceOptions.length > 0 ? (
-                    <div className="pt-3 border-t border-[#EDF4FA] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-[#526579] shrink-0">
-                        <Layers className="w-4 h-4 text-[#5C84BE]" />
-                        <span>Mức giá áp dụng:</span>
-                      </div>
-
-                      <div className="flex items-center gap-2 flex-1 sm:justify-end">
-                        {/* Combobox TO, RỘNG, DỄ NHÌN VÀ DỄ BẤM */}
-                        <div className="relative flex-1 sm:max-w-md">
+                    {/* Vùng chọn mức giá Combobox TO hoặc hiển thị đơn giá chuẩn khi không có nhiều gói */}
+                    {srv.selected && srv.priceOptions && srv.priceOptions.length > 0 ? (
+                      <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+                        {/* Combobox TO, RỘNG, DỄ BẤM - KHÔNG BỊ TRÙNG LẶP */}
+                        <div className="relative w-full sm:w-72">
                           <select
                             value={srv.selectedOptionId || srv.priceOptions[0]?.id}
                             onChange={(e) => handleServiceOptionChange(srv.id, e.target.value)}
@@ -1385,7 +1355,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                           >
                             {srv.priceOptions.map((opt) => (
                               <option key={opt.id} value={opt.id} className="py-1">
-                                {opt.label} • {opt.price.toLocaleString("vi-VN")} {opt.unit}
+                                {opt.label}: {opt.price.toLocaleString("vi-VN")} {opt.unit}
                               </option>
                             ))}
                           </select>
@@ -1403,23 +1373,37 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                           <ExternalLink className="w-4 h-4" />
                         </Link>
                       </div>
-                    </div>
-                  ) : srv.selected ? (
-                    <div className="pt-2.5 border-t border-[#EDF4FA] flex items-center justify-between text-xs text-[#7A93AD]">
-                      <span className="text-[11px] flex items-center gap-1.5 font-semibold text-slate-500">
-                        <Check className="w-4 h-4 text-emerald-600" />
-                        <span>Áp dụng mức giá mặc định của cơ sở</span>
-                      </span>
-                      <Link
-                        href="/services"
-                        target="_blank"
-                        className="text-[11px] text-[#5C84BE] hover:underline font-bold flex items-center gap-1"
-                      >
-                        <span>Sửa tại Menu Dịch vụ</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </Link>
-                    </div>
-                  ) : null}
+                    ) : srv.selected ? (
+                      <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                        <div className="flex items-baseline gap-1 bg-[#F4F8FC] px-3.5 py-2 rounded-xl border border-[#E3EDF6]">
+                          <span className="text-base sm:text-lg font-black font-mono text-[#5C84BE]">
+                            {formatPrice(srv.price)}
+                          </span>
+                          <span className="text-xs font-black text-[#253F5B]">
+                            {srv.unit}
+                          </span>
+                        </div>
+                        <Link
+                          href="/services"
+                          target="_blank"
+                          className="h-10 px-3 rounded-xl border border-[#D5E3F0] bg-[#F8FBFE] hover:bg-[#EDF4FA] text-[#5C84BE] text-xs font-bold shrink-0 flex items-center gap-1 transition-colors"
+                        >
+                          <span>Menu Dịch vụ</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    ) : (
+                      /* Khi chưa chọn: hiển thị mờ đơn vị cơ sở */
+                      <div className="flex items-baseline gap-1 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 opacity-60 shrink-0 self-end sm:self-center">
+                        <span className="text-sm sm:text-base font-bold font-mono text-slate-500">
+                          {formatPrice(srv.price)}
+                        </span>
+                        <span className="text-xs font-bold text-slate-400">
+                          {srv.unit}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}
