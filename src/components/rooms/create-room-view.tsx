@@ -841,7 +841,6 @@ export function CreateRoomView() {
                   </label>
                   <Link
                     href="/services"
-                    target="_blank"
                     className="text-[11px] font-bold text-[#5C84BE] hover:underline flex items-center gap-1"
                     title="Mở trang Quản lý Bảng dịch vụ & Tiện nghi để thêm, sửa, xóa danh mục tiện nghi"
                   >
@@ -1338,7 +1337,6 @@ export function CreateRoomView() {
                         {/* Nút sang Menu Dịch Vụ */}
                         <Link
                           href="/services"
-                          target="_blank"
                           className="h-11 px-3.5 rounded-xl border border-[#D5E3F0] bg-[#F8FBFE] hover:bg-[#EDF4FA] text-[#5C84BE] text-xs font-bold shrink-0 flex items-center gap-1.5 transition-colors shadow-2xs"
                           title="Quản lý và thêm mức giá mới tại Menu Dịch vụ"
                         >
@@ -1358,7 +1356,6 @@ export function CreateRoomView() {
                         </div>
                         <Link
                           href="/services"
-                          target="_blank"
                           className="h-10 px-3 rounded-xl border border-[#D5E3F0] bg-[#F8FBFE] hover:bg-[#EDF4FA] text-[#5C84BE] text-xs font-bold shrink-0 flex items-center gap-1 transition-colors"
                         >
                           <span>Menu Dịch vụ</span>
@@ -1399,7 +1396,6 @@ export function CreateRoomView() {
             </div>
             <Link
               href="/services"
-              target="_blank"
               className="px-4 py-2.5 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white font-bold text-xs shadow-md hover:shadow-lg transition-all shrink-0 flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>Mở Menu Bảng Giá Dịch Vụ</span>
