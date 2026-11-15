@@ -143,8 +143,8 @@ export function ReportsView() {
           <div className="space-y-4 pt-2">
             {[
               { label: "Tiền thuê phòng gốc", percent: 74, color: "bg-[#5C84BE]" },
-              { label: "Tiền điện sinh hoạt (3.5k)", percent: 14, color: "bg-amber-500" },
-              { label: "Tiền nước sạch (30k)", percent: 6, color: "bg-sky-500" },
+              { label: "Tiền điện sinh hoạt", percent: 14, color: "bg-amber-500" },
+              { label: "Tiền nước sinh hoạt", percent: 6, color: "bg-sky-500" },
               { label: "Gửi xe máy & Dịch vụ khác", percent: 6, color: "bg-emerald-500" },
             ].map((item, idx) => (
               <div key={idx} className="space-y-1.5">

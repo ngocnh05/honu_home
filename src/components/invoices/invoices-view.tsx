@@ -55,6 +55,10 @@ export function InvoicesView() {
   const [formClosingDate, setFormClosingDate] = React.useState("2026-03-25");
   const [formDueDate, setFormDueDate] = React.useState("2026-03-28");
 
+  // Đơn giá điện & nước theo từng phòng cụ thể
+  const [formElecUnitPrice, setFormElecUnitPrice] = React.useState(3500);
+  const [formWaterUnitPrice, setFormWaterUnitPrice] = React.useState(30000);
+
   // Electricity meters
   const [formElecOld, setFormElecOld] = React.useState(1250);
   const [formElecNew, setFormElecNew] = React.useState(1340);
@@ -73,6 +77,28 @@ export function InvoicesView() {
     return isoStr;
   };
 
+  // Helper tìm đơn giá điện & nước riêng của từng phòng (nếu có riêng, không lấy cào bằng)
+  const resolveRoomRates = (
+    r: (typeof initialRooms)[0],
+    defaultElec: number,
+    defaultWater: number
+  ) => {
+    let rElec: number | undefined = r.services?.electricityPrice;
+    let rWater: number | undefined = r.services?.waterPrice;
+    if (!rElec && r.customServices) {
+      const s = r.customServices.find((x) => x.name.toLowerCase().includes("điện"));
+      if (s && s.price) rElec = s.price;
+    }
+    if (!rWater && r.customServices) {
+      const s = r.customServices.find((x) => x.name.toLowerCase().includes("nước"));
+      if (s && s.price) rWater = s.price;
+    }
+    return {
+      elecPrice: rElec || defaultElec,
+      waterPrice: rWater || defaultWater,
+    };
+  };
+
   // Available rooms for selected building - CHỈ HIỂN THỊ PHÒNG ĐANG THUÊ (ẨN PHÒNG TRỐNG)
   const availableRooms = React.useMemo(() => {
     return initialRooms.filter(
@@ -84,8 +110,27 @@ export function InvoicesView() {
     );
   }, [formBuildingId]);
 
+  // Building services lookup (Tự động lấy đơn giá theo từng cơ sở)
+  const currentBuildingServices = React.useMemo(() => {
+    return getServicesByBuildingId(formBuildingId);
+  }, [formBuildingId]);
+
+  const elecService = currentBuildingServices.find((s) => s.type === "meter" && s.name.toLowerCase().includes("điện"));
+  const waterService = currentBuildingServices.find((s) => s.name.toLowerCase().includes("nước"));
+  const wifiService = currentBuildingServices.find((s) => s.type === "per_room");
+
+  const defaultBuildingElecPrice = elecService?.price || 3500;
+  const defaultBuildingWaterPrice = waterService?.price || 30000;
+  const wifiPrice = wifiService?.price || 50000;
+  const serviceFee = 100000;
+  const parkingFee = 200000;
+
   const handleSelectBuilding = (bId: string) => {
     setFormBuildingId(bId);
+    const bldServices = getServicesByBuildingId(bId);
+    const bldElec = bldServices.find((s) => s.type === "meter" && s.name.toLowerCase().includes("điện"))?.price || 3500;
+    const bldWater = bldServices.find((s) => s.name.toLowerCase().includes("nước"))?.price || 30000;
+
     const rooms = initialRooms.filter(
       (r) =>
         r.buildingId === bId &&
@@ -103,6 +148,10 @@ export function InvoicesView() {
       setFormElecNew((firstRoom.initialElectricityIndex || 1250) + 85);
       setFormWaterOld(firstRoom.initialWaterIndex || 48);
       setFormWaterNew((firstRoom.initialWaterIndex || 48) + 6);
+
+      const rates = resolveRoomRates(firstRoom, bldElec, bldWater);
+      setFormElecUnitPrice(rates.elecPrice);
+      setFormWaterUnitPrice(rates.waterPrice);
     } else {
       setFormRoomNumber("");
       setFormTenantName("");
@@ -124,30 +173,19 @@ export function InvoicesView() {
       setFormElecNew((r.initialElectricityIndex || 1250) + 85);
       setFormWaterOld(r.initialWaterIndex || 48);
       setFormWaterNew((r.initialWaterIndex || 48) + 6);
+
+      const rates = resolveRoomRates(r, defaultBuildingElecPrice, defaultBuildingWaterPrice);
+      setFormElecUnitPrice(rates.elecPrice);
+      setFormWaterUnitPrice(rates.waterPrice);
     }
   };
 
-  // Building services lookup (Tự động lấy đơn giá theo từng cơ sở)
-  const currentBuildingServices = React.useMemo(() => {
-    return getServicesByBuildingId(formBuildingId);
-  }, [formBuildingId]);
-
-  const elecService = currentBuildingServices.find((s) => s.type === "meter" && s.name.toLowerCase().includes("điện"));
-  const waterService = currentBuildingServices.find((s) => s.name.toLowerCase().includes("nước"));
-  const wifiService = currentBuildingServices.find((s) => s.type === "per_room");
-
-  const elecUnitPrice = elecService?.price || 3500;
-  const waterUnitPrice = waterService?.price || 30000;
-  const wifiPrice = wifiService?.price || 50000;
-  const serviceFee = 100000;
-  const parkingFee = 200000;
-
   // Calculations
   const elecUsage = Math.max(0, formElecNew - formElecOld);
-  const elecAmount = elecUsage * elecUnitPrice;
+  const elecAmount = elecUsage * formElecUnitPrice;
 
   const waterUsage = Math.max(0, formWaterNew - formWaterOld);
-  const waterAmount = waterUsage * waterUnitPrice;
+  const waterAmount = waterUsage * formWaterUnitPrice;
 
   const cleanRoomPrice = Number(formRoomPrice.replace(/\D/g, "")) || 0;
   const totalBillCalculated =
@@ -234,14 +272,14 @@ export function InvoicesView() {
         oldIndex: formElecOld,
         newIndex: formElecNew,
         usage: elecUsage,
-        unitPrice: elecUnitPrice,
+        unitPrice: formElecUnitPrice,
         amount: elecAmount,
       },
       water: {
         oldIndex: formWaterOld,
         newIndex: formWaterNew,
         usage: waterUsage,
-        unitPrice: waterUnitPrice,
+        unitPrice: formWaterUnitPrice,
         amount: waterAmount,
       },
       services: [
@@ -446,15 +484,25 @@ export function InvoicesView() {
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-[#F8FBFE] border-b border-[#E3EDF6] text-[#526579] font-bold">
-                <th className="py-4 px-6">Phòng & Cơ sở</th>
+                <th className="py-4 px-5">Phòng & Cơ sở</th>
                 <th className="py-4 px-4">Khách đại diện</th>
                 <th className="py-4 px-4">Tiền phòng</th>
-                <th className="py-4 px-4">Tiền Điện (3.5k)</th>
-                <th className="py-4 px-4">Tiền Nước (30k)</th>
+                <th className="py-4 px-4 min-w-[210px]">
+                  <div className="flex items-center gap-1.5 text-amber-900">
+                    <Zap className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+                    <span>Tiền điện</span>
+                  </div>
+                </th>
+                <th className="py-4 px-4 min-w-[210px]">
+                  <div className="flex items-center gap-1.5 text-sky-900">
+                    <Droplets className="w-3.5 h-3.5 text-sky-600 fill-sky-500" />
+                    <span>Tiền nước</span>
+                  </div>
+                </th>
                 <th className="py-4 px-4">Dịch vụ khác</th>
-                <th className="py-4 px-4">Tổng Bill</th>
+                <th className="py-4 px-4">Tổng hóa đơn</th>
                 <th className="py-4 px-4">Trạng thái</th>
-                <th className="py-4 px-4 text-center">Phiếu thu</th>
+                <th className="py-4 px-4 text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#F0F5FA]">
@@ -462,76 +510,111 @@ export function InvoicesView() {
                 const otherServicesTotal = inv.services.reduce((a, b) => a + b.amount, 0);
                 return (
                   <tr key={inv.id} className="hover:bg-[#F9FBFE] transition-colors">
-                    {/* Phòng */}
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-2">
-                        <span className="font-black text-[#5C84BE] bg-[#EAF2F8] px-2.5 py-1 rounded-lg text-xs">
+                    {/* Phòng & Cơ sở */}
+                    <td className="py-3.5 px-5">
+                      <div className="flex items-center gap-2.5">
+                        <span className="font-black text-[#5C84BE] bg-[#EAF2F8] px-2.5 py-1.5 rounded-xl text-xs shadow-2xs">
                           {inv.roomNumber}
                         </span>
                         <div>
-                          <div className="font-bold text-[#253F5B] text-[11px]">
+                          <div className="font-bold text-[#253F5B] text-xs">
                             {inv.buildingName}
                           </div>
-                          <span className="text-[10px] text-[#7A93AD] font-mono">
+                          <span className="text-[10px] text-[#7A93AD] font-mono block">
                             {inv.id}
                           </span>
                         </div>
                       </div>
                     </td>
 
-                    {/* Khách */}
-                    <td className="py-4 px-4">
-                      <div className="font-bold text-[#253F5B]">{inv.tenantName}</div>
-                      <span className="text-[10px] text-[#7A93AD]">{inv.tenantPhone}</span>
+                    {/* Khách đại diện */}
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-[#F0F5FA] border border-[#D9E6F2] flex items-center justify-center text-[#5C84BE] shrink-0 font-bold text-xs">
+                          <User className="w-3.5 h-3.5 text-[#5C84BE]" />
+                        </div>
+                        <div>
+                          <div className="font-bold text-[#253F5B] text-xs">{inv.tenantName}</div>
+                          <span className="text-[10px] text-[#7A93AD] block">{inv.tenantPhone}</span>
+                        </div>
+                      </div>
                     </td>
 
                     {/* Tiền phòng */}
-                    <td className="py-4 px-4 font-bold text-[#253F5B]">
-                      {inv.roomPrice.toLocaleString("vi-VN")} đ
-                    </td>
-
-                    {/* Điện */}
-                    <td className="py-4 px-4">
-                      <div className="font-bold text-[#253F5B]">
-                        {inv.electricity.amount.toLocaleString("vi-VN")} đ
+                    <td className="py-3.5 px-4">
+                      <div className="font-black text-[#253F5B] text-xs">
+                        {inv.roomPrice.toLocaleString("vi-VN")} đ
                       </div>
-                      <span className="text-[10px] text-amber-700 font-semibold bg-amber-50 px-1.5 py-0.5 rounded">
-                        {inv.electricity.usage} kWh ({inv.electricity.oldIndex} → {inv.electricity.newIndex})
+                      <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded inline-block mt-0.5">
+                        Cố định tháng
                       </span>
                     </td>
 
-                    {/* Nước */}
-                    <td className="py-4 px-4">
-                      <div className="font-bold text-[#253F5B]">
-                        {inv.water.amount.toLocaleString("vi-VN")} đ
+                    {/* Tiền điện - Thiết kế thẻ trực quan giống Hình 2 */}
+                    <td className="py-3.5 px-4">
+                      <div className="p-2.5 rounded-2xl bg-amber-50/70 border border-amber-200/90 space-y-1.5 shadow-2xs">
+                        <div className="flex items-center justify-between text-xs font-bold text-amber-950">
+                          <span className="flex items-center gap-1 text-[11px] text-amber-900 font-bold">
+                            <Zap className="w-3.5 h-3.5 text-amber-600 fill-amber-500 shrink-0" />
+                            <span>{inv.electricity.unitPrice.toLocaleString("vi-VN")} đ/kWh</span>
+                          </span>
+                          <span className="text-xs font-black text-amber-950">
+                            {inv.electricity.amount.toLocaleString("vi-VN")} đ
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] bg-white/90 border border-amber-200/70 rounded-lg px-2 py-1 font-medium text-amber-900">
+                          <span>Số: {inv.electricity.oldIndex} → {inv.electricity.newIndex}</span>
+                          <span className="font-black text-amber-800 bg-amber-100/90 px-1.5 py-0.5 rounded">
+                            {inv.electricity.usage} kWh
+                          </span>
+                        </div>
                       </div>
-                      <span className="text-[10px] text-sky-700 font-semibold bg-sky-50 px-1.5 py-0.5 rounded">
-                        {inv.water.usage} khối ({inv.water.oldIndex} → {inv.water.newIndex})
-                      </span>
+                    </td>
+
+                    {/* Tiền nước - Thiết kế thẻ trực quan giống Hình 2 */}
+                    <td className="py-3.5 px-4">
+                      <div className="p-2.5 rounded-2xl bg-sky-50/70 border border-sky-200/90 space-y-1.5 shadow-2xs">
+                        <div className="flex items-center justify-between text-xs font-bold text-sky-950">
+                          <span className="flex items-center gap-1 text-[11px] text-sky-900 font-bold">
+                            <Droplets className="w-3.5 h-3.5 text-sky-600 fill-sky-500 shrink-0" />
+                            <span>{inv.water.unitPrice.toLocaleString("vi-VN")} đ/khối</span>
+                          </span>
+                          <span className="text-xs font-black text-sky-950">
+                            {inv.water.amount.toLocaleString("vi-VN")} đ
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] bg-white/90 border border-sky-200/70 rounded-lg px-2 py-1 font-medium text-sky-900">
+                          <span>Số: {inv.water.oldIndex} → {inv.water.newIndex}</span>
+                          <span className="font-black text-sky-800 bg-sky-100/90 px-1.5 py-0.5 rounded">
+                            {inv.water.usage} khối
+                          </span>
+                        </div>
+                      </div>
                     </td>
 
                     {/* Dịch vụ khác */}
-                    <td className="py-4 px-4">
-                      <div className="font-bold text-[#526579]">
+                    <td className="py-3.5 px-4">
+                      <div className="font-bold text-[#526579] text-xs">
                         {otherServicesTotal.toLocaleString("vi-VN")} đ
                       </div>
-                      <span className="text-[10px] text-[#7A93AD]">
+                      <span className="text-[10px] text-[#7A93AD] bg-[#F4F8FC] border border-[#E2EEF8] px-1.5 py-0.5 rounded inline-block mt-0.5">
                         {inv.services.length} dịch vụ
                       </span>
                     </td>
 
                     {/* Tổng bill */}
-                    <td className="py-4 px-4">
+                    <td className="py-3.5 px-4">
                       <div className="font-black text-sm text-[#253F5B] tracking-tight">
                         {inv.totalAmount.toLocaleString("vi-VN")} đ
                       </div>
-                      <span className="text-[10px] text-[#7A93AD]">
-                        Hạn: {inv.dueDate}
-                      </span>
+                      <div className="inline-flex items-center gap-1 text-[10px] text-[#7A93AD] bg-[#F0F5FA] px-1.5 py-0.5 rounded font-medium mt-0.5">
+                        <Clock className="w-3 h-3 text-[#7A93AD]" />
+                        <span>Hạn: {inv.dueDate}</span>
+                      </div>
                     </td>
 
                     {/* Trạng thái */}
-                    <td className="py-4 px-4">
+                    <td className="py-3.5 px-4">
                       {inv.status === "paid" ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px]">
                           <Check className="w-3 h-3 text-emerald-600" />
@@ -551,7 +634,7 @@ export function InvoicesView() {
                     </td>
 
                     {/* Xem chi tiết */}
-                    <td className="py-4 px-4 text-center">
+                    <td className="py-3.5 px-4 text-center">
                       <button
                         type="button"
                         onClick={() => setViewingInvoice(inv)}
@@ -927,10 +1010,20 @@ export function InvoicesView() {
                   {/* Chốt chỉ số ĐIỆN */}
                   <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
                     <div className="flex items-center justify-between text-xs font-bold text-amber-900">
-                      <span className="flex items-center gap-1.5">
-                        <Zap className="w-4 h-4 text-amber-600" />
-                        <span>Chỉ số ĐIỆN (Đơn giá {elecUnitPrice.toLocaleString("vi-VN")} đ/kWh)</span>
-                      </span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <Zap className="w-4 h-4 text-amber-600 fill-amber-500" />
+                        <span>Chỉ số ĐIỆN</span>
+                        <span className="text-[11px] text-amber-800 font-normal">
+                          (Đơn giá phòng:
+                        </span>
+                        <input
+                          type="number"
+                          value={formElecUnitPrice}
+                          onChange={(e) => setFormElecUnitPrice(Number(e.target.value) || 0)}
+                          className="w-16 h-6 px-1 text-center font-black text-amber-950 bg-white border border-amber-300 rounded text-xs outline-none"
+                        />
+                        <span className="text-[11px] text-amber-800 font-normal">đ/kWh)</span>
+                      </div>
                       <span className="text-sm font-black text-amber-900">{elecAmount.toLocaleString("vi-VN")} đ</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
@@ -964,11 +1057,21 @@ export function InvoicesView() {
                   {/* Chốt chỉ số NƯỚC */}
                   <div className="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-2">
                     <div className="flex items-center justify-between text-xs font-bold text-sky-900">
-                      <span className="flex items-center gap-1.5">
-                        <Droplets className="w-4 h-4 text-sky-600" />
-                        <span>Chỉ số NƯỚC (Đơn giá {waterUnitPrice.toLocaleString("vi-VN")} {waterService?.unit || "đ/khối"})</span>
-                      </span>
-                      <span className="text-sm font-black text-sky-900">{waterAmount.toLocaleString("vi-VN")} đ</span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <Droplets className="w-4 h-4 text-sky-600 fill-sky-500" />
+                        <span>Chỉ số NƯỚC</span>
+                        <span className="text-[11px] text-sky-800 font-normal">
+                          (Đơn giá phòng:
+                        </span>
+                        <input
+                          type="number"
+                          value={formWaterUnitPrice}
+                          onChange={(e) => setFormWaterUnitPrice(Number(e.target.value) || 0)}
+                          className="w-20 h-6 px-1 text-center font-black text-sky-950 bg-white border border-sky-300 rounded text-xs outline-none"
+                        />
+                        <span className="text-[11px] text-sky-800 font-normal">đ/khối)</span>
+                      </div>
+                      <span className="text-sm font-black text-sky-950">{waterAmount.toLocaleString("vi-VN")} đ</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <div>
