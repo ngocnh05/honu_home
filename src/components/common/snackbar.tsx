@@ -106,6 +106,11 @@ function SnackbarCard({
 }) {
   const [isPaused, setIsPaused] = React.useState(false);
   const [progress, setProgress] = React.useState(100);
+  const onCloseRef = React.useRef(onClose);
+
+  React.useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   const duration = item.duration || 3800;
 
@@ -119,7 +124,9 @@ function SnackbarCard({
       setProgress((prev) => {
         if (prev <= step) {
           clearInterval(timer);
-          onClose();
+          setTimeout(() => {
+            onCloseRef.current();
+          }, 0);
           return 0;
         }
         return prev - step;
@@ -127,7 +134,7 @@ function SnackbarCard({
     }, intervalTime);
 
     return () => clearInterval(timer);
-  }, [duration, isPaused, onClose]);
+  }, [duration, isPaused]);
 
   // Configurations for 3 colors: Xanh (Success), Vàng (Warning), Đỏ (Error)
   const config = React.useMemo(() => {
