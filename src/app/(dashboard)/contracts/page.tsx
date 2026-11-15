@@ -1,16 +1,10 @@
-import { FileCheck2 } from "lucide-react";
-import { PlaceholderPage } from "@/components/common/placeholder-page";
+import { ContractsView } from "@/components/contracts/contracts-view";
 
 export const metadata = {
-  title: "Hợp đồng thuê | HonuHome",
+  title: "Quản Lý Hợp Đồng Thuê | HonuHome",
+  description: "Theo dõi danh sách hợp đồng, thời hạn thuê, tiền đặt cọc và ngày thanh toán.",
 };
 
 export default function ContractsPage() {
-  return (
-    <PlaceholderPage
-      title="Quản lý Hợp đồng thuê"
-      description="Theo dõi danh sách hợp đồng, thời hạn thuê, tiền đặt cọc và chu kỳ thanh toán."
-      icon={FileCheck2}
-    />
-  );
+  return <ContractsView />;
 }

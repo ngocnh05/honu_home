@@ -1,16 +1,10 @@
-import { Users } from "lucide-react";
-import { PlaceholderPage } from "@/components/common/placeholder-page";
+import { TenantsView } from "@/components/tenants/tenants-view";
 
 export const metadata = {
-  title: "Khách thuê | HonuHome",
+  title: "Quản Lý Khách Thuê | HonuHome",
+  description: "Quản lý người đại diện hợp đồng và khách ở cùng phòng, CCCD, thông tin liên hệ.",
 };
 
 export default function TenantsPage() {
-  return (
-    <PlaceholderPage
-      title="Hồ sơ Khách thuê"
-      description="Quản lý thông tin cá nhân khách thuê, CCCD, thông tin liên hệ, thành viên ở cùng và biển số xe."
-      icon={Users}
-    />
-  );
+  return <TenantsView />;
 }

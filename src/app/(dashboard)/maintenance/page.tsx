@@ -1,16 +1,10 @@
-import { Wrench } from "lucide-react";
-import { PlaceholderPage } from "@/components/common/placeholder-page";
+import { MaintenanceView } from "@/components/maintenance/maintenance-view";
 
 export const metadata = {
-  title: "Sự cố / Bảo trì | HonuHome",
+  title: "Sự Cố & Lịch Bảo Trì | HonuHome",
+  description: "Tiếp nhận phản ánh hư hỏng thiết bị từ khách thuê, điều phối kỹ thuật và chi phí sửa chữa.",
 };
 
 export default function MaintenancePage() {
-  return (
-    <PlaceholderPage
-      title="Sự cố & Lịch Bảo trì"
-      description="Tiếp nhận phản ánh hư hỏng thiết bị từ khách thuê, điều phối kỹ thuật và theo dõi chi phí sửa chữa."
-      icon={Wrench}
-    />
-  );
+  return <MaintenanceView />;
 }

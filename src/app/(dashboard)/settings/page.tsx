@@ -1,16 +1,10 @@
-import { Settings } from "lucide-react";
-import { PlaceholderPage } from "@/components/common/placeholder-page";
+import { SettingsView } from "@/components/settings/settings-view";
 
 export const metadata = {
-  title: "Cài đặt | HonuHome",
+  title: "Cài Đặt Hệ Thống | HonuHome",
+  description: "Cấu hình tài khoản ngân hàng VietQR, chu kỳ hóa đơn và thông tin liên hệ HonuHome.",
 };
 
 export default function SettingsPage() {
-  return (
-    <PlaceholderPage
-      title="Cài đặt Hệ thống"
-      description="Cấu hình tài khoản, phân quyền quản lý, mẫu in hóa đơn/hợp đồng và tích hợp thông báo."
-      icon={Settings}
-    />
-  );
+  return <SettingsView />;
 }

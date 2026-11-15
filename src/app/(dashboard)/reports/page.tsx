@@ -1,16 +1,10 @@
-import { BarChart3 } from "lucide-react";
-import { PlaceholderPage } from "@/components/common/placeholder-page";
+import { ReportsView } from "@/components/reports/reports-view";
 
 export const metadata = {
-  title: "Báo cáo thống kê | HonuHome",
+  title: "Báo Cáo & Phân Tích Tài Chính | HonuHome",
+  description: "Biểu đồ tỷ lệ lấp đầy phòng, phân tích doanh thu và công nợ trên toàn chuỗi HonuHome.",
 };
 
 export default function ReportsPage() {
-  return (
-    <PlaceholderPage
-      title="Báo cáo & Thống kê Tài chính"
-      description="Biểu đồ tỷ lệ lấp đầy phòng trống, doanh thu thực tế, công nợ chưa thu và phân tích dòng tiền."
-      icon={BarChart3}
-    />
-  );
+  return <ReportsView />;
 }
