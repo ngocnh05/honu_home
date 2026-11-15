@@ -34,6 +34,7 @@ import {
   BadgeDollarSign,
 } from "lucide-react";
 import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
+import type { ServicePriceOption } from "@/types/service";
 import { initialBuildings } from "@/lib/mock-data/buildings";
 import { getServicesByBuildingId } from "@/lib/mock-data/services";
 import { useSnackbar } from "@/components/common/snackbar";
@@ -128,18 +129,36 @@ export function CreateRoomView() {
   // 4. Meters & Services
   const [initialElectricityIndex, setInitialElectricityIndex] = React.useState("1250");
   const [initialWaterIndex, setInitialWaterIndex] = React.useState("48");
-  // Dịch vụ của cơ sở (Mỗi cơ sở có bảng dịch vụ riêng, phòng CHỌN dịch vụ áp dụng)
-  const [roomServices, setRoomServices] = React.useState(() => {
+  // Dịch vụ của cơ sở (Mỗi cơ sở có bảng dịch vụ riêng với nhiều mức giá lựa chọn)
+  interface RoomServiceState {
+    id: string;
+    name: string;
+    price: number;
+    unit: string;
+    type?: string;
+    selected: boolean;
+    priceOptions?: ServicePriceOption[];
+    selectedOptionId?: string;
+    selectedOptionLabel?: string;
+  }
+
+  const [roomServices, setRoomServices] = React.useState<RoomServiceState[]>(() => {
     const defaultBldId = initialBuildings[0]?.id || "bld_cg";
     const catalog = getServicesByBuildingId(defaultBldId);
-    return catalog.map((s) => ({
-      id: s.id,
-      name: s.name,
-      price: s.price,
-      unit: s.unit,
-      type: s.type,
-      selected: s.isMandatory || s.type === "meter" || s.type === "per_room",
-    }));
+    return catalog.map((s) => {
+      const defaultOpt = s.priceOptions?.find((o) => o.isDefault) || s.priceOptions?.[0];
+      return {
+        id: s.id,
+        name: s.name,
+        price: defaultOpt ? defaultOpt.price : s.price,
+        unit: defaultOpt ? defaultOpt.unit : s.unit,
+        type: defaultOpt ? defaultOpt.type : s.type,
+        selected: s.isMandatory || s.type === "meter" || s.type === "per_room",
+        priceOptions: s.priceOptions,
+        selectedOptionId: defaultOpt ? defaultOpt.id : "custom",
+        selectedOptionLabel: defaultOpt ? defaultOpt.label : undefined,
+      };
+    });
   });
 
   // 5. Notes & Handover
@@ -199,14 +218,20 @@ export function CreateRoomView() {
     setBuildingId(newBuildingId);
     const catalog = getServicesByBuildingId(newBuildingId);
     setRoomServices(
-      catalog.map((s) => ({
-        id: s.id,
-        name: s.name,
-        price: s.price,
-        unit: s.unit,
-        type: s.type,
-        selected: s.isMandatory || s.type === "meter" || s.type === "per_room",
-      }))
+      catalog.map((s) => {
+        const defaultOpt = s.priceOptions?.find((o) => o.isDefault) || s.priceOptions?.[0];
+        return {
+          id: s.id,
+          name: s.name,
+          price: defaultOpt ? defaultOpt.price : s.price,
+          unit: defaultOpt ? defaultOpt.unit : s.unit,
+          type: defaultOpt ? defaultOpt.type : s.type,
+          selected: s.isMandatory || s.type === "meter" || s.type === "per_room",
+          priceOptions: s.priceOptions,
+          selectedOptionId: defaultOpt ? defaultOpt.id : "custom",
+          selectedOptionLabel: defaultOpt ? defaultOpt.label : undefined,
+        };
+      })
     );
   };
 
@@ -216,9 +241,43 @@ export function CreateRoomView() {
     );
   };
 
+  const handleServiceOptionChange = (serviceId: string, optionId: string) => {
+    setRoomServices((prev) =>
+      prev.map((s) => {
+        if (s.id !== serviceId) return s;
+        if (optionId === "custom") {
+          return {
+            ...s,
+            selectedOptionId: "custom",
+            selectedOptionLabel: "Tùy chỉnh riêng",
+          };
+        }
+        const opt = s.priceOptions?.find((o) => o.id === optionId);
+        if (!opt) return s;
+        return {
+          ...s,
+          selectedOptionId: opt.id,
+          selectedOptionLabel: opt.label,
+          price: opt.price,
+          unit: opt.unit,
+          type: opt.type,
+        };
+      })
+    );
+  };
+
   const updateRoomServicePrice = (id: string, price: number) => {
     setRoomServices((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, price } : s))
+      prev.map((s) =>
+        s.id === id
+          ? {
+              ...s,
+              price,
+              selectedOptionId: "custom",
+              selectedOptionLabel: "Tùy chỉnh riêng",
+            }
+          : s
+      )
     );
   };
 
@@ -240,6 +299,8 @@ export function CreateRoomView() {
         name: s.name,
         price: s.price,
         unit: s.unit,
+        type: s.type,
+        selectedOptionLabel: s.selectedOptionLabel,
       }));
 
     const selectedBuilding = initialBuildings.find((b) => b.id === buildingId);
@@ -1140,67 +1201,94 @@ export function CreateRoomView() {
           </div>
 
           {/* Danh sách checkbox dịch vụ của cơ sở */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {roomServices.map((srv) => (
               <div
                 key={srv.id}
                 onClick={() => toggleRoomService(srv.id)}
-                className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 ${
                   srv.selected
                     ? "border-[#5C84BE] bg-[#F8FBFE] shadow-2xs"
                     : "border-[#EAF0F6] bg-white opacity-60 hover:opacity-100"
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
-                      srv.selected
-                        ? "bg-[#5C84BE] text-white shadow-xs"
-                        : "border-2 border-slate-300 bg-white"
-                    }`}
-                  >
-                    {srv.selected && <Check className="w-4 h-4 stroke-[3]" />}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors shrink-0 ${
+                        srv.selected
+                          ? "bg-[#5C84BE] text-white shadow-xs"
+                          : "border-2 border-slate-300 bg-white"
+                      }`}
+                    >
+                      {srv.selected && <Check className="w-4 h-4 stroke-[3]" />}
+                    </div>
+                    <div>
+                      <span className="text-xs font-black text-[#253F5B] block">
+                        {srv.name}
+                      </span>
+                      <span className="text-[10px] text-[#7A93AD] font-semibold">
+                        {srv.type === "meter"
+                          ? "Đo theo công tơ"
+                          : srv.type === "per_person"
+                          ? "Theo đầu người"
+                          : srv.type === "per_vehicle"
+                          ? "Theo số xe"
+                          : "Theo phòng"}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-xs font-black text-[#253F5B] block">
-                      {srv.name}
-                    </span>
-                    <span className="text-[10px] text-[#7A93AD] font-semibold">
-                      {srv.type === "meter"
-                        ? "Đo theo công tơ"
-                        : srv.type === "per_person"
-                        ? "Theo đầu người"
-                        : srv.type === "per_vehicle"
-                        ? "Theo số xe"
-                        : "Theo phòng"}
+
+                  {/* Giá và đơn vị tính */}
+                  <div
+                    className="flex items-center gap-1.5 shrink-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formatPrice(srv.price)}
+                        onChange={(e) =>
+                          updateRoomServicePrice(srv.id, parsePrice(e.target.value))
+                        }
+                        disabled={!srv.selected}
+                        className={`w-24 h-8 px-2 rounded-xl border text-right text-xs font-bold transition-all ${
+                          srv.selected
+                            ? "bg-white border-[#D5E3F0] text-[#253F5B] focus:border-[#5C84BE]"
+                            : "bg-slate-100 border-slate-200 text-slate-400"
+                        }`}
+                      />
+                    </div>
+                    <span className="text-xs font-bold text-[#5C84BE] min-w-[50px]">
+                      {srv.unit}
                     </span>
                   </div>
                 </div>
 
-                {/* Giá dịch vụ: hiển thị hoặc cho phép điều chỉnh giá riêng cho phòng */}
-                <div
-                  className="flex items-center gap-1.5"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={formatPrice(srv.price)}
-                      onChange={(e) =>
-                        updateRoomServicePrice(srv.id, parsePrice(e.target.value))
-                      }
-                      disabled={!srv.selected}
-                      className={`w-28 h-9 px-2.5 rounded-xl border text-right text-xs font-bold transition-all ${
-                        srv.selected
-                          ? "bg-white border-[#D5E3F0] text-[#253F5B] focus:border-[#5C84BE]"
-                          : "bg-slate-100 border-slate-200 text-slate-400"
-                      }`}
-                    />
+                {/* Chọn gói cước / mức giá nếu có */}
+                {srv.selected && srv.priceOptions && srv.priceOptions.length > 0 && (
+                  <div
+                    className="pt-2 border-t border-[#EAF2F8] flex items-center justify-between gap-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <span className="text-[10px] font-bold text-[#7A93AD] flex items-center gap-1 shrink-0">
+                      <Layers className="w-3 h-3 text-[#5C84BE]" />
+                      <span>Chọn mức giá:</span>
+                    </span>
+                    <select
+                      value={srv.selectedOptionId || "custom"}
+                      onChange={(e) => handleServiceOptionChange(srv.id, e.target.value)}
+                      className="h-7 px-2 rounded-lg border border-[#D5E3F0] bg-white text-[11px] font-bold text-[#253F5B] focus:border-[#5C84BE] outline-none max-w-[220px] truncate"
+                    >
+                      {srv.priceOptions.map((opt) => (
+                        <option key={opt.id} value={opt.id}>
+                          {opt.label} ({opt.price.toLocaleString("vi-VN")} {opt.unit})
+                        </option>
+                      ))}
+                      <option value="custom">Tùy chỉnh đơn giá khác...</option>
+                    </select>
                   </div>
-                  <span className="text-xs font-bold text-[#5C84BE] min-w-[55px]">
-                    {srv.unit}
-                  </span>
-                </div>
+                )}
               </div>
             ))}
           </div>

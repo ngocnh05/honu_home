@@ -27,7 +27,7 @@ import {
   MapPin,
   Cake,
 } from "lucide-react";
-import type { Room } from "@/types/room";
+import type { Room, CustomService } from "@/types/room";
 import { parseVideoSource } from "@/lib/video-helpers";
 import { getServicesByBuildingId } from "@/lib/mock-data/services";
 
@@ -52,7 +52,7 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
   const [selectedMediaSlot, setSelectedMediaSlot] = React.useState<"cover" | "video" | number>("cover");
 
   // Dịch vụ phòng: lấy từ room.customServices hoặc theo cơ sở của phòng
-  const activeServices = React.useMemo(() => {
+  const activeServices: CustomService[] = React.useMemo(() => {
     if (room.customServices && room.customServices.length > 0) {
       return room.customServices;
     }
@@ -62,6 +62,8 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
       name: s.name,
       price: s.price,
       unit: s.unit,
+      selectedOptionLabel: s.priceOptions?.[0]?.label,
+      type: s.type,
     }));
   }, [room.customServices, room.buildingId]);
 
@@ -685,6 +687,11 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                         <p className="text-xs font-extrabold text-[#253F5B] truncate">
                           {srv.price.toLocaleString("vi-VN")} {srv.unit}
                         </p>
+                        {srv.selectedOptionLabel && (
+                          <p className="text-[10px] text-[#5C84BE] font-semibold truncate" title={srv.selectedOptionLabel}>
+                            {srv.selectedOptionLabel}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))}

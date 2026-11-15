@@ -19,7 +19,7 @@ import {
   Clock,
   Layers,
 } from "lucide-react";
-import type { ServiceItem, ServiceBillingType } from "@/types/service";
+import type { ServiceItem, ServiceBillingType, ServicePriceOption } from "@/types/service";
 import { initialServices } from "@/lib/mock-data/services";
 import { initialBuildings } from "@/lib/mock-data/buildings";
 import { useSnackbar } from "@/components/common/snackbar";
@@ -41,6 +41,13 @@ export function ServicesView() {
   const [formPrice, setFormPrice] = React.useState("");
   const [formUnit, setFormUnit] = React.useState("đ/kWh");
   const [formDescription, setFormDescription] = React.useState("");
+  const [formPriceOptions, setFormPriceOptions] = React.useState<ServicePriceOption[]>([]);
+
+  // Sub-form for adding a price option in modal
+  const [newOptLabel, setNewOptLabel] = React.useState("");
+  const [newOptPrice, setNewOptPrice] = React.useState("");
+  const [newOptUnit, setNewOptUnit] = React.useState("đ/kWh");
+  const [newOptType, setNewOptType] = React.useState<ServiceBillingType>("meter");
 
   // Filtered Services
   const filteredServices = React.useMemo(() => {
@@ -65,6 +72,13 @@ export function ServicesView() {
     setFormPrice("3500");
     setFormUnit("đ/kWh");
     setFormDescription("");
+    setFormPriceOptions([
+      { id: `opt_${Date.now()}_1`, label: "Tiêu chuẩn", price: 3500, unit: "đ/kWh", type: "meter", isDefault: true }
+    ]);
+    setNewOptLabel("");
+    setNewOptPrice("");
+    setNewOptUnit("đ/kWh");
+    setNewOptType("meter");
     setShowModal(true);
   };
 
@@ -77,6 +91,24 @@ export function ServicesView() {
     setFormPrice(String(service.price));
     setFormUnit(service.unit);
     setFormDescription(service.description || "");
+    setFormPriceOptions(
+      service.priceOptions && service.priceOptions.length > 0
+        ? [...service.priceOptions]
+        : [
+            {
+              id: `opt_${service.id}_default`,
+              label: "Mặc định",
+              price: service.price,
+              unit: service.unit,
+              type: service.type,
+              isDefault: true,
+            },
+          ]
+    );
+    setNewOptLabel("");
+    setNewOptPrice("");
+    setNewOptUnit(service.unit);
+    setNewOptType(service.type);
     setShowModal(true);
   };
 
@@ -84,10 +116,65 @@ export function ServicesView() {
   const handleTypeChange = (type: ServiceBillingType) => {
     setFormType(type);
     if (type === "meter") setFormUnit("đ/kWh");
-    else if (type === "per_person") setFormUnit("đ/người/tháng");
-    else if (type === "per_vehicle") setFormUnit("đ/xe/tháng");
-    else if (type === "per_room") setFormUnit("đ/phòng/tháng");
+    else if (type === "per_person") setFormUnit("đ/người");
+    else if (type === "per_vehicle") setFormUnit("đ/xe");
+    else if (type === "per_room") setFormUnit("đ/phòng");
     else setFormUnit("đ/tháng");
+  };
+
+  // Quick unit helper for sub-form
+  const handleNewOptTypeChange = (type: ServiceBillingType) => {
+    setNewOptType(type);
+    if (type === "meter") setNewOptUnit("đ/kWh");
+    else if (type === "per_person") setNewOptUnit("đ/người");
+    else if (type === "per_vehicle") setNewOptUnit("đ/xe");
+    else if (type === "per_room") setNewOptUnit("đ/phòng");
+    else setNewOptUnit("đ/tháng");
+  };
+
+  // Add price option
+  const handleAddPriceOption = () => {
+    if (!newOptLabel.trim()) {
+      error("Vui lòng nhập tên mức giá / gói cước");
+      return;
+    }
+    const cleanP = Number(newOptPrice.replace(/\D/g, "")) || 0;
+    if (cleanP < 0) {
+      error("Đơn giá không hợp lệ");
+      return;
+    }
+    const newOpt: ServicePriceOption = {
+      id: `opt_${Date.now()}`,
+      label: newOptLabel.trim(),
+      price: cleanP,
+      unit: newOptUnit.trim() || formUnit,
+      type: newOptType,
+      isDefault: formPriceOptions.length === 0,
+    };
+    setFormPriceOptions((prev) => [...prev, newOpt]);
+    setNewOptLabel("");
+    setNewOptPrice("");
+  };
+
+  // Remove price option
+  const handleRemovePriceOption = (optId: string) => {
+    setFormPriceOptions((prev) => prev.filter((o) => o.id !== optId));
+  };
+
+  // Set default option
+  const handleSetDefaultOption = (optId: string) => {
+    setFormPriceOptions((prev) =>
+      prev.map((o) => {
+        const isDef = o.id === optId;
+        if (isDef) {
+          // sync main form price & unit to default option
+          setFormPrice(String(o.price));
+          setFormUnit(o.unit);
+          setFormType(o.type);
+        }
+        return { ...o, isDefault: isDef };
+      })
+    );
   };
 
   // Submit Handler
@@ -98,13 +185,22 @@ export function ServicesView() {
       return;
     }
     const cleanPrice = Number(formPrice.replace(/\D/g, "")) || 0;
-    if (cleanPrice <= 0) {
-      error("Vui lòng nhập đơn giá hợp lệ");
-      return;
-    }
 
     const bld = initialBuildings.find((b) => b.id === formBuildingId);
     const buildingName = formBuildingId === "all" ? "Áp dụng tất cả cơ sở" : bld?.name || "Cơ sở";
+
+    const finalOptions: ServicePriceOption[] = formPriceOptions.length > 0
+      ? formPriceOptions
+      : [
+          {
+            id: `opt_${Date.now()}`,
+            label: "Tiêu chuẩn",
+            price: cleanPrice,
+            unit: formUnit,
+            type: formType,
+            isDefault: true,
+          },
+        ];
 
     if (editingService) {
       setServices((prev) =>
@@ -120,6 +216,7 @@ export function ServicesView() {
                 priceFormatted: `${cleanPrice.toLocaleString("vi-VN")} ${formUnit}`,
                 unit: formUnit,
                 description: formDescription,
+                priceOptions: finalOptions,
               }
             : item
         )
@@ -138,6 +235,7 @@ export function ServicesView() {
         description: formDescription,
         isMandatory: true,
         appliedRoomsCount: 45,
+        priceOptions: finalOptions,
       };
       setServices((prev) => [newService, ...prev]);
       success(`Đã thêm dịch vụ "${formName}"`);
@@ -285,7 +383,7 @@ export function ServicesView() {
               {/* Price Display */}
               <div className="bg-[#F8FBFE] p-3.5 rounded-2xl border border-[#EAF2F8] flex items-baseline justify-between">
                 <div>
-                  <span className="text-xs text-[#7A93AD] font-semibold block">Đơn giá áp dụng:</span>
+                  <span className="text-xs text-[#7A93AD] font-semibold block">Đơn giá mặc định:</span>
                   <span className="text-xl font-black text-[#253F5B] tracking-tight">
                     {srv.price.toLocaleString("vi-VN")} đ
                   </span>
@@ -294,6 +392,31 @@ export function ServicesView() {
                   / {srv.unit.replace("đ/", "")}
                 </span>
               </div>
+
+              {/* Price Options Chips */}
+              {srv.priceOptions && srv.priceOptions.length > 0 && (
+                <div className="space-y-1.5 pt-1">
+                  <span className="text-[11px] font-bold text-[#7A93AD] flex items-center gap-1">
+                    <Layers className="w-3 h-3 text-[#5C84BE]" />
+                    <span>{srv.priceOptions.length} mức giá có thể chọn cho phòng:</span>
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {srv.priceOptions.map((opt) => (
+                      <span
+                        key={opt.id}
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border transition-all ${
+                          opt.isDefault
+                            ? "bg-amber-50 text-amber-800 border-amber-200"
+                            : "bg-[#F4F8FC] text-[#526579] border-[#DCE8F3]"
+                        }`}
+                        title={opt.label}
+                      >
+                        {opt.label}: {opt.price.toLocaleString("vi-VN")} {opt.unit}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <p className="text-xs text-[#526579] line-clamp-2 leading-relaxed">
                 {srv.description || "Dịch vụ phòng trọ áp dụng tự động vào chu kỳ chốt hóa đơn hàng tháng."}
@@ -322,26 +445,31 @@ export function ServicesView() {
       {/* Modal Thêm / Chỉnh Sửa Dịch Vụ */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-2xl w-full max-w-md p-6 space-y-5 animate-scaleUp">
-            <div className="flex items-center justify-between pb-3 border-b border-[#F0F5FA]">
+          <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col p-6 space-y-4 animate-scaleUp overflow-hidden">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F0F5FA] shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
                   <Zap className="w-4 h-4" />
                 </div>
-                <h3 className="text-base font-black text-[#253F5B]">
-                  {editingService ? "Chỉnh Sửa Dịch Vụ" : "Thêm Dịch Vụ Phòng Mới"}
-                </h3>
+                <div>
+                  <h3 className="text-base font-black text-[#253F5B]">
+                    {editingService ? "Chỉnh Sửa Dịch Vụ & Mức Giá" : "Thêm Dịch Vụ Phòng Mới"}
+                  </h3>
+                  <p className="text-[11px] text-[#7A93AD]">
+                    Thiết lập dịch vụ cơ sở và các tùy chọn giá cho từng loại phòng
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="w-8 h-8 rounded-xl bg-[#F0F5FA] text-[#7A93AD] hover:text-[#253F5B] flex items-center justify-center cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-xl bg-[#F0F5FA] text-[#7A93AD] hover:text-[#253F5B] flex items-center justify-center cursor-pointer transition-colors shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-1 flex-1">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-[#253F5B]">Tên dịch vụ *</label>
                 <input
@@ -372,7 +500,7 @@ export function ServicesView() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Hình thức tính</label>
+                  <label className="text-xs font-bold text-[#253F5B]">Hình thức mặc định</label>
                   <select
                     value={formType}
                     onChange={(e) => handleTypeChange(e.target.value as ServiceBillingType)}
@@ -387,7 +515,7 @@ export function ServicesView() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Đơn vị tính</label>
+                  <label className="text-xs font-bold text-[#253F5B]">Đơn vị tính mặc định</label>
                   <input
                     type="text"
                     required
@@ -400,7 +528,7 @@ export function ServicesView() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#253F5B]">Đơn giá (VNĐ) *</label>
+                <label className="text-xs font-bold text-[#253F5B]">Đơn giá mặc định (VNĐ) *</label>
                 <input
                   type="text"
                   required
@@ -409,6 +537,116 @@ export function ServicesView() {
                   placeholder="Ví dụ: 3500, 30000..."
                   className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
                 />
+              </div>
+
+              {/* 4. Section: Các mức giá / Gói cước có thể lựa chọn cho phòng */}
+              <div className="space-y-2.5 p-3.5 rounded-2xl bg-[#F8FBFE] border border-[#DEEAF4]">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                    <Layers className="w-4 h-4 text-[#5C84BE]" />
+                    <span>Các mức giá có thể chọn cho phòng ({formPriceOptions.length})</span>
+                  </span>
+                  <span className="text-[10px] text-[#7A93AD]">Tích chọn mức làm mặc định</span>
+                </div>
+
+                {/* Danh sách các options đã tạo */}
+                <div className="space-y-1.5">
+                  {formPriceOptions.map((opt) => (
+                    <div
+                      key={opt.id}
+                      className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-[#E3EDF6] text-xs"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <input
+                          type="radio"
+                          name="defaultOption"
+                          checked={opt.isDefault}
+                          onChange={() => handleSetDefaultOption(opt.id)}
+                          className="w-3.5 h-3.5 text-[#5C84BE] cursor-pointer"
+                          title="Đặt làm mặc định"
+                        />
+                        <span className="font-bold text-[#253F5B] truncate">{opt.label}</span>
+                        {opt.isDefault && (
+                          <span className="text-[9px] font-extrabold text-amber-700 bg-amber-100 px-1.5 py-0.2 rounded">
+                            Mặc định
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="font-extrabold text-[#5C84BE]">
+                          {opt.price.toLocaleString("vi-VN")} {opt.unit}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePriceOption(opt.id)}
+                          className="p-1 rounded text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Xóa mức giá này"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {formPriceOptions.length === 0 && (
+                    <p className="text-[11px] text-[#7A93AD] italic text-center py-1">
+                      Chưa có mức giá riêng biệt. Sẽ dùng đơn giá mặc định ở trên.
+                    </p>
+                  )}
+                </div>
+
+                {/* Form thêm mức giá mới */}
+                <div className="pt-2 border-t border-[#EAF2F8] space-y-2">
+                  <span className="text-[11px] font-bold text-[#5C84BE] block">
+                    + Thêm mức giá / Gói tính tiền khác:
+                  </span>
+                  <div className="grid grid-cols-12 gap-2">
+                    <input
+                      type="text"
+                      placeholder="Tên gói (VD: Khoán theo người)"
+                      value={newOptLabel}
+                      onChange={(e) => setNewOptLabel(e.target.value)}
+                      className="col-span-6 h-8 px-2.5 rounded-lg border border-[#D9E6F2] bg-white text-xs text-[#253F5B] outline-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Đơn giá (VD: 100000)"
+                      value={newOptPrice}
+                      onChange={(e) => setNewOptPrice(e.target.value)}
+                      className="col-span-3 h-8 px-2 rounded-lg border border-[#D9E6F2] bg-white text-xs text-[#253F5B] outline-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Đơn vị (đ/người)"
+                      value={newOptUnit}
+                      onChange={(e) => setNewOptUnit(e.target.value)}
+                      className="col-span-3 h-8 px-2 rounded-lg border border-[#D9E6F2] bg-white text-xs text-[#253F5B] outline-none"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between gap-2 pt-1">
+                    <div className="flex items-center gap-1.5 text-xs text-[#7A93AD]">
+                      <span>Hình thức:</span>
+                      <select
+                        value={newOptType}
+                        onChange={(e) => handleNewOptTypeChange(e.target.value as ServiceBillingType)}
+                        className="h-7 px-2 rounded-lg border border-[#D9E6F2] bg-white text-[11px] font-medium text-[#253F5B]"
+                      >
+                        <option value="meter">Chỉ số (Điện/Nước)</option>
+                        <option value="per_person">Theo người</option>
+                        <option value="per_vehicle">Theo xe</option>
+                        <option value="per_room">Theo phòng</option>
+                        <option value="fixed">Cố định</option>
+                      </select>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddPriceOption}
+                      className="h-7 px-3 rounded-lg bg-[#253F5B] hover:bg-[#1B2F44] text-white text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                    >
+                      <Plus className="w-3 h-3" />
+                      <span>Thêm mức</span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -422,7 +660,7 @@ export function ServicesView() {
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#F0F5FA]">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#F0F5FA] shrink-0">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}

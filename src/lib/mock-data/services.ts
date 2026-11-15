@@ -15,6 +15,11 @@ export const initialServices: ServiceItem[] = [
     iconName: "Zap",
     isMandatory: true,
     appliedRoomsCount: 45,
+    priceOptions: [
+      { id: "opt_cg_dien_1", label: "Tiêu chuẩn (3.500 đ/kWh)", price: 3500, unit: "đ/kWh", type: "meter", isDefault: true },
+      { id: "opt_cg_dien_2", label: "Kinh doanh / Tải cao (3.800 đ/kWh)", price: 3800, unit: "đ/kWh", type: "meter" },
+      { id: "opt_cg_dien_3", label: "Khoán trọn gói (350.000 đ/phòng)", price: 350000, unit: "đ/phòng", type: "per_room" },
+    ],
   },
   {
     id: "cg_nuoc",
@@ -29,6 +34,12 @@ export const initialServices: ServiceItem[] = [
     iconName: "Droplets",
     isMandatory: true,
     appliedRoomsCount: 45,
+    priceOptions: [
+      { id: "opt_cg_nuoc_1", label: "Theo đồng hồ (30.000 đ/khối)", price: 30000, unit: "đ/khối", type: "meter", isDefault: true },
+      { id: "opt_cg_nuoc_2", label: "Khoán theo người (100.000 đ/người)", price: 100000, unit: "đ/người", type: "per_person" },
+      { id: "opt_cg_nuoc_3", label: "Khoán trọn gói (150.000 đ/phòng)", price: 150000, unit: "đ/phòng", type: "per_room" },
+      { id: "opt_cg_nuoc_4", label: "Ưu đãi sinh viên (70.000 đ/người)", price: 70000, unit: "đ/người", type: "per_person" },
+    ],
   },
   {
     id: "cg_wifi",
@@ -43,6 +54,11 @@ export const initialServices: ServiceItem[] = [
     iconName: "Wifi",
     isMandatory: true,
     appliedRoomsCount: 45,
+    priceOptions: [
+      { id: "opt_cg_wifi_1", label: "Gói Tiêu chuẩn 300Mbps (50.000 đ/phòng)", price: 50000, unit: "đ/phòng", type: "per_room", isDefault: true },
+      { id: "opt_cg_wifi_2", label: "Gói VIP 500Mbps riêng (100.000 đ/phòng)", price: 100000, unit: "đ/phòng", type: "per_room" },
+      { id: "opt_cg_wifi_3", label: "Miễn phí (Ưu đãi hợp đồng)", price: 0, unit: "đ/phòng", type: "per_room" },
+    ],
   },
   {
     id: "cg_vesinh",
@@ -57,6 +73,10 @@ export const initialServices: ServiceItem[] = [
     iconName: "Sparkles",
     isMandatory: true,
     appliedRoomsCount: 45,
+    priceOptions: [
+      { id: "opt_cg_vs_1", label: "Theo đầu người (50.000 đ/người)", price: 50000, unit: "đ/người", type: "per_person", isDefault: true },
+      { id: "opt_cg_vs_2", label: "Trọn gói theo phòng (100.000 đ/phòng)", price: 100000, unit: "đ/phòng", type: "per_room" },
+    ],
   },
   {
     id: "cg_xe",
@@ -71,6 +91,11 @@ export const initialServices: ServiceItem[] = [
     iconName: "Bike",
     isMandatory: false,
     appliedRoomsCount: 38,
+    priceOptions: [
+      { id: "opt_cg_xe_1", label: "Xe số / Xe ga thường (100.000 đ/xe)", price: 100000, unit: "đ/xe", type: "per_vehicle", isDefault: true },
+      { id: "opt_cg_xe_2", label: "Xe điện có sạc qua đêm (150.000 đ/xe)", price: 150000, unit: "đ/xe", type: "per_vehicle" },
+      { id: "opt_cg_xe_3", label: "Xe thứ 2 ưu đãi (80.000 đ/xe)", price: 80000, unit: "đ/xe", type: "per_vehicle" },
+    ],
   },
 
   // --- Cơ sở: HonuHome Mỹ Đình (bld_md) ---
@@ -87,6 +112,11 @@ export const initialServices: ServiceItem[] = [
     iconName: "Zap",
     isMandatory: true,
     appliedRoomsCount: 30,
+    priceOptions: [
+      { id: "opt_md_dien_1", label: "Tiêu chuẩn (3.800 đ/kWh)", price: 3800, unit: "đ/kWh", type: "meter", isDefault: true },
+      { id: "opt_md_dien_2", label: "Ưu đãi dài hạn (3.500 đ/kWh)", price: 3500, unit: "đ/kWh", type: "meter" },
+      { id: "opt_md_dien_3", label: "Khoán trọn gói (400.000 đ/phòng)", price: 400000, unit: "đ/phòng", type: "per_room" },
+    ],
   },
   {
     id: "md_nuoc",
@@ -101,6 +131,10 @@ export const initialServices: ServiceItem[] = [
     iconName: "Droplets",
     isMandatory: true,
     appliedRoomsCount: 30,
+    priceOptions: [
+      { id: "opt_md_nuoc_1", label: "Theo đồng hồ (35.000 đ/khối)", price: 35000, unit: "đ/khối", type: "meter", isDefault: true },
+      { id: "opt_md_nuoc_2", label: "Khoán theo người (120.000 đ/người)", price: 120000, unit: "đ/người", type: "per_person" },
+    ],
   },
   {
     id: "md_wifi",
@@ -115,6 +149,10 @@ export const initialServices: ServiceItem[] = [
     iconName: "Wifi",
     isMandatory: true,
     appliedRoomsCount: 30,
+    priceOptions: [
+      { id: "opt_md_wifi_1", label: "Gói Tiêu chuẩn (60.000 đ/phòng)", price: 60000, unit: "đ/phòng", type: "per_room", isDefault: true },
+      { id: "opt_md_wifi_2", label: "Miễn phí (Ưu đãi)", price: 0, unit: "đ/phòng", type: "per_room" },
+    ],
   },
   {
     id: "md_vesinh",
@@ -129,6 +167,10 @@ export const initialServices: ServiceItem[] = [
     iconName: "Sparkles",
     isMandatory: true,
     appliedRoomsCount: 30,
+    priceOptions: [
+      { id: "opt_md_vs_1", label: "Theo đầu người (60.000 đ/người)", price: 60000, unit: "đ/người", type: "per_person", isDefault: true },
+      { id: "opt_md_vs_2", label: "Trọn gói phòng (120.000 đ/phòng)", price: 120000, unit: "đ/phòng", type: "per_room" },
+    ],
   },
   {
     id: "md_may_giat",
@@ -143,6 +185,10 @@ export const initialServices: ServiceItem[] = [
     iconName: "Waves",
     isMandatory: false,
     appliedRoomsCount: 18,
+    priceOptions: [
+      { id: "opt_md_mg_1", label: "Không giới hạn lượt (70.000 đ/người)", price: 70000, unit: "đ/người", type: "per_person", isDefault: true },
+      { id: "opt_md_mg_2", label: "Trọn gói phòng (120.000 đ/phòng)", price: 120000, unit: "đ/phòng", type: "per_room" },
+    ],
   },
   {
     id: "md_xe",
@@ -157,6 +203,10 @@ export const initialServices: ServiceItem[] = [
     iconName: "Bike",
     isMandatory: false,
     appliedRoomsCount: 25,
+    priceOptions: [
+      { id: "opt_md_xe_1", label: "Xe máy tiêu chuẩn (120.000 đ/xe)", price: 120000, unit: "đ/xe", type: "per_vehicle", isDefault: true },
+      { id: "opt_md_xe_2", label: "Xe máy điện sạc (160.000 đ/xe)", price: 160000, unit: "đ/xe", type: "per_vehicle" },
+    ],
   },
   {
     id: "md_oto",
@@ -171,6 +221,10 @@ export const initialServices: ServiceItem[] = [
     iconName: "Car",
     isMandatory: false,
     appliedRoomsCount: 4,
+    priceOptions: [
+      { id: "opt_md_oto_1", label: "Xe 4-5 chỗ (1.200.000 đ/tháng)", price: 1200000, unit: "đ/xe", type: "per_vehicle", isDefault: true },
+      { id: "opt_md_oto_2", label: "Xe 7 chỗ / Bán tải (1.500.000 đ/tháng)", price: 1500000, unit: "đ/xe", type: "per_vehicle" },
+    ],
   },
 
   // --- Cơ sở: HonuHome Đống Đa (bld_cl) ---
@@ -187,6 +241,10 @@ export const initialServices: ServiceItem[] = [
     iconName: "Zap",
     isMandatory: true,
     appliedRoomsCount: 20,
+    priceOptions: [
+      { id: "opt_cl_dien_1", label: "Tiêu chuẩn (4.000 đ/kWh)", price: 4000, unit: "đ/kWh", type: "meter", isDefault: true },
+      { id: "opt_cl_dien_2", label: "Ưu đãi dài hạn (3.800 đ/kWh)", price: 3800, unit: "đ/kWh", type: "meter" },
+    ],
   },
   {
     id: "cl_nuoc",
@@ -201,6 +259,10 @@ export const initialServices: ServiceItem[] = [
     iconName: "Droplets",
     isMandatory: true,
     appliedRoomsCount: 20,
+    priceOptions: [
+      { id: "opt_cl_nuoc_1", label: "Khoán theo người (100.000 đ/người)", price: 100000, unit: "đ/người", type: "per_person", isDefault: true },
+      { id: "opt_cl_nuoc_2", label: "Trọn gói phòng (150.000 đ/phòng)", price: 150000, unit: "đ/phòng", type: "per_room" },
+    ],
   },
   {
     id: "cl_wifi",
@@ -215,6 +277,10 @@ export const initialServices: ServiceItem[] = [
     iconName: "Wifi",
     isMandatory: true,
     appliedRoomsCount: 20,
+    priceOptions: [
+      { id: "opt_cl_wifi_1", label: "Gói Tiêu chuẩn (50.000 đ/phòng)", price: 50000, unit: "đ/phòng", type: "per_room", isDefault: true },
+      { id: "opt_cl_wifi_2", label: "Miễn phí (0 đ)", price: 0, unit: "đ/phòng", type: "per_room" },
+    ],
   },
   {
     id: "cl_vesinh",
@@ -229,6 +295,10 @@ export const initialServices: ServiceItem[] = [
     iconName: "Sparkles",
     isMandatory: true,
     appliedRoomsCount: 20,
+    priceOptions: [
+      { id: "opt_cl_vs_1", label: "Theo người (50.000 đ/người)", price: 50000, unit: "đ/người", type: "per_person", isDefault: true },
+      { id: "opt_cl_vs_2", label: "Trọn gói phòng (100.000 đ/phòng)", price: 100000, unit: "đ/phòng", type: "per_room" },
+    ],
   },
   {
     id: "cl_xe",
@@ -243,13 +313,13 @@ export const initialServices: ServiceItem[] = [
     iconName: "Bike",
     isMandatory: false,
     appliedRoomsCount: 16,
+    priceOptions: [
+      { id: "opt_cl_xe_1", label: "Xe máy tiêu chuẩn (100.000 đ/xe)", price: 100000, unit: "đ/xe", type: "per_vehicle", isDefault: true },
+      { id: "opt_cl_xe_2", label: "Xe điện có sạc (150.000 đ/xe)", price: 150000, unit: "đ/xe", type: "per_vehicle" },
+    ],
   },
 ];
 
-/**
- * Lấy danh sách các dịch vụ thuộc về một cơ sở cụ thể.
- * Nếu có dịch vụ 'all', sẽ gộp thêm vào nếu chưa có dịch vụ cùng tên.
- */
 export function getServicesByBuildingId(buildingId: string): ServiceItem[] {
   const buildingServices = initialServices.filter(
     (s) => s.buildingId === buildingId
@@ -257,6 +327,5 @@ export function getServicesByBuildingId(buildingId: string): ServiceItem[] {
   if (buildingServices.length > 0) {
     return buildingServices;
   }
-  // Fallback: nếu cơ sở mới chưa có dịch vụ riêng, lấy dịch vụ của Cầu Giấy làm template mặc định
   return initialServices.filter((s) => s.buildingId === "bld_cg");
 }

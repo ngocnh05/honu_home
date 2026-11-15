@@ -6,6 +6,8 @@ export interface CustomService {
   name: string; // Tên dịch vụ (VD: Điện, Nước, Wifi, Cầu thang, Giặt sấy, Xe máy,...)
   price: number; // Đơn giá
   unit: string; // đ/kWh, đ/khối, đ/người, đ/phòng, đ/xe, đ/tháng
+  selectedOptionLabel?: string; // Tên mức giá được chọn (VD: "Theo đồng hồ tiêu chuẩn", "Khoán theo người"...)
+  type?: string;
 }
 
 export interface RoomServices {
