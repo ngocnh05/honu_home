@@ -16,10 +16,15 @@ import {
   Zap,
   Droplets,
   Wifi,
-  ShieldCheck,
   BadgeDollarSign,
   Video,
   Building2,
+  CreditCard,
+  Gauge,
+  Users,
+  Bike,
+  MapPin,
+  Cake,
 } from "lucide-react";
 import type { Room } from "@/types/room";
 
@@ -90,8 +95,8 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
 
   return (
     <div className="w-full space-y-5 animate-fadeIn pb-12 select-none">
-      {/* 1. Top Header Bar: Status Badge + Tiêu đề phòng (Chuẩn Figma 37:172, 37:185) */}
-      <div className="flex items-center justify-between bg-white px-8 py-5 rounded-3xl border border-[#E3EDF6] shadow-sm w-full">
+      {/* 1. Top Header Bar: Status Badge + Tiêu đề phòng + Nút Sửa */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white px-8 py-5 rounded-3xl border border-[#E3EDF6] shadow-sm w-full">
         <div className="flex items-center gap-4">
           {/* Status Badge */}
           <span
@@ -106,13 +111,13 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
               Phòng - {room.roomNumber}
             </h1>
             {room.buildingName && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5C84BE] bg-[#EAF2F8] px-2.5 py-1 rounded-lg border border-[#D8E6F3]">
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5C84BE] bg-[#EAF2F8] px-3 py-1 rounded-xl border border-[#D8E6F3]">
                 <Building2 className="w-3.5 h-3.5" />
                 {room.buildingName}
               </span>
             )}
             {room.floor && (
-              <span className="text-xs font-bold text-[#7A93AD] bg-[#EAF2F8] px-2.5 py-1 rounded-lg">
+              <span className="text-xs font-bold text-[#7A93AD] bg-[#F2F6FA] px-2.5 py-1 rounded-lg">
                 Tầng {room.floor}
               </span>
             )}
@@ -122,23 +127,23 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
         <div className="flex items-center gap-3">
           <Link
             href={`/rooms/${room.roomNumber}/edit`}
-            className="h-10 px-4 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-95 text-white font-bold text-xs flex items-center gap-2 shadow-sm shadow-[#5C84BE]/25 transition-all cursor-pointer"
+            className="h-10 px-4.5 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-95 text-white font-bold text-xs flex items-center gap-2 shadow-sm shadow-[#5C84BE]/25 transition-all cursor-pointer"
           >
             <Edit className="w-3.5 h-3.5" />
-            <span>Sửa thông tin</span>
+            <span>Sửa thông tin phòng</span>
           </Link>
           <span className="text-xs font-semibold text-[#7A93AD]">Mã phòng:</span>
-          <span className="font-mono font-bold text-xs text-[#253F5B] bg-[#F2F8FC] px-3 py-1.5 rounded-lg border border-[#DCE8F3]">
+          <span className="font-mono font-bold text-xs text-[#253F5B] bg-[#F2F8FC] px-3 py-2 rounded-xl border border-[#DCE8F3]">
             {room.id}
           </span>
         </div>
       </div>
 
-      {/* 3. Main Detail Card (Chuẩn Figma 37:171) */}
+      {/* 2. Main Detail Card */}
       <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-sm p-8 space-y-8 w-full">
         {/* Top Info Section: Ảnh phòng + Gallery + Thông số chi tiết */}
         <div className="grid grid-cols-12 gap-8 items-start">
-          {/* Left Column: Ảnh phòng (Figma node 37:218) */}
+          {/* Left Column: Ảnh phòng (260x360) & Thư viện ảnh & Video */}
           <div className="col-span-12 lg:col-span-4 flex flex-col items-center">
             <div className="relative w-[260px] h-[360px] rounded-[30px] overflow-hidden shadow-md border-2 border-[#E3EDF6] group bg-[#F8FBFE]">
               <Image
@@ -195,53 +200,66 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
             )}
           </div>
 
-          {/* Right Column: Bảng thông số chi tiết (Figma 37:278 - 37:285) */}
-          <div className="col-span-12 lg:col-span-8 space-y-6 pt-1">
-            {/* 1. Loại phòng */}
-            <div className="grid grid-cols-12 items-center border-b border-[#F0F5FA] pb-4">
-              <span className="col-span-4 text-base font-medium text-[#526579]">
-                Loại phòng
+          {/* Right Column: Bảng thông số chi tiết */}
+          <div className="col-span-12 lg:col-span-8 space-y-5 pt-1">
+            {/* 1. Loại phòng & Tầng */}
+            <div className="grid grid-cols-12 items-center border-b border-[#F0F5FA] pb-3.5">
+              <span className="col-span-4 text-sm font-semibold text-[#526579]">
+                Loại phòng & Tầng
               </span>
-              <span className="col-span-8 text-lg font-black text-[#253F5B]">
-                {room.type}
-              </span>
+              <div className="col-span-8 flex items-center gap-2">
+                <span className="text-base font-black text-[#253F5B]">
+                  {room.type}
+                </span>
+                <span className="text-xs font-bold text-[#5C84BE] bg-[#EAF2F8] px-2 py-0.5 rounded-md">
+                  Tầng {room.floor || 1}
+                </span>
+              </div>
             </div>
 
-            {/* 2. Giá thuê */}
-            <div className="grid grid-cols-12 items-center border-b border-[#F0F5FA] pb-4">
-              <span className="col-span-4 text-base font-medium text-[#526579]">
-                Giá thuê
+            {/* 2. Giá thuê & Tiền cọc */}
+            <div className="grid grid-cols-12 items-center border-b border-[#F0F5FA] pb-3.5">
+              <span className="col-span-4 text-sm font-semibold text-[#526579]">
+                Giá thuê & Tiền cọc
               </span>
-              <div className="col-span-8 flex items-baseline gap-2">
-                <span className="text-xl font-black text-[#253F5B] tracking-tight">
-                  {room.priceFormatted}
-                </span>
-                <span className="text-sm font-medium text-[#7A93AD]">/tháng</span>
+              <div className="col-span-8 flex flex-wrap items-baseline gap-3">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-xl font-black text-[#253F5B] tracking-tight">
+                    {room.priceFormatted}
+                  </span>
+                  <span className="text-xs font-medium text-[#7A93AD]">/tháng</span>
+                </div>
+                {room.deposit !== undefined && (
+                  <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                    Cọc: {room.deposit.toLocaleString("vi-VN")} đ
+                    {room.depositStatus === "paid" ? " (Đã thu)" : " (Chưa thu)"}
+                  </span>
+                )}
               </div>
             </div>
 
             {/* 3. Diện tích */}
-            <div className="grid grid-cols-12 items-center border-b border-[#F0F5FA] pb-4">
-              <span className="col-span-4 text-base font-medium text-[#526579]">
-                Diện tích
+            <div className="grid grid-cols-12 items-center border-b border-[#F0F5FA] pb-3.5">
+              <span className="col-span-4 text-sm font-semibold text-[#526579]">
+                Diện tích phòng
               </span>
-              <span className="col-span-8 text-lg font-black text-[#253F5B]">
+              <span className="col-span-8 text-base font-black text-[#253F5B]">
                 {room.area || 20} m²
               </span>
             </div>
 
-            {/* 4. Tiện nghi (Figma 37:314 - 37:316) */}
-            <div className="grid grid-cols-12 items-center border-b border-[#F0F5FA] pb-5">
-              <span className="col-span-4 text-base font-medium text-[#526579]">
-                Tiện nghi
+            {/* 4. Tiện nghi sẵn có */}
+            <div className="grid grid-cols-12 items-center border-b border-[#F0F5FA] pb-4">
+              <span className="col-span-4 text-sm font-semibold text-[#526579]">
+                Tiện nghi trong phòng
               </span>
-              <div className="col-span-8 flex flex-wrap items-center gap-6">
+              <div className="col-span-8 flex flex-wrap items-center gap-2.5">
                 {amenities.map((item) => (
                   <div
                     key={item.name}
-                    className="flex items-center gap-2 bg-[#F6F9FD] px-3.5 py-2 rounded-2xl border border-[#E3EDF6] hover:border-[#5C84BE] transition-colors"
+                    className="flex items-center gap-2 bg-[#F6F9FD] px-3 py-1.5 rounded-xl border border-[#E3EDF6] hover:border-[#5C84BE] transition-colors"
                   >
-                    <div className="w-8 h-8 relative shrink-0">
+                    <div className="w-5 h-5 relative shrink-0">
                       <Image
                         src={item.icon}
                         alt={item.name}
@@ -249,7 +267,7 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                         className="object-contain"
                       />
                     </div>
-                    <span className="text-sm font-bold text-[#253F5B]">
+                    <span className="text-xs font-bold text-[#253F5B]">
                       {item.name}
                     </span>
                   </div>
@@ -257,74 +275,97 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
               </div>
             </div>
 
-            {/* 5. Người thuê hiện tại (Figma 38:201) */}
+            {/* 5. Khách thuê hiện tại */}
             <div className="grid grid-cols-12 items-center pt-1">
-              <span className="col-span-4 text-base font-medium text-[#526579]">
-                Người thuê hiện tại
+              <span className="col-span-4 text-sm font-semibold text-[#526579]">
+                Khách thuê hiện tại
               </span>
               <div className="col-span-8">
                 {room.tenantName !== "---" ? (
-                  <div className="flex items-center justify-between bg-[#F8FBFE] p-4 rounded-2xl border border-[#E2EEF8] max-w-[540px]">
-                    <div className="flex items-center gap-4">
-                      {/* Avatar */}
-                      <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0 border-2 border-white shadow-sm bg-[#0D99FF]/10 flex items-center justify-center">
-                        <Image
-                          src="/images/rooms/tenant-avatar.svg"
-                          alt={room.tenantName}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2.5">
-                          <h4 className="text-lg font-black text-[#253F5B]">
-                            {room.tenantName}
-                          </h4>
-                          {room.tenantPhone && (
-                            <a
-                              href={`tel:${room.tenantPhone}`}
-                              className="text-xs font-bold text-[#5C84BE] hover:underline flex items-center gap-1 bg-[#EAF2F8] px-2 py-0.5 rounded-md"
-                            >
-                              <Phone className="w-3 h-3" />
-                              <span>{room.tenantPhone}</span>
-                            </a>
+                  <div className="bg-[#F8FBFE] p-4 rounded-2xl border border-[#E2EEF8] space-y-3 max-w-[560px]">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-white shadow-sm bg-[#0D99FF]/10 flex items-center justify-center">
+                          <Image
+                            src="/images/rooms/tenant-avatar.svg"
+                            alt={room.tenantName}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-base font-black text-[#253F5B]">
+                              {room.tenantName}
+                            </h4>
+                            {room.tenantPhone && (
+                              <a
+                                href={`tel:${room.tenantPhone}`}
+                                className="text-xs font-bold text-[#5C84BE] hover:underline flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-[#D5E3F0]"
+                              >
+                                <Phone className="w-3 h-3 text-[#5C84BE]" />
+                                <span>{room.tenantPhone}</span>
+                              </a>
+                            )}
+                          </div>
+                          {room.idCardNumber && (
+                            <p className="text-[11px] font-semibold text-slate-500 mt-0.5 flex items-center gap-1">
+                              <CreditCard className="w-3 h-3 text-[#7A93AD]" />
+                              <span>CCCD: {room.idCardNumber}</span>
+                            </p>
                           )}
                         </div>
-                        <p className="text-xs font-semibold text-[#7A93AD] mt-1">
-                          {room.tenantRole || "Khách thuê căn hộ"}
-                          {room.tenantAge ? ` • ${room.tenantAge} tuổi` : ""}
-                          {room.tenantHometown ? ` • Quê ${room.tenantHometown}` : ""}
-                          {room.occupantsCount ? ` • ${room.occupantsCount} người` : ""}
-                          {room.vehiclesCount !== undefined ? ` • ${room.vehiclesCount} xe` : ""}
-                        </p>
                       </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowTenantModal(true)}
+                        className="bg-[#0D99FF] hover:bg-[#0088ee] active:scale-95 text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap"
+                      >
+                        Xem hồ sơ
+                      </button>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => setShowTenantModal(true)}
-                      className="bg-[#0D99FF] hover:bg-[#0088ee] active:scale-95 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl shadow-sm transition-all cursor-pointer whitespace-nowrap"
-                    >
-                      Xem hồ sơ
-                    </button>
+                    {/* Nhân khẩu & Quê quán */}
+                    <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[#E8F1FA] text-xs font-semibold text-[#668099]">
+                      {room.tenantHometown && (
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-[#5C84BE]" />
+                          Quê {room.tenantHometown}
+                        </span>
+                      )}
+                      {room.tenantAge && (
+                        <span className="flex items-center gap-1">
+                          <Cake className="w-3.5 h-3.5 text-[#5C84BE]" />
+                          {room.tenantAge} tuổi
+                        </span>
+                      )}
+                      {room.occupantsCount ? (
+                        <span className="flex items-center gap-1">
+                          <Users className="w-3.5 h-3.5 text-[#5C84BE]" />
+                          {room.occupantsCount} người ở
+                        </span>
+                      ) : null}
+                      {room.vehiclesCount !== undefined ? (
+                        <span className="flex items-center gap-1">
+                          <Bike className="w-3.5 h-3.5 text-[#5C84BE]" />
+                          {room.vehiclesCount} xe máy
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between bg-[#F8FBFE] p-4 rounded-2xl border border-dashed border-[#D2E2F0] max-w-[540px]">
-                    <div className="flex items-center gap-3 text-sm font-bold text-[#7A93AD]">
+                  <div className="flex items-center justify-between bg-[#F8FBFE] p-4 rounded-2xl border border-dashed border-[#D2E2F0] max-w-[560px]">
+                    <div className="flex items-center gap-3 text-xs font-bold text-[#7A93AD]">
                       <UserCheck className="w-5 h-5 text-[#8FA8C4]" />
                       <span>Phòng hiện đang trống, chưa có người thuê</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        alert(
-                          `Tạo hợp đồng mới cho phòng ${room.roomNumber}`
-                        )
-                      }
-                      className="bg-[#5C84BE] hover:bg-[#4B73AD] text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
+                    <Link
+                      href={`/rooms/${room.roomNumber}/edit`}
+                      className="bg-[#5C84BE] hover:bg-[#4B73AD] text-white font-bold text-xs px-3.5 py-1.5 rounded-xl transition-all cursor-pointer"
                     >
-                      + Tạo hợp đồng
-                    </button>
+                      + Nhập hợp đồng
+                    </Link>
                   </div>
                 )}
               </div>
@@ -332,7 +373,7 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
           </div>
         </div>
 
-        {/* Bottom Tabs Section (Figma node 38:206 & tabs 38:203 - 38:205) */}
+        {/* 3. Bottom Tabs Section */}
         <div className="pt-4 border-t border-[#EEF4FA]">
           {/* Tabs Bar Header */}
           <div className="flex items-center gap-8 border-b border-[#EAF1F8] pb-1">
@@ -345,7 +386,7 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                   : "text-[#526579] hover:text-[#253F5B]"
               }`}
             >
-              Thông tin chung
+              Hợp đồng & Dịch vụ
               {activeTab === "general" && (
                 <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#0D99FF] rounded-full" />
               )}
@@ -375,69 +416,116 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                   : "text-[#526579] hover:text-[#253F5B]"
               }`}
             >
-              Ghi chú
+              Mô tả & Bàn giao
               {activeTab === "notes" && (
                 <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#0D99FF] rounded-full" />
               )}
             </button>
           </div>
 
-          {/* Tab 1: Thông tin chung (Figma 38:206) */}
+          {/* Tab 1: Hợp đồng & Dịch vụ */}
           {activeTab === "general" && (
             <div className="mt-6 bg-[#F8FBFE] border border-[#E3EDF6] rounded-[30px] p-8 space-y-6">
-              {/* Mô tả */}
+              {/* Thẻ Hợp Đồng & Thanh Toán */}
               <div>
-                <h3 className="text-base font-bold text-[#253F5B] mb-2">
-                  Mô tả
+                <h3 className="text-xs font-bold text-[#7A93AD] uppercase tracking-wider mb-3">
+                  Thông Tin Hợp Đồng & Chu Kỳ Thanh Toán
                 </h3>
-                <p className="text-base font-medium text-[#526579] leading-relaxed">
-                  {room.description ||
-                    `Phòng ở tầng ${room.floor || 2}, thoáng mát , có cửa sổ , đầy đủ tiện nghi`}
-                </p>
-              </div>
-
-              {/* Ngày bắt đầu & Ngày hết hạn */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-[#E8F1FA]">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white border border-[#E0ECF7] flex items-center justify-center text-[#0D99FF] shadow-xs">
-                    <Calendar className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-[#7A93AD]">
-                      Ngày bắt đầu thuê
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="bg-white p-3.5 rounded-2xl border border-[#E0ECF7]">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#7A93AD]">
+                      <Calendar className="w-3.5 h-3.5 text-[#0D99FF]" />
+                      <span>Bắt đầu thuê</span>
+                    </div>
+                    <p className="text-base font-black text-[#253F5B] mt-1">
+                      {room.startDate || "01/01/2026"}
                     </p>
-                    <p className="text-lg font-black text-[#253F5B]">
-                      {room.startDate || "01/01/2025"}
+                  </div>
+
+                  <div className="bg-white p-3.5 rounded-2xl border border-[#E0ECF7]">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#7A93AD]">
+                      <Clock className="w-3.5 h-3.5 text-[#0D99FF]" />
+                      <span>Hết hạn HĐ</span>
+                    </div>
+                    <p className="text-base font-black text-[#253F5B] mt-1">
+                      {room.endDate || "01/01/2027"}
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-3.5 rounded-2xl border border-[#E0ECF7]">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#7A93AD]">
+                      <Clock className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Ngày chốt tiền</span>
+                    </div>
+                    <p className="text-base font-black text-[#253F5B] mt-1">
+                      Ngày {room.paymentCycleDay || 28} hàng tháng
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-3.5 rounded-2xl border border-[#E0ECF7]">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#7A93AD]">
+                      <BadgeDollarSign className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>Chu kỳ đóng tiền</span>
+                    </div>
+                    <p className="text-base font-black text-[#253F5B] mt-1">
+                      {room.paymentCycle || "1 tháng/lần"}
                     </p>
                   </div>
                 </div>
+              </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white border border-[#E0ECF7] flex items-center justify-center text-[#0D99FF] shadow-xs">
-                    <Clock className="w-5 h-5" />
+              {/* Chỉ số công tơ ban đầu */}
+              <div className="pt-4 border-t border-[#E8F1FA] space-y-3">
+                <h4 className="text-xs font-bold text-[#7A93AD] uppercase tracking-wider flex items-center gap-1.5">
+                  <Gauge className="w-3.5 h-3.5 text-[#5C84BE]" />
+                  <span>Chỉ Số Công Tơ Bàn Giao Ban Đầu</span>
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-white p-3.5 rounded-2xl border border-[#E3EDF6] flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <Zap className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-[#7A93AD]">Công tơ điện bàn giao</p>
+                        <p className="text-base font-black text-[#253F5B]">
+                          {room.initialElectricityIndex ?? 1250} kWh
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
+                      Chỉ số gốc
+                    </span>
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-[#7A93AD]">
-                      Ngày hết hạn
-                    </p>
-                    <p className="text-lg font-black text-[#253F5B]">
-                      {room.endDate || "01/01/2026"}
-                    </p>
+
+                  <div className="bg-white p-3.5 rounded-2xl border border-[#E3EDF6] flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+                        <Droplets className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-[#7A93AD]">Đồng hồ nước bàn giao</p>
+                        <p className="text-base font-black text-[#253F5B]">
+                          {room.initialWaterIndex ?? 48} m³
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md">
+                      Chỉ số gốc
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Đơn giá Dịch vụ & Tiền cọc */}
+              {/* Bảng giá dịch vụ phòng */}
               <div className="pt-4 border-t border-[#E8F1FA] space-y-3">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold text-[#7A93AD] uppercase tracking-wider">
-                    Bảng giá dịch vụ phòng & tiền cọc
+                    Bảng giá dịch vụ áp dụng cho căn phòng
                   </h4>
-                  {room.deposit && (
-                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                      Cọc: {room.deposit.toLocaleString("vi-VN")} đ
-                    </span>
-                  )}
+                  <span className="text-xs font-bold text-[#5C84BE] bg-[#EAF2F8] px-2.5 py-0.5 rounded-full">
+                    {room.customServices?.length || 4} khoản dịch vụ
+                  </span>
                 </div>
 
                 {room.customServices && room.customServices.length > 0 ? (
@@ -445,13 +533,13 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                     {room.customServices.map((srv) => (
                       <div
                         key={srv.id}
-                        className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5"
+                        className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5 shadow-2xs"
                       >
                         <div className="w-8 h-8 rounded-xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shrink-0">
                           <Sparkles className="w-4 h-4" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[10px] text-[#7A93AD] font-bold truncate">
+                          <p className="text-[11px] text-[#7A93AD] font-bold truncate">
                             {srv.name}
                           </p>
                           <p className="text-xs font-extrabold text-[#253F5B] truncate">
@@ -463,76 +551,50 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {/* Điện */}
                     <div className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                         <Zap className="w-4 h-4" />
                       </div>
                       <div>
                         <p className="text-[10px] text-[#7A93AD] font-bold">Điện</p>
-                        <p className="text-xs font-extrabold text-[#253F5B]">
-                          {room.services?.electricityPrice
-                            ? `${room.services.electricityPrice.toLocaleString("vi-VN")} đ/kWh`
-                            : "3.500 đ/kWh"}
-                        </p>
+                        <p className="text-xs font-extrabold text-[#253F5B]">3.500 đ/kWh</p>
                       </div>
                     </div>
 
-                    {/* Nước */}
                     <div className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
                         <Droplets className="w-4 h-4" />
                       </div>
                       <div>
                         <p className="text-[10px] text-[#7A93AD] font-bold">Nước</p>
-                        <p className="text-xs font-extrabold text-[#253F5B]">
-                          {room.services?.waterPrice
-                            ? `${room.services.waterPrice.toLocaleString("vi-VN")} đ/${
-                                room.services.waterUnit === "m3"
-                                  ? "m³"
-                                  : room.services.waterUnit === "person"
-                                  ? "người"
-                                  : "phòng"
-                              }`
-                            : "30.000 đ/m³"}
-                        </p>
+                        <p className="text-xs font-extrabold text-[#253F5B]">30.000 đ/m³</p>
                       </div>
                     </div>
 
-                    {/* Dịch vụ / Wifi */}
                     <div className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
                         <Wifi className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="text-[10px] text-[#7A93AD] font-bold">Wifi / Dịch vụ</p>
-                        <p className="text-xs font-extrabold text-[#253F5B]">
-                          {room.services?.wifiPrice
-                            ? `${room.services.wifiPrice.toLocaleString("vi-VN")} đ/tháng`
-                            : "50.000 đ/tháng"}
-                        </p>
+                        <p className="text-[10px] text-[#7A93AD] font-bold">Wifi / Mạng</p>
+                        <p className="text-xs font-extrabold text-[#253F5B]">50.000 đ/tháng</p>
                       </div>
                     </div>
 
-                    {/* Tiền cọc */}
                     <div className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                         <BadgeDollarSign className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="text-[10px] text-[#7A93AD] font-bold">Tiền cọc</p>
-                        <p className="text-xs font-extrabold text-[#253F5B]">
-                          {room.deposit
-                            ? `${room.deposit.toLocaleString("vi-VN")} đ`
-                            : room.priceFormatted}
-                        </p>
+                        <p className="text-[10px] text-[#7A93AD] font-bold">Vệ sinh chung</p>
+                        <p className="text-xs font-extrabold text-[#253F5B]">100.000 đ/người</p>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Action Buttons (Figma 38:186 & 38:188) */}
+              {/* Action Buttons */}
               <div className="flex items-center justify-end gap-4 pt-4 border-t border-[#E8F1FA]">
                 <Link
                   href={`/rooms/${room.roomNumber}/edit`}
@@ -568,6 +630,7 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                       <th className="py-3 px-4">Người Thuê</th>
                       <th className="py-3 px-4">Thời Gian Thuê</th>
                       <th className="py-3 px-4">Giá Thuê</th>
+                      <th className="py-3 px-4">Tiền Cọc</th>
                       <th className="py-3 px-4">Trạng Thái</th>
                     </tr>
                   </thead>
@@ -577,15 +640,16 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                         HD-2025-0101
                       </td>
                       <td className="py-3 px-4 font-bold text-[#253F5B]">
-                        {room.tenantName !== "---"
-                          ? room.tenantName
-                          : "Nguyễn Văn A"}
+                        {room.tenantName !== "---" ? room.tenantName : "Nguyễn Văn A"}
                       </td>
                       <td className="py-3 px-4 text-[#526579]">
-                        01/01/2025 - 01/01/2026
+                        {room.startDate || "01/01/2025"} - {room.endDate || "01/01/2026"}
                       </td>
                       <td className="py-3 px-4 font-bold text-[#253F5B]">
                         {room.priceFormatted}
+                      </td>
+                      <td className="py-3 px-4 font-bold text-emerald-600">
+                        {room.deposit ? `${room.deposit.toLocaleString("vi-VN")} đ` : room.priceFormatted}
                       </td>
                       <td className="py-3 px-4">
                         <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#B5DDA6] text-[#253F5B]">
@@ -606,6 +670,9 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                       <td className="py-3 px-4 font-medium text-[#526579]">
                         2.400.000 đ
                       </td>
+                      <td className="py-3 px-4 font-medium text-[#7A93AD]">
+                        2.400.000 đ
+                      </td>
                       <td className="py-3 px-4">
                         <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#E6EFF8] text-[#526579]">
                           Đã thanh lý
@@ -618,30 +685,31 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
             </div>
           )}
 
-          {/* Tab 3: Ghi chú */}
+          {/* Tab 3: Mô tả & Bàn giao */}
           {activeTab === "notes" && (
-            <div className="mt-6 bg-[#F8FBFE] border border-[#E3EDF6] rounded-[30px] p-6 space-y-4">
-              <h3 className="text-sm font-bold text-[#253F5B] flex items-center gap-2">
-                <FileText className="w-4 h-4 text-[#0D99FF]" />
-                Ghi chú nội bộ & Biên bản bàn giao
-              </h3>
-              <div className="bg-white p-5 rounded-2xl border border-[#E3EDF6] text-sm text-[#526579] space-y-2 leading-relaxed">
-                <p>
-                  • <strong>Tiền cọc:</strong> Đã thu 1 tháng tiền phòng (
-                  {room.priceFormatted}).
-                </p>
-                <p>
-                  • <strong>Bàn giao chìa khóa:</strong> 02 chìa khóa phòng, 01
-                  thẻ từ thang máy cho khách.
-                </p>
-                <p>
-                  • <strong>Chỉ số đồng hồ ban đầu:</strong> Điện: 1.250 kWh,
-                  Nước: 48 m³.
-                </p>
-                <p>
-                  • <strong>Quy định:</strong> Giữ gìn trật tự sau 23h, không nuôi
-                  chó mèo gây ồn ào.
-                </p>
+            <div className="mt-6 bg-[#F8FBFE] border border-[#E3EDF6] rounded-[30px] p-6 space-y-5">
+              {/* Mô tả phòng */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-bold text-[#253F5B] flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#0D99FF]" />
+                  Mô tả đặc điểm căn hộ
+                </h3>
+                <div className="bg-white p-4.5 rounded-2xl border border-[#E3EDF6] text-sm text-[#526579] leading-relaxed">
+                  {room.description ||
+                    `Phòng ở tầng ${room.floor || 1}, không gian sạch sẽ, thoáng mát, có cửa sổ đón gió tự nhiên, nội thất trang bị cơ bản.`}
+                </div>
+              </div>
+
+              {/* Ghi chú bàn giao & Biên bản */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-bold text-[#253F5B] flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-[#0D99FF]" />
+                  Ghi chú nội bộ & Biên bản bàn giao tài sản
+                </h3>
+                <div className="bg-white p-4.5 rounded-2xl border border-[#E3EDF6] text-sm text-[#526579] leading-relaxed">
+                  {room.notes ||
+                    "Tiền cọc: 1 tháng tiền phòng. Hợp đồng thanh toán ngày 28 hàng tháng. Bàn giao 02 chìa khóa cơ, 01 thẻ từ thang máy. Quy định giữ gìn trật tự sau 23h, không nuôi chó mèo gây ồn ào."}
+                </div>
               </div>
             </div>
           )}
@@ -650,47 +718,37 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
 
       {/* Renew Modal Demo */}
       {showRenewModal && (
-        <div
-          onClick={() => setShowRenewModal(false)}
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-6 sm:p-10 cursor-pointer animate-fadeIn"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-[#E3EDF6] space-y-4 animate-scaleIn cursor-default"
-          >
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-[#E3EDF6] space-y-4">
             <h3 className="text-lg font-black text-[#253F5B]">
               Gia hạn hợp đồng phòng {room.roomNumber}
             </h3>
             <p className="text-xs text-[#7A93AD]">
-              Gia hạn thêm thời gian thuê cho khách <strong>{room.tenantName}</strong>.
+              Gia hạn thêm thời hạn thuê cho khách thuê hiện tại ({room.tenantName}).
             </p>
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-bold text-[#526579]">
-                  Kỳ hạn gia hạn
-                </label>
-                <select className="w-full mt-1 h-10 px-3 bg-[#F4F8FC] border border-[#D9E6F2] rounded-xl text-xs font-bold text-[#253F5B]">
-                  <option>6 tháng (Đến 01/07/2026)</option>
-                  <option>12 tháng (Đến 01/01/2027)</option>
-                  <option>24 tháng (Đến 01/01/2028)</option>
-                </select>
-              </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-[#253F5B]">Thời hạn gia hạn</label>
+              <select className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] text-xs font-bold text-[#253F5B] outline-none">
+                <option>Thêm 6 tháng (đến 01/07/2027)</option>
+                <option>Thêm 1 năm (đến 01/01/2028)</option>
+                <option>Thêm 2 năm (đến 01/01/2029)</option>
+              </select>
             </div>
-            <div className="flex items-center justify-end gap-2 pt-2">
+            <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setShowRenewModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-[#7A93AD] hover:bg-[#F0F5FA] cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
               >
-                Hủy bỏ
+                Hủy
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  alert("Gia hạn hợp đồng thành công!");
+                  alert(`Đã gửi yêu cầu gia hạn hợp đồng phòng ${room.roomNumber}!`);
                   setShowRenewModal(false);
                 }}
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-[#0D99FF] text-white hover:bg-[#0088ee] cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#0D99FF] text-white hover:bg-[#0088ee] cursor-pointer"
               >
                 Xác nhận gia hạn
               </button>
@@ -699,18 +757,12 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
         </div>
       )}
 
-      {/* Tenant Profile Modal */}
+      {/* Tenant Modal Demo */}
       {showTenantModal && (
-        <div
-          onClick={() => setShowTenantModal(false)}
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-6 sm:p-10 cursor-pointer animate-fadeIn"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-[#E3EDF6] space-y-4 animate-scaleIn cursor-default"
-          >
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-[#E3EDF6] space-y-4">
             <div className="flex items-center gap-3">
-              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-[#0D99FF]/10 shrink-0">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0 border-2 border-white shadow-sm bg-[#0D99FF]/10 flex items-center justify-center">
                 <Image
                   src="/images/rooms/tenant-avatar.svg"
                   alt={room.tenantName}
@@ -719,33 +771,39 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                 />
               </div>
               <div>
-                <h3 className="text-lg font-black text-[#253F5B]">
-                  {room.tenantName}
-                </h3>
+                <h3 className="text-lg font-black text-[#253F5B]">{room.tenantName}</h3>
                 <p className="text-xs font-semibold text-[#7A93AD]">
-                  {room.tenantRole || "Sv năm 1 - ĐH Mở"}
+                  Khách thuê phòng {room.roomNumber}
                 </p>
               </div>
             </div>
-            <div className="bg-[#F8FBFE] p-4 rounded-2xl border border-[#E3EDF6] space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-[#7A93AD]">Số điện thoại:</span>
+
+            <div className="space-y-2 bg-[#F8FBFE] p-4 rounded-2xl border border-[#E3EDF6] text-xs">
+              <div className="flex justify-between py-1 border-b border-[#EEF4FA]">
+                <span className="text-slate-400 font-semibold">Số điện thoại:</span>
+                <span className="font-bold text-[#253F5B]">{room.tenantPhone || "Chưa cập nhật"}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-[#EEF4FA]">
+                <span className="text-slate-400 font-semibold">Số CCCD / CMND:</span>
+                <span className="font-bold text-[#253F5B]">{room.idCardNumber || "038202008912"}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-[#EEF4FA]">
+                <span className="text-slate-400 font-semibold">Quê quán:</span>
+                <span className="font-bold text-[#253F5B]">{room.tenantHometown || "Nghệ An"}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-[#EEF4FA]">
+                <span className="text-slate-400 font-semibold">Tuổi:</span>
+                <span className="font-bold text-[#253F5B]">{room.tenantAge || "22"} tuổi</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-slate-400 font-semibold">Quy mô ở:</span>
                 <span className="font-bold text-[#253F5B]">
-                  {room.tenantPhone || "0912 345 678"}
+                  {room.occupantsCount || 1} người • {room.vehiclesCount || 1} xe máy
                 </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#7A93AD]">Số CCCD:</span>
-                <span className="font-mono font-bold text-[#253F5B]">
-                  079203001892
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#7A93AD]">Quê quán:</span>
-                <span className="font-bold text-[#253F5B]">TP. Hồ Chí Minh</span>
               </div>
             </div>
-            <div className="flex items-center justify-end gap-2 pt-2">
+
+            <div className="flex justify-end pt-2">
               <button
                 type="button"
                 onClick={() => setShowTenantModal(false)}

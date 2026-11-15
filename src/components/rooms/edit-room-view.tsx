@@ -21,11 +21,19 @@ import {
   CheckCircle2,
   Check,
   Building2,
+  CreditCard,
+  Clock,
   X,
   Video,
+  Zap,
+  Droplets,
+  Gauge,
+  FileText,
+  BadgeDollarSign,
   Save,
 } from "lucide-react";
 import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
+import { initialBuildings } from "@/lib/mock-data/buildings";
 import { useSnackbar } from "@/components/common/snackbar";
 
 // Format 2700000 -> "2.700.000"
@@ -47,8 +55,8 @@ const parsePrice = (formatted: string | number | undefined): number => {
 const defaultInitialServices: CustomService[] = [
   { id: "s1", name: "Tiền điện", price: 3500, unit: "đ/kWh" },
   { id: "s2", name: "Tiền nước", price: 30000, unit: "đ/khối" },
-  { id: "s3", name: "Wifi / Mạng", price: 50000, unit: "đ/phòng" },
-  { id: "s4", name: "Cầu thang & Vệ sinh", price: 100000, unit: "đ/người" },
+  { id: "s3", name: "Wifi / Mạng tốc độ cao", price: 50000, unit: "đ/phòng" },
+  { id: "s4", name: "Cầu thang & Vệ sinh chung", price: 100000, unit: "đ/người" },
 ];
 
 const availableAmenitiesList = [
@@ -70,7 +78,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
   const router = useRouter();
   const { success } = useSnackbar();
 
-  // Basic Info initialized from room prop
+  // 1. Basic Specs initialized from room
   const [buildingId, setBuildingId] = React.useState(room.buildingId || "bld_cg");
   const [roomNumber, setRoomNumber] = React.useState(room.roomNumber || "");
   const [type, setType] = React.useState<RoomType>(room.type || "Phòng Đơn");
@@ -79,7 +87,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
   const [area, setArea] = React.useState<string>(String(room.area || 20));
   const [description, setDescription] = React.useState<string>(
     room.description ||
-      `Phòng ở tầng ${room.floor || 1}, thoáng mát, có cửa sổ, đầy đủ tiện nghi cơ bản.`
+      `Phòng ở tầng ${room.floor || 1}, thoáng mát, có ban công đón gió tự nhiên, nội thất cơ bản.`
   );
   const [status, setStatus] = React.useState<RoomStatus>(room.status || "available");
   const [selectedAmenities, setSelectedAmenities] = React.useState<string[]>(
@@ -88,7 +96,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
       : ["Giường", "Tủ quần áo", "Wifi", "Máy lạnh"]
   );
 
-  // Images & Video
+  // 2. Images & Video
   const [coverImage, setCoverImage] = React.useState<string>(
     room.image || "/images/rooms/room-demo.png"
   );
@@ -99,11 +107,12 @@ export function EditRoomView({ room }: EditRoomViewProps) {
   );
   const [videoUrl, setVideoUrl] = React.useState<string>(room.videoUrl || "");
 
-  // Contract Details
+  // 3. Contract & Tenant Details
   const [tenantName, setTenantName] = React.useState(
     room.tenantName && room.tenantName !== "---" ? room.tenantName : ""
   );
   const [tenantPhone, setTenantPhone] = React.useState(room.tenantPhone || "");
+  const [idCardNumber, setIdCardNumber] = React.useState(room.idCardNumber || "");
   const [occupantsCount, setOccupantsCount] = React.useState<string>(
     String(room.occupantsCount || 1)
   );
@@ -117,15 +126,37 @@ export function EditRoomView({ room }: EditRoomViewProps) {
   const [deposit, setDeposit] = React.useState<string>(
     formatPrice(room.deposit) || formatPrice(room.price) || "2.700.000"
   );
+  const [depositStatus, setDepositStatus] = React.useState<"paid" | "unpaid" | "refunded">(
+    room.depositStatus || (room.status === "rented" ? "paid" : "unpaid")
+  );
+  const [paymentCycleDay, setPaymentCycleDay] = React.useState<string>(
+    String(room.paymentCycleDay || 28)
+  );
+  const [paymentCycle, setPaymentCycle] = React.useState<string>(
+    room.paymentCycle || "1 tháng/lần"
+  );
   const [tenantHometown, setTenantHometown] = React.useState(room.tenantHometown || "");
   const [tenantAge, setTenantAge] = React.useState(String(room.tenantAge || ""));
 
-  // Dynamic Custom Services List
+  // 4. Meters & Services
+  const [initialElectricityIndex, setInitialElectricityIndex] = React.useState<string>(
+    String(room.initialElectricityIndex ?? 1250)
+  );
+  const [initialWaterIndex, setInitialWaterIndex] = React.useState<string>(
+    String(room.initialWaterIndex ?? 48)
+  );
   const [services, setServices] = React.useState<CustomService[]>(
     room.customServices && room.customServices.length > 0
       ? room.customServices
       : defaultInitialServices
   );
+
+  // 5. Notes & Handover
+  const [notes, setNotes] = React.useState<string>(
+    room.notes ||
+      "Tiền cọc: 1 tháng tiền phòng. Hợp đồng thanh toán ngày 28 hàng tháng. Bàn giao 02 chìa khóa cơ, 01 thẻ từ thang máy."
+  );
+
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   // Toggle amenity selection
@@ -149,12 +180,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
   const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      const newUrls: string[] = [];
-      for (let i = 0; i < files.length; i++) {
-        if (galleryImages.length + newUrls.length < 8) {
-          newUrls.push(URL.createObjectURL(files[i]));
-        }
-      }
+      const newUrls = Array.from(files).map((f) => URL.createObjectURL(f));
       setGalleryImages((prev) => [...prev, ...newUrls].slice(0, 8));
     }
   };
@@ -210,16 +236,12 @@ export function EditRoomView({ room }: EditRoomViewProps) {
     const cleanDeposit = parsePrice(deposit);
     const validServices = services.filter((s) => s.name.trim() !== "");
 
-    const buildingNameMap: Record<string, string> = {
-      bld_cg: "HonuHome Cầu Giấy",
-      bld_md: "HonuHome Mỹ Đình",
-      bld_cl: "HonuHome Đống Đa",
-    };
+    const selectedBuilding = initialBuildings.find((b) => b.id === buildingId);
 
     const updatedRoom: Room = {
       ...room,
       buildingId,
-      buildingName: buildingNameMap[buildingId] || room.buildingName || "HonuHome Cầu Giấy",
+      buildingName: selectedBuilding?.name || room.buildingName || "HonuHome Cầu Giấy",
       roomNumber: roomNumber.trim().toUpperCase(),
       type,
       floor: Number(floor) || 1,
@@ -234,11 +256,18 @@ export function EditRoomView({ room }: EditRoomViewProps) {
           : "Đang sửa",
       tenantName: status === "rented" ? tenantName.trim() : "---",
       tenantPhone: status === "rented" && tenantPhone.trim() ? tenantPhone.trim() : undefined,
+      idCardNumber: status === "rented" && idCardNumber.trim() ? idCardNumber.trim() : undefined,
       startDate: status === "rented" && startDate.trim() ? startDate.trim() : undefined,
       endDate: status === "rented" && endDate.trim() ? endDate.trim() : "---",
       deposit: status === "rented" ? cleanDeposit : undefined,
+      depositStatus: status === "rented" ? depositStatus : undefined,
+      paymentCycleDay: Number(paymentCycleDay) || 28,
+      paymentCycle,
+      initialElectricityIndex: Number(initialElectricityIndex) || 0,
+      initialWaterIndex: Number(initialWaterIndex) || 0,
       area: Number(area) || 20,
       description,
+      notes,
       image: coverImage,
       galleryImages,
       videoUrl: videoUrl.trim() || undefined,
@@ -305,15 +334,15 @@ export function EditRoomView({ room }: EditRoomViewProps) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* 3. Main Card: Bộ Sưu Tập Ảnh & Thông Số Chi Tiết */}
+        {/* 2. Main Card: Bộ Sưu Tập Ảnh & Thông Số Chi Tiết */}
         <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-sm p-8 space-y-8 w-full">
           <div className="grid grid-cols-12 gap-8 items-start">
-            {/* CỘT TRÁI (4 cột): QUẢN LÝ BỘ SƯU TẬP ẢNH */}
+            {/* CỘT TRÁI (4 cột): QUẢN LÝ BỘ SƯU TẬP ẢNH & VIDEO */}
             <div className="col-span-12 lg:col-span-4 space-y-4">
               <div className="flex items-center justify-between pb-1 border-b border-[#F0F5FA]">
                 <span className="text-xs font-bold text-[#253F5B] uppercase tracking-wider flex items-center gap-1.5">
                   <Camera className="w-4 h-4 text-[#5C84BE]" />
-                  <span>Hình ảnh căn phòng</span>
+                  <span>Hình ảnh & Video phòng</span>
                 </span>
                 <span className="text-[11px] text-[#7A93AD]">Tối đa 8 ảnh</span>
               </div>
@@ -426,7 +455,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
               </div>
             </div>
 
-            {/* CỘT PHẢI (8 cột): THÔNG SỐ CHI TIẾT CĂN PHÒNG */}
+            {/* CỘT PHẢI (8 cột): THÔNG SỐ CĂN PHÒNG */}
             <div className="col-span-12 lg:col-span-8 space-y-6 pt-1">
               <div className="flex items-center gap-2 text-xs font-bold text-[#253F5B] uppercase tracking-wider pb-2 border-b border-[#F0F5FA]">
                 <Layers className="w-4 h-4 text-[#5C84BE]" />
@@ -444,9 +473,11 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                   onChange={(e) => setBuildingId(e.target.value)}
                   className="w-full h-11 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer transition-all"
                 >
-                  <option value="bld_cg">HonuHome Cầu Giấy (Số 18, Ngõ 86 Duy Tân, Dịch Vọng Hậu)</option>
-                  <option value="bld_md">HonuHome Mỹ Đình (Số 5, Ngõ 12 Lê Đức Thọ, Nam Từ Liêm)</option>
-                  <option value="bld_cl">HonuHome Đống Đa (Số 22, Ngõ 91 Chùa Láng, Láng Thượng)</option>
+                  {initialBuildings.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name} — {b.address}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -484,7 +515,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                     onChange={(e) => setFloor(Number(e.target.value) || 1)}
                     className="w-full h-11 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer transition-all"
                   >
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((f) => (
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((f) => (
                       <option key={f} value={f}>
                         Tầng {f}
                       </option>
@@ -496,7 +527,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
               {/* Hàng 2: Giá Thuê & Diện Tích */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Giá Thuê (đ/tháng) *</label>
+                  <label className="text-xs font-bold text-[#253F5B]">Giá Thuê Niêm Yết (đ/tháng) *</label>
                   <div className="relative">
                     <input
                       type="text"
@@ -536,7 +567,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
               {/* Hàng 3: Tiện Nghi Phòng */}
               <div className="space-y-2 pt-1 border-t border-[#F0F5FA]">
                 <label className="text-xs font-bold text-[#253F5B] block">
-                  Tiện Nghi Phòng (Tích chọn sẵn có trong phòng)
+                  Tiện Nghi Sẵn Có Trong Phòng (Tích chọn)
                 </label>
                 <div className="flex flex-wrap gap-2.5">
                   {availableAmenitiesList.map((item) => {
@@ -572,18 +603,18 @@ export function EditRoomView({ room }: EditRoomViewProps) {
               <div className="space-y-1.5 pt-1 border-t border-[#F0F5FA]">
                 <label className="text-xs font-bold text-[#253F5B]">Mô Tả Căn Hộ</label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Nhập mô tả căn hộ, hướng đón gió, ban công, nội thất..."
-                  className="w-full p-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-medium text-[#253F5B] transition-all leading-relaxed"
+                  className="w-full p-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-medium text-[#253F5B] transition-all leading-relaxed"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        {/* 4. Card: Khách Thuê & Hợp Đồng (Theo đúng 9 trường thứ tự) */}
+        {/* 3. Card: Khách Thuê & Hợp Đồng (ĐẦY ĐỦ CÁC TRƯỜNG CHUẨN ERD) */}
         <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-sm p-8 space-y-6 w-full">
           <div className="flex items-center justify-between pb-3 border-b border-[#F0F5FA]">
             <div className="flex items-center gap-2">
@@ -593,30 +624,30 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                   Thông Tin Hợp Đồng & Khách Thuê
                 </h3>
                 <p className="text-xs text-[#7A93AD]">
-                  Áp dụng khi phòng đã có khách vào ở (Trạng thái: Đang Thuê)
+                  Thiết lập khi phòng đã có khách vào ở (Trạng thái: Đang Thuê)
                 </p>
               </div>
             </div>
 
             {status !== "rented" && (
               <span className="text-xs font-bold text-[#7A93AD] bg-[#F2F8FC] px-3 py-1.5 rounded-xl border border-[#D9E6F2]">
-                Phòng hiện tại đang chọn: {status === "available" ? "Trống" : "Đang sửa"}
+                Phòng hiện đang: {status === "available" ? "Trống" : "Đang sửa"}
               </span>
             )}
           </div>
 
           {status === "rented" ? (
             <div className="space-y-4">
-              {/* Hàng 1: Người thuê & Số điện thoại */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Hàng 1: Người thuê, SĐT & CCCD/CMND */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5 text-[#5C84BE]" />
-                    <span>Người thuê *</span>
+                    <span>Họ và tên khách thuê *</span>
                   </label>
                   <input
                     type="text"
-                    placeholder="Họ và tên khách thuê"
+                    placeholder="VD: Nguyễn Văn A"
                     value={tenantName}
                     onChange={(e) => setTenantName(e.target.value)}
                     className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm font-semibold text-[#253F5B]"
@@ -627,20 +658,62 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5 text-[#5C84BE]" />
-                    <span>Số điện thoại</span>
+                    <span>Số điện thoại liên hệ</span>
                   </label>
                   <input
                     type="tel"
-                    placeholder="0987.654.321"
+                    placeholder="VD: 0987.654.321"
                     value={tenantPhone}
                     onChange={(e) => setTenantPhone(e.target.value)}
                     className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm font-semibold text-[#253F5B]"
                   />
                 </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                    <CreditCard className="w-3.5 h-3.5 text-[#5C84BE]" />
+                    <span>Số CCCD / CMND</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="VD: 038202008912"
+                    value={idCardNumber}
+                    onChange={(e) => setIdCardNumber(e.target.value)}
+                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm font-semibold text-[#253F5B]"
+                  />
+                </div>
               </div>
 
-              {/* Hàng 2: Số người ở & Số xe */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Hàng 2: Quê quán, Tuổi, Số người & Số xe */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-[#5C84BE]" />
+                    <span>Quê quán</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="VD: Hà Nội, Nghệ An..."
+                    value={tenantHometown}
+                    onChange={(e) => setTenantHometown(e.target.value)}
+                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-semibold text-[#253F5B]"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                    <Cake className="w-3.5 h-3.5 text-[#5C84BE]" />
+                    <span>Tuổi</span>
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="22"
+                    value={tenantAge}
+                    onChange={(e) => setTenantAge(e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-semibold text-[#253F5B] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5 text-[#5C84BE]" />
@@ -652,9 +725,9 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                       placeholder="1"
                       value={occupantsCount}
                       onChange={(e) => setOccupantsCount(e.target.value)}
-                      className="w-full h-10 px-3.5 pr-14 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm font-semibold text-[#253F5B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-full h-10 px-3 pr-10 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-semibold text-[#253F5B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
-                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-medium pointer-events-none">
+                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] text-[#7A93AD] font-medium pointer-events-none">
                       người
                     </span>
                   </div>
@@ -671,17 +744,17 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                       placeholder="1"
                       value={vehiclesCount}
                       onChange={(e) => setVehiclesCount(e.target.value)}
-                      className="w-full h-10 px-3.5 pr-12 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm font-semibold text-[#253F5B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-full h-10 px-3 pr-8 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-semibold text-[#253F5B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
-                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-medium pointer-events-none">
+                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] text-[#7A93AD] font-medium pointer-events-none">
                       xe
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Hàng 3: Ngày bắt đầu HĐ & Ngày kết thúc */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Hàng 3: Ngày bắt đầu HĐ, Ngày kết thúc, Ngày chốt tiền, Chu kỳ thanh toán */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-[#5C84BE]" />
@@ -692,7 +765,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                     placeholder="01/01/2026"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B]"
+                    className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B]"
                   />
                 </div>
 
@@ -706,15 +779,50 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                     placeholder="01/01/2027"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm text-[#253F5B]"
+                    className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B]"
                   />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#5C84BE]" />
+                    <span>Ngày chốt tiền hàng tháng</span>
+                  </label>
+                  <select
+                    value={paymentCycleDay}
+                    onChange={(e) => setPaymentCycleDay(e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer"
+                  >
+                    {[1, 5, 10, 15, 20, 25, 28, 30].map((d) => (
+                      <option key={d} value={d}>
+                        Ngày {d} hàng tháng
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                    <BadgeDollarSign className="w-3.5 h-3.5 text-[#5C84BE]" />
+                    <span>Chu kỳ đóng tiền</span>
+                  </label>
+                  <select
+                    value={paymentCycle}
+                    onChange={(e) => setPaymentCycle(e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer"
+                  >
+                    <option value="1 tháng/lần">1 tháng / lần</option>
+                    <option value="3 tháng/lần">3 tháng / lần</option>
+                    <option value="6 tháng/lần">6 tháng / lần</option>
+                    <option value="1 năm/lần">1 năm / lần</option>
+                  </select>
                 </div>
               </div>
 
-              {/* Hàng 4: Tiền đặt cọc & Quê quán & Tuổi */}
-              <div className="grid grid-cols-12 gap-4">
-                <div className="col-span-12 sm:col-span-4 space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Tiền đặt cọc</label>
+              {/* Hàng 4: Tiền đặt cọc & Trạng thái thu cọc */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#253F5B]">Tiền Đặt Cọc Hợp Đồng (VNĐ)</label>
                   <div className="relative">
                     <input
                       type="text"
@@ -730,32 +838,32 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                   </div>
                 </div>
 
-                <div className="col-span-12 sm:col-span-5 space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-[#5C84BE]" />
-                    <span>Quê quán</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="VD: Hà Nội, Nghệ An, Nam Định..."
-                    value={tenantHometown}
-                    onChange={(e) => setTenantHometown(e.target.value)}
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm font-semibold text-[#253F5B]"
-                  />
-                </div>
-
-                <div className="col-span-12 sm:col-span-3 space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                    <Cake className="w-3.5 h-3.5 text-[#5C84BE]" />
-                    <span>Tuổi</span>
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="VD: 22"
-                    value={tenantAge}
-                    onChange={(e) => setTenantAge(e.target.value)}
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm font-semibold text-[#253F5B] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#253F5B]">Trạng thái tiền cọc</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setDepositStatus("paid")}
+                      className={`h-10 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                        depositStatus === "paid"
+                          ? "bg-emerald-50 border-emerald-500 text-emerald-800 shadow-xs"
+                          : "bg-[#F8FAFD] border-[#D2E2F0] text-slate-500 hover:bg-slate-100"
+                      }`}
+                    >
+                      ✓ Đã thu cọc
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDepositStatus("unpaid")}
+                      className={`h-10 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                        depositStatus === "unpaid"
+                          ? "bg-amber-50 border-amber-500 text-amber-800 shadow-xs"
+                          : "bg-[#F8FAFD] border-[#D2E2F0] text-slate-500 hover:bg-slate-100"
+                      }`}
+                    >
+                      Chưa thu cọc
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -763,11 +871,66 @@ export function EditRoomView({ room }: EditRoomViewProps) {
             <div className="p-8 rounded-2xl border border-dashed border-[#CFDFEE] bg-[#F8FBFE] flex flex-col items-center justify-center text-center">
               <CheckCircle2 className="w-10 h-10 text-emerald-500 mb-2" />
               <p className="text-base font-bold text-[#253F5B]">Phòng trống sẵn sàng đón khách</p>
-              <p className="text-xs text-[#7A93AD] mt-1 max-w-[400px]">
-                Chọn trạng thái <b>"Đang Thuê"</b> ở trên nếu phòng đã có khách vào ở để cập nhật thông tin hợp đồng và người thuê
+              <p className="text-xs text-[#7A93AD] mt-1 max-w-[420px]">
+                Chọn trạng thái <b>"Đang Thuê"</b> ở trên nếu phòng đã có khách vào ở để cấu hình hồ sơ người thuê và hợp đồng
               </p>
             </div>
           )}
+        </div>
+
+        {/* 4. Card: Chỉ Số Công Tơ Bàn Giao Ban Đầu */}
+        <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-sm p-8 space-y-4 w-full">
+          <div className="flex items-center gap-2.5 pb-3 border-b border-[#F0F5FA]">
+            <Gauge className="w-5 h-5 text-[#5C84BE]" />
+            <div>
+              <h3 className="text-base font-bold text-[#253F5B]">
+                Chỉ Số Đồng Hồ Bàn Giao Ban Đầu
+              </h3>
+              <p className="text-xs text-[#7A93AD]">
+                Làm căn cứ để đối chiếu chốt tiền điện & nước trong hóa đơn tháng đầu tiên
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-amber-500" />
+                <span>Chỉ số công tơ điện ban đầu</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  placeholder="1250"
+                  value={initialElectricityIndex}
+                  onChange={(e) => setInitialElectricityIndex(e.target.value)}
+                  className="w-full h-10 px-3.5 pr-14 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm font-bold text-[#253F5B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-bold pointer-events-none">
+                  kWh
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                <Droplets className="w-3.5 h-3.5 text-sky-500" />
+                <span>Chỉ số đồng hồ nước ban đầu</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  placeholder="48"
+                  value={initialWaterIndex}
+                  onChange={(e) => setInitialWaterIndex(e.target.value)}
+                  className="w-full h-10 px-3.5 pr-12 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-sm font-bold text-[#253F5B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#7A93AD] font-bold pointer-events-none">
+                  m³
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* 5. Card: Bảng Dịch Vụ Áp Dụng Cho Căn Hộ */}
@@ -780,7 +943,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                   Bảng Dịch Vụ & Chi Phí Phòng
                 </h3>
                 <p className="text-xs text-[#7A93AD]">
-                  Tự do cập nhật tên dịch vụ và định mức giá riêng theo từng cơ sở trọ
+                  Tự do cập nhật đơn giá điện, nước, internet và các dịch vụ riêng cho căn phòng
                 </p>
               </div>
             </div>
@@ -876,7 +1039,30 @@ export function EditRoomView({ room }: EditRoomViewProps) {
           </div>
         </div>
 
-        {/* 6. Bottom Sticky Actions Bar */}
+        {/* 6. Card: Ghi Chú Bàn Giao & Nội Quy Phòng */}
+        <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-sm p-8 space-y-4 w-full">
+          <div className="flex items-center gap-2.5 pb-3 border-b border-[#F0F5FA]">
+            <FileText className="w-5 h-5 text-[#5C84BE]" />
+            <div>
+              <h3 className="text-base font-bold text-[#253F5B]">
+                Ghi Chú Bàn Giao & Nội Quy Phòng
+              </h3>
+              <p className="text-xs text-[#7A93AD]">
+                Số lượng chìa khóa cơ, thẻ từ thang máy, tài sản bàn giao và nội quy cần lưu ý
+              </p>
+            </div>
+          </div>
+
+          <textarea
+            rows={3}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="VD: Bàn giao 02 chìa khóa phòng, 01 thẻ từ thang máy cho khách. Tiền cọc giữ 1 tháng. Quy định giữ gìn trật tự sau 23h..."
+            className="w-full p-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-medium text-[#253F5B] transition-all leading-relaxed"
+          />
+        </div>
+
+        {/* 7. Bottom Sticky Actions Bar */}
         <div className="sticky bottom-4 z-20 flex items-center justify-between bg-white/95 backdrop-blur-md px-8 py-4 rounded-3xl border border-[#E3EDF6] shadow-xl">
           <div className="text-xs text-[#7A93AD] font-medium">
             Phòng: <b className="text-[#253F5B]">{roomNumber || room.roomNumber}</b> •{" "}

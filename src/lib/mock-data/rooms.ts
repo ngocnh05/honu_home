@@ -569,6 +569,25 @@ export function getRoomByNumber(roomNumber: string): Room {
     amenities: baseRoom.amenities || ["Giường", "Tủ", "Wifi", "Máy lạnh"],
     notes:
       baseRoom.notes ||
-      "Tiền cọc: 1 tháng tiền phòng. Hợp đồng thanh toán theo quý. Bàn giao 02 chìa khóa cơ, 01 thẻ từ thang máy.",
+      "Tiền cọc: 1 tháng tiền phòng. Hợp đồng thanh toán ngày 28 hàng tháng. Bàn giao 02 chìa khóa cơ, 01 thẻ từ thang máy.",
+    idCardNumber:
+      baseRoom.idCardNumber ||
+      (baseRoom.tenantName !== "---" ? "038202008912" : undefined),
+    depositStatus:
+      baseRoom.depositStatus ||
+      (baseRoom.status === "rented" ? "paid" : "unpaid"),
+    paymentCycleDay: baseRoom.paymentCycleDay || 28,
+    paymentCycle: baseRoom.paymentCycle || "1 tháng/lần",
+    initialElectricityIndex: baseRoom.initialElectricityIndex ?? 1250,
+    initialWaterIndex: baseRoom.initialWaterIndex ?? 48,
+    customServices:
+      baseRoom.customServices && baseRoom.customServices.length > 0
+        ? baseRoom.customServices
+        : [
+            { id: "s1", name: "Tiền điện", price: 3500, unit: "đ/kWh" },
+            { id: "s2", name: "Tiền nước", price: 30000, unit: "đ/khối" },
+            { id: "s3", name: "Wifi / Mạng tốc độ cao", price: 50000, unit: "đ/phòng" },
+            { id: "s4", name: "Cầu thang & Vệ sinh chung", price: 100000, unit: "đ/người" },
+          ],
   };
 }

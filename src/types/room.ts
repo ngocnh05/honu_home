@@ -36,8 +36,14 @@ export interface Room {
   startDate?: string;
   endDate?: string;
   deposit?: number; // Tiền đặt cọc
+  depositStatus?: "paid" | "unpaid" | "refunded"; // Trạng thái cọc (Đã thu / Chưa thu / Đã hoàn)
+  paymentCycleDay?: number; // Ngày chốt tiền hàng tháng (vd: 28)
+  paymentCycle?: string; // Chu kỳ đóng tiền (1 tháng/lần, 3 tháng/lần...)
+  initialElectricityIndex?: number; // Chỉ số điện ban đầu (kWh)
+  initialWaterIndex?: number; // Chỉ số nước ban đầu (m3)
   occupantsCount?: number; // Số người ở (VD: 1, 2, 3...)
   vehiclesCount?: number; // Số xe máy gửi (VD: 0, 1, 2...)
+  idCardNumber?: string; // Số CCCD / CMND
   tenantHometown?: string; // Quê quán (VD: Hà Nội, Nghệ An,...)
   tenantAge?: string | number; // Tuổi (VD: 20, 24,...)
   services?: RoomServices;
