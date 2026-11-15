@@ -494,7 +494,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                     <div className="absolute bottom-3 left-3 right-3 bg-white/90 backdrop-blur-sm px-3.5 py-1.5 rounded-xl text-center shadow-sm">
                       <p className="text-[11px] font-bold text-[#253F5B] flex items-center justify-center gap-1.5">
                         <Sparkles className="w-3.5 h-3.5 text-[#5C84BE]" />
-                        <span>Hình 1: Ảnh đại diện chính phòng</span>
+                        <span>Ảnh đại diện chính phòng (Khung 2)</span>
                       </p>
                     </div>
                   </div>
@@ -516,6 +516,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                           <video
                             key={parsedVideo.src}
                             src={parsedVideo.src}
+                            poster={coverImage}
                             controls
                             autoPlay
                             playsInline
@@ -524,7 +525,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                         )}
                         <div className="absolute top-3 left-3 bg-rose-600/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1.5 shadow-sm">
                           <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                          <span>Hình 2: Video quay phòng (Cloudinary / MP4)</span>
+                          <span>Khung 1: Video quay phòng (Cloudinary / MP4)</span>
                         </div>
                       </>
                     ) : (
@@ -533,7 +534,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                           <Video className="w-6 h-6" />
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-white">Hình 2: Video phòng (Ghim)</p>
+                          <p className="text-xs font-bold text-white">Khung 1: Video phòng (Ghim)</p>
                           <p className="text-[11px] text-slate-300 max-w-[240px] mt-0.5">
                             Chưa có video. Dán link Cloudinary (mp4), YouTube hoặc tải file video từ máy bên dưới.
                           </p>
@@ -557,20 +558,20 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                   <div className="relative w-full h-full group bg-[#F8FBFE]">
                     <Image
                       src={galleryImages[selectedMediaSlot]}
-                      alt={`Hình ${selectedMediaSlot + 3}`}
+                      alt={`Khung ${selectedMediaSlot + 3}`}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute bottom-3 left-3 right-3 bg-white/90 backdrop-blur-sm px-3.5 py-1.5 rounded-xl text-center shadow-sm">
                       <p className="text-[11px] font-bold text-[#253F5B] flex items-center justify-center gap-1.5">
-                        <span>Hình {selectedMediaSlot + 3}: Ảnh chi tiết góc phòng</span>
+                        <span>Khung {selectedMediaSlot + 3}: Ảnh chi tiết góc phòng</span>
                       </p>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Dải thumbnail theo thứ tự: Hình 1 (Bìa) -> Hình 2 (Video ghim) -> Hình 3+ (Ảnh thêm) */}
+              {/* Dải thumbnail theo thứ tự: Khung 1 (Video) -> Khung 2 (Ảnh đại diện) -> Khung 3+ (Ảnh thêm) */}
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between text-xs font-bold text-[#526579]">
                   <span>Danh sách ảnh & video ({2 + galleryImages.length})</span>
@@ -588,32 +589,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                 </div>
 
                 <div className="grid grid-cols-4 gap-2">
-                  {/* 1. HÌNH 1: Ảnh bìa chính */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedMediaSlot("cover")}
-                    className={`relative w-full h-[68px] rounded-xl overflow-hidden border-2 transition-all cursor-pointer text-left bg-gray-100 ${
-                      selectedMediaSlot === "cover"
-                        ? "border-[#5C84BE] ring-2 ring-[#5C84BE]/25 shadow-sm scale-102"
-                        : "border-[#D9E6F2] hover:border-slate-400 opacity-90"
-                    }`}
-                    title="Hình 1: Ảnh đại diện chính"
-                  >
-                    <Image
-                      src={coverImage}
-                      alt="Hình 1: Ảnh bìa"
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute top-1 left-1 bg-black/70 backdrop-blur-xs text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-md leading-none">
-                      Hình 1
-                    </div>
-                    <div className="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-xs text-white text-[8px] font-bold py-0.5 text-center truncate">
-                      Ảnh bìa
-                    </div>
-                  </button>
-
-                  {/* 2. HÌNH 2: VIDEO GHIM CỐ ĐỊNH */}
+                  {/* 1. KHUNG 1: VIDEO GHIM CỐ ĐỊNH */}
                   <div
                     onClick={() => setSelectedMediaSlot("video")}
                     className={`relative w-full h-[68px] rounded-xl overflow-hidden border-2 transition-all cursor-pointer bg-slate-900 group ${
@@ -621,15 +597,23 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                         ? "border-rose-500 ring-2 ring-rose-500/30 shadow-sm scale-102"
                         : "border-[#D9E6F2] hover:border-rose-400"
                     }`}
-                    title="Hình 2: Video quay phòng thực tế (Ghim)"
+                    title="Khung 1: Video quay phòng thực tế (Ghim)"
                   >
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-rose-950/40 to-slate-900">
+                    {coverImage && (
+                      <Image
+                        src={coverImage}
+                        alt="Video thumbnail"
+                        fill
+                        className="object-cover opacity-40 group-hover:opacity-50 transition-opacity"
+                      />
+                    )}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30">
                       <div className="w-6 h-6 rounded-full bg-rose-600 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                         <Play className="w-3 h-3 fill-white ml-0.5" />
                       </div>
                     </div>
                     <div className="absolute top-1 left-1 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md leading-none shadow-xs">
-                      Hình 2
+                      Khung 1
                     </div>
                     <div className="absolute bottom-0 inset-x-0 bg-black/75 backdrop-blur-xs text-rose-200 text-[8px] font-bold py-0.5 text-center truncate">
                       ▶ Video (Ghim)
@@ -650,7 +634,32 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                     )}
                   </div>
 
-                  {/* 3+. HÌNH 3 TRỞ ĐI: CÁC ẢNH GÓC PHÒNG BỔ SUNG */}
+                  {/* 2. KHUNG 2: ẢNH ĐẠI DIỆN CHÍNH */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMediaSlot("cover")}
+                    className={`relative w-full h-[68px] rounded-xl overflow-hidden border-2 transition-all cursor-pointer text-left bg-gray-100 ${
+                      selectedMediaSlot === "cover"
+                        ? "border-[#5C84BE] ring-2 ring-[#5C84BE]/25 shadow-sm scale-102"
+                        : "border-[#D9E6F2] hover:border-slate-400 opacity-90"
+                    }`}
+                    title="Khung 2: Ảnh đại diện chính"
+                  >
+                    <Image
+                      src={coverImage}
+                      alt="Khung 2: Ảnh bìa"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute top-1 left-1 bg-black/70 backdrop-blur-xs text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-md leading-none">
+                      Khung 2
+                    </div>
+                    <div className="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-xs text-white text-[8px] font-bold py-0.5 text-center truncate">
+                      Ảnh đại diện
+                    </div>
+                  </button>
+
+                  {/* 3+. KHUNG 3 TRỞ ĐI: CÁC ẢNH GÓC PHÒNG BỔ SUNG */}
                   {galleryImages.map((img, idx) => {
                     const slotNumber = idx + 3;
                     const isSelected = selectedMediaSlot === idx;
@@ -663,16 +672,16 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                             ? "border-[#5C84BE] ring-2 ring-[#5C84BE]/25 shadow-sm scale-102"
                             : "border-[#D9E6F2] hover:border-slate-400 opacity-90"
                         }`}
-                        title={`Hình ${slotNumber}: Ảnh góc phòng`}
+                        title={`Khung ${slotNumber}: Ảnh góc phòng`}
                       >
                         <Image
                           src={img}
-                          alt={`Hình ${slotNumber}`}
+                          alt={`Khung ${slotNumber}`}
                           fill
                           className="object-cover"
                         />
                         <div className="absolute top-1 left-1 bg-black/70 backdrop-blur-xs text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-md leading-none">
-                          Hình {slotNumber}
+                          Khung {slotNumber}
                         </div>
                         <button
                           type="button"
@@ -711,7 +720,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
                     <Video className="w-3.5 h-3.5 text-rose-500" />
-                    <span>Cấu hình Video phòng (Ghim ở Hình 2)</span>
+                    <span>Cấu hình Video phòng (Ghim ở Khung 1)</span>
                   </span>
                   {videoUrl ? (
                     <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
@@ -748,7 +757,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                   </label>
                 </div>
                 <p className="text-[10px] text-slate-400 leading-relaxed">
-                  Tương lai dùng <strong className="text-slate-600 font-semibold">Cloudinary</strong> lưu trữ video/ảnh miễn phí. Khi dán link hoặc chọn Hình 2, video sẽ phát xem trước trực tiếp tại khung trên.
+                  Tương lai dùng <strong className="text-slate-600 font-semibold">Cloudinary</strong> lưu trữ video/ảnh miễn phí. Khi dán link hoặc chọn Khung 1, video sẽ phát xem trước trực tiếp tại khung trên. Ảnh đại diện vẫn hiển thị mặc định khi mới vào xem phòng.
                 </p>
               </div>
             </div>
