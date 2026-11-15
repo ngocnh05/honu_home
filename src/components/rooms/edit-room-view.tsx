@@ -32,6 +32,7 @@ import {
   Gauge,
   FileText,
   BadgeDollarSign,
+  Wifi,
   Save,
 } from "lucide-react";
 import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
@@ -1261,95 +1262,138 @@ export function EditRoomView({ room }: EditRoomViewProps) {
 
           {/* Danh sách checkbox dịch vụ của cơ sở */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {roomServices.map((srv) => (
-              <div
-                key={srv.id}
-                onClick={() => toggleRoomService(srv.id)}
-                className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 ${
-                  srv.selected
-                    ? "border-[#5C84BE] bg-[#F8FBFE] shadow-2xs"
-                    : "border-[#EAF0F6] bg-white opacity-60 hover:opacity-100"
-                }`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors shrink-0 ${
-                        srv.selected
-                          ? "bg-[#5C84BE] text-white shadow-xs"
-                          : "border-2 border-slate-300 bg-white"
-                      }`}
-                    >
-                      {srv.selected && <Check className="w-4 h-4 stroke-[3]" />}
-                    </div>
-                    <div>
-                      <span className="text-xs font-black text-[#253F5B] block">
-                        {srv.name}
-                      </span>
-                      <span className="text-[10px] text-[#7A93AD] font-semibold">
-                        {srv.type === "meter"
-                          ? "Đo theo công tơ"
-                          : srv.type === "per_person"
-                          ? "Theo đầu người"
-                          : srv.type === "per_vehicle"
-                          ? "Theo số xe"
-                          : "Theo phòng"}
-                      </span>
-                    </div>
-                  </div>
+            {roomServices.map((srv) => {
+              const isElec = srv.name.toLowerCase().includes("điện");
+              const isWater = srv.name.toLowerCase().includes("nước");
+              const isWifi =
+                srv.name.toLowerCase().includes("wifi") ||
+                srv.name.toLowerCase().includes("internet") ||
+                srv.name.toLowerCase().includes("mạng");
 
-                  {/* Giá và đơn vị tính */}
-                  <div
-                    className="flex items-center gap-1.5 shrink-0"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={formatPrice(srv.price)}
-                        onChange={(e) =>
-                          updateRoomServicePrice(srv.id, parsePrice(e.target.value))
-                        }
-                        disabled={!srv.selected}
-                        className={`w-24 h-8 px-2 rounded-xl border text-right text-xs font-bold transition-all ${
+              return (
+                <div
+                  key={srv.id}
+                  onClick={() => toggleRoomService(srv.id)}
+                  className={`p-4 sm:p-4.5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                    srv.selected
+                      ? "border-[#5C84BE] bg-gradient-to-br from-[#F8FBFE] to-white shadow-xs ring-1 ring-[#5C84BE]/20"
+                      : "border-[#EAF0F6] bg-white opacity-60 hover:opacity-100 hover:border-slate-300"
+                  }`}
+                >
+                  {/* Top row: Checkbox, Icon, Tên dịch vụ & Giá hiển thị thanh lịch */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors shrink-0 ${
                           srv.selected
-                            ? "bg-white border-[#D5E3F0] text-[#253F5B] focus:border-[#5C84BE]"
-                            : "bg-slate-100 border-slate-200 text-slate-400"
+                            ? "bg-[#5C84BE] text-white shadow-xs"
+                            : "border-2 border-slate-300 bg-white"
                         }`}
-                      />
-                    </div>
-                    <span className="text-xs font-bold text-[#5C84BE] min-w-[50px]">
-                      {srv.unit}
-                    </span>
-                  </div>
-                </div>
+                      >
+                        {srv.selected && <Check className="w-4 h-4 stroke-[3]" />}
+                      </div>
 
-                {/* Chọn gói cước / mức giá nếu có */}
-                {srv.selected && srv.priceOptions && srv.priceOptions.length > 0 && (
-                  <div
-                    className="pt-2 border-t border-[#EAF2F8] flex items-center justify-between gap-2"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <span className="text-[10px] font-bold text-[#7A93AD] flex items-center gap-1 shrink-0">
-                      <Layers className="w-3 h-3 text-[#5C84BE]" />
-                      <span>Chọn mức giá:</span>
-                    </span>
-                    <select
-                      value={srv.selectedOptionId || "custom"}
-                      onChange={(e) => handleServiceOptionChange(srv.id, e.target.value)}
-                      className="h-7 px-2 rounded-lg border border-[#D5E3F0] bg-white text-[11px] font-bold text-[#253F5B] focus:border-[#5C84BE] outline-none max-w-[220px] truncate"
-                    >
-                      {srv.priceOptions.map((opt) => (
-                        <option key={opt.id} value={opt.id}>
-                          {opt.label} ({opt.price.toLocaleString("vi-VN")} {opt.unit})
-                        </option>
-                      ))}
-                      <option value="custom">Tùy chỉnh đơn giá khác...</option>
-                    </select>
+                      <div
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                          isElec
+                            ? "bg-amber-50 text-amber-600"
+                            : isWater
+                            ? "bg-sky-50 text-sky-600"
+                            : isWifi
+                            ? "bg-indigo-50 text-indigo-600"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {isElec ? (
+                          <Zap className="w-4 h-4 fill-amber-500/20" />
+                        ) : isWater ? (
+                          <Droplets className="w-4 h-4 fill-sky-500/20" />
+                        ) : isWifi ? (
+                          <Wifi className="w-4 h-4" />
+                        ) : srv.type === "meter" ? (
+                          <Gauge className="w-4 h-4" />
+                        ) : (
+                          <Layers className="w-4 h-4 text-[#5C84BE]" />
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+                        <span className="text-xs sm:text-sm font-black text-[#253F5B] block truncate">
+                          {srv.name}
+                        </span>
+                        <span className="text-[10px] text-[#7A93AD] font-semibold">
+                          {srv.type === "meter"
+                            ? "Đo theo công tơ"
+                            : srv.type === "per_person"
+                            ? "Theo đầu người"
+                            : srv.type === "per_vehicle"
+                            ? "Theo số xe"
+                            : "Theo phòng"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Hiển thị đơn vị giá thanh lịch & nổi bật (Không cần ô nhập thô kệch) */}
+                    <div className="flex items-baseline gap-1 shrink-0 bg-[#F4F8FC] px-3 py-1.5 rounded-xl border border-[#E3EDF6]">
+                      <span
+                        className={`text-sm sm:text-base font-black font-mono tracking-tight ${
+                          srv.selected ? "text-[#5C84BE]" : "text-slate-400"
+                        }`}
+                      >
+                        {formatPrice(srv.price)}
+                      </span>
+                      <span className="text-[11px] font-bold text-[#7A93AD]">
+                        {srv.unit}
+                      </span>
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
+
+                  {/* Bottom row: Chọn mức giá áp dụng nếu dịch vụ có nhiều mức giá */}
+                  {srv.selected && srv.priceOptions && srv.priceOptions.length > 0 && (
+                    <div
+                      className="pt-2.5 border-t border-[#EDF4FA] flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span className="text-[11px] font-bold text-[#526579] flex items-center gap-1.5 shrink-0">
+                        <Layers className="w-3.5 h-3.5 text-[#5C84BE]" />
+                        <span>Mức giá áp dụng:</span>
+                      </span>
+
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <select
+                          value={srv.selectedOptionId || "custom"}
+                          onChange={(e) => handleServiceOptionChange(srv.id, e.target.value)}
+                          className="flex-1 sm:w-60 h-8 px-3 rounded-xl border border-[#D5E3F0] bg-white text-xs font-bold text-[#253F5B] focus:border-[#5C84BE] outline-none transition-all cursor-pointer shadow-2xs hover:border-[#5C84BE] truncate"
+                        >
+                          {srv.priceOptions.map((opt) => (
+                            <option key={opt.id} value={opt.id}>
+                              {opt.label} ({opt.price.toLocaleString("vi-VN")} {opt.unit})
+                            </option>
+                          ))}
+                          <option value="custom">✏️ Nhập đơn giá tùy chỉnh...</option>
+                        </select>
+
+                        {/* Chỉ hiện ô nhập khi chọn tùy chỉnh đơn giá riêng */}
+                        {srv.selectedOptionId === "custom" && (
+                          <div className="flex items-center gap-1 bg-white px-2.5 py-1 rounded-xl border border-indigo-200 shadow-2xs shrink-0 animate-fadeIn">
+                            <input
+                              type="text"
+                              value={formatPrice(srv.price)}
+                              onChange={(e) =>
+                                updateRoomServicePrice(srv.id, parsePrice(e.target.value))
+                              }
+                              placeholder="0"
+                              className="w-20 h-6 text-right text-xs font-bold font-mono text-indigo-700 outline-none"
+                            />
+                            <span className="text-[10px] font-bold text-slate-400">{srv.unit}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           <div className="p-3.5 rounded-2xl bg-[#F0F5FA] border border-[#DEEAF4] flex items-center justify-between text-xs text-[#526579]">
