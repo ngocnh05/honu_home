@@ -27,6 +27,7 @@ import {
 import type { Invoice, InvoiceStatus } from "@/types/invoice";
 import { initialInvoices } from "@/lib/mock-data/invoices";
 import { initialBuildings } from "@/lib/mock-data/buildings";
+import { initialRooms } from "@/lib/mock-data/rooms";
 import { getServicesByBuildingId } from "@/lib/mock-data/services";
 import { useSnackbar } from "@/components/common/snackbar";
 
@@ -56,6 +57,41 @@ export function InvoicesView() {
   // Water meters
   const [formWaterOld, setFormWaterOld] = React.useState(48);
   const [formWaterNew, setFormWaterNew] = React.useState(54);
+
+  // Available rooms for selected building
+  const availableRooms = React.useMemo(() => {
+    return initialRooms.filter((r) => r.buildingId === formBuildingId);
+  }, [formBuildingId]);
+
+  const handleSelectBuilding = (bId: string) => {
+    setFormBuildingId(bId);
+    const rooms = initialRooms.filter((r) => r.buildingId === bId);
+    if (rooms.length > 0) {
+      const firstRoom = rooms[0];
+      setFormRoomNumber(firstRoom.roomNumber);
+      setFormTenantName(firstRoom.tenantName && firstRoom.tenantName !== "---" ? firstRoom.tenantName : "Khách thuê");
+      setFormTenantPhone(firstRoom.tenantPhone || "0912.345.678");
+      setFormRoomPrice(firstRoom.price.toLocaleString("vi-VN"));
+      setFormElecOld(firstRoom.initialElectricityIndex || 1250);
+      setFormElecNew((firstRoom.initialElectricityIndex || 1250) + 85);
+      setFormWaterOld(firstRoom.initialWaterIndex || 48);
+      setFormWaterNew((firstRoom.initialWaterIndex || 48) + 6);
+    }
+  };
+
+  const handleSelectRoom = (rNum: string) => {
+    setFormRoomNumber(rNum);
+    const r = initialRooms.find((rm) => rm.roomNumber === rNum && rm.buildingId === formBuildingId);
+    if (r) {
+      setFormTenantName(r.tenantName && r.tenantName !== "---" ? r.tenantName : "Khách thuê");
+      setFormTenantPhone(r.tenantPhone || "0912.345.678");
+      setFormRoomPrice(r.price.toLocaleString("vi-VN"));
+      setFormElecOld(r.initialElectricityIndex || 1250);
+      setFormElecNew((r.initialElectricityIndex || 1250) + 85);
+      setFormWaterOld(r.initialWaterIndex || 48);
+      setFormWaterNew((r.initialWaterIndex || 48) + 6);
+    }
+  };
 
   // Building services lookup (Tự động lấy đơn giá theo từng cơ sở)
   const currentBuildingServices = React.useMemo(() => {
@@ -495,137 +531,153 @@ export function InvoicesView() {
       {/* Modal Xem Phiếu Thu & Mã QR VietQR */}
       {viewingInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-2xl w-full max-w-lg p-6 space-y-5 animate-scaleUp max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col p-6 sm:p-7 space-y-4 animate-scaleUp overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-[#F0F5FA]">
-              <div>
-                <h3 className="text-base font-black text-[#253F5B]">
-                  Phiếu Thu Tiền Phòng {viewingInvoice.roomNumber}
-                </h3>
-                <p className="text-xs text-[#7A93AD]">
-                  {viewingInvoice.month} • {viewingInvoice.buildingName}
-                </p>
+            <div className="flex items-center justify-between pb-3 border-b border-[#F0F5FA] shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold border border-rose-100">
+                  <Receipt className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-[#253F5B]">
+                    Phiếu Thu Tiền Phòng {viewingInvoice.roomNumber}
+                  </h3>
+                  <p className="text-xs text-[#7A93AD]">
+                    {viewingInvoice.month} • {viewingInvoice.buildingName}
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setViewingInvoice(null)}
-                className="w-8 h-8 rounded-xl bg-[#F0F5FA] text-[#7A93AD] hover:text-[#253F5B] flex items-center justify-center cursor-pointer transition-colors"
+                className="w-9 h-9 rounded-xl bg-[#F0F5FA] text-[#7A93AD] hover:text-[#253F5B] flex items-center justify-center cursor-pointer transition-colors shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Chi tiết người nhận */}
-            <div className="bg-[#F8FBFE] p-4 rounded-2xl border border-[#EAF2F8] flex items-center justify-between text-xs">
-              <div>
-                <span className="text-[#7A93AD] font-semibold block">Khách đại diện:</span>
-                <span className="text-sm font-black text-[#253F5B]">
-                  {viewingInvoice.tenantName}
-                </span>
-                <span className="text-[11px] text-[#526579] block">
-                  SĐT: {viewingInvoice.tenantPhone}
-                </span>
-              </div>
-              <div className="text-right">
-                <span className="text-[#7A93AD] font-semibold block">Hạn nộp tiền:</span>
-                <span className="font-bold text-rose-600">{viewingInvoice.dueDate}</span>
-                <span className="text-[10px] text-slate-400 block font-mono">
-                  {viewingInvoice.id}
-                </span>
-              </div>
-            </div>
-
-            {/* Bảng kê chi phí */}
-            <div className="space-y-2 text-xs">
-              <div className="font-bold text-[#253F5B] uppercase tracking-wider text-[11px]">
-                Chi tiết khoản thu trong tháng:
-              </div>
-
-              <div className="space-y-1.5 divide-y divide-[#F0F5FA] border border-[#EAF2F8] rounded-2xl p-3 bg-white">
-                {/* 1. Tiền phòng */}
-                <div className="flex items-center justify-between pt-1">
-                  <span className="font-semibold text-[#526579]">1. Tiền thuê phòng:</span>
-                  <span className="font-bold text-[#253F5B]">
-                    {viewingInvoice.roomPrice.toLocaleString("vi-VN")} đ
+            <div className="overflow-y-auto pr-1 space-y-4 flex-1">
+              {/* Chi tiết người nhận & Hạn nộp */}
+              <div className="bg-[#F8FBFE] p-4 rounded-2xl border border-[#EAF2F8] flex items-center justify-between text-xs">
+                <div>
+                  <span className="text-[#7A93AD] font-semibold block">Khách đại diện:</span>
+                  <span className="text-sm font-black text-[#253F5B]">
+                    {viewingInvoice.tenantName}
+                  </span>
+                  <span className="text-[11px] text-[#526579] block">
+                    SĐT: {viewingInvoice.tenantPhone}
                   </span>
                 </div>
-
-                {/* 2. Tiền điện */}
-                <div className="flex items-center justify-between pt-1.5">
-                  <div>
-                    <span className="font-semibold text-[#526579]">2. Tiền điện sinh hoạt:</span>
-                    <span className="text-[10px] text-[#7A93AD] block">
-                      {viewingInvoice.electricity.usage} kWh ({viewingInvoice.electricity.oldIndex} → {viewingInvoice.electricity.newIndex}) × 3.500đ
-                    </span>
-                  </div>
-                  <span className="font-bold text-[#253F5B]">
-                    {viewingInvoice.electricity.amount.toLocaleString("vi-VN")} đ
+                <div className="text-right">
+                  <span className="text-[#7A93AD] font-semibold block">Hạn nộp tiền:</span>
+                  <span className="font-bold text-rose-600">{viewingInvoice.dueDate}</span>
+                  <span className="text-[10px] text-slate-400 block font-mono">
+                    Mã HĐ: {viewingInvoice.id}
                   </span>
                 </div>
+              </div>
 
-                {/* 3. Tiền nước */}
-                <div className="flex items-center justify-between pt-1.5">
-                  <div>
-                    <span className="font-semibold text-[#526579]">3. Tiền nước sạch:</span>
-                    <span className="text-[10px] text-[#7A93AD] block">
-                      {viewingInvoice.water.usage} khối ({viewingInvoice.water.oldIndex} → {viewingInvoice.water.newIndex}) × 30.000đ
-                    </span>
-                  </div>
-                  <span className="font-bold text-[#253F5B]">
-                    {viewingInvoice.water.amount.toLocaleString("vi-VN")} đ
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                {/* Bảng kê chi phí */}
+                <div className="md:col-span-7 space-y-2 text-xs">
+                  <span className="font-bold text-[#253F5B] uppercase tracking-wider text-[11px] block">
+                    Chi tiết các khoản thu trong tháng:
                   </span>
-                </div>
 
-                {/* 4. Dịch vụ kèm theo */}
-                {viewingInvoice.services.map((srv, idx) => (
-                  <div key={idx} className="flex items-center justify-between pt-1.5">
-                    <div>
-                      <span className="font-semibold text-[#526579]">
-                        {4 + idx}. {srv.name}:
-                      </span>
-                      <span className="text-[10px] text-[#7A93AD] block">
-                        {srv.quantity} {srv.unit} × {srv.unitPrice.toLocaleString("vi-VN")}đ
+                  <div className="space-y-1.5 divide-y divide-[#F0F5FA] border border-[#EAF2F8] rounded-2xl p-3.5 bg-white shadow-2xs">
+                    {/* 1. Tiền phòng */}
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="font-semibold text-[#526579]">1. Tiền thuê phòng:</span>
+                      <span className="font-bold text-[#253F5B]">
+                        {viewingInvoice.roomPrice.toLocaleString("vi-VN")} đ
                       </span>
                     </div>
-                    <span className="font-bold text-[#253F5B]">
-                      {srv.amount.toLocaleString("vi-VN")} đ
-                    </span>
+
+                    {/* 2. Tiền điện */}
+                    <div className="flex items-center justify-between pt-1.5">
+                      <div>
+                        <span className="font-semibold text-[#526579]">2. Tiền điện sinh hoạt:</span>
+                        <span className="text-[10px] text-[#7A93AD] block">
+                          {viewingInvoice.electricity.usage} kWh ({viewingInvoice.electricity.oldIndex} → {viewingInvoice.electricity.newIndex}) × 3.500đ
+                        </span>
+                      </div>
+                      <span className="font-bold text-[#253F5B]">
+                        {viewingInvoice.electricity.amount.toLocaleString("vi-VN")} đ
+                      </span>
+                    </div>
+
+                    {/* 3. Tiền nước */}
+                    <div className="flex items-center justify-between pt-1.5">
+                      <div>
+                        <span className="font-semibold text-[#526579]">3. Tiền nước sạch:</span>
+                        <span className="text-[10px] text-[#7A93AD] block">
+                          {viewingInvoice.water.usage} khối ({viewingInvoice.water.oldIndex} → {viewingInvoice.water.newIndex}) × 30.000đ
+                        </span>
+                      </div>
+                      <span className="font-bold text-[#253F5B]">
+                        {viewingInvoice.water.amount.toLocaleString("vi-VN")} đ
+                      </span>
+                    </div>
+
+                    {/* 4. Dịch vụ kèm theo */}
+                    {viewingInvoice.services.map((srv, idx) => (
+                      <div key={idx} className="flex items-center justify-between pt-1.5">
+                        <div>
+                          <span className="font-semibold text-[#526579]">
+                            {4 + idx}. {srv.name}:
+                          </span>
+                          <span className="text-[10px] text-[#7A93AD] block">
+                            {srv.quantity} {srv.unit} × {srv.unitPrice.toLocaleString("vi-VN")}đ
+                          </span>
+                        </div>
+                        <span className="font-bold text-[#253F5B]">
+                          {srv.amount.toLocaleString("vi-VN")} đ
+                        </span>
+                      </div>
+                    ))}
+
+                    {/* Tổng cộng */}
+                    <div className="flex items-center justify-between pt-2.5 font-black text-xs text-[#253F5B]">
+                      <span>TỔNG CỘNG THANH TOÁN:</span>
+                      <span className="text-base text-rose-600">
+                        {viewingInvoice.totalAmount.toLocaleString("vi-VN")} đ
+                      </span>
+                    </div>
                   </div>
-                ))}
-
-                {/* Tổng cộng */}
-                <div className="flex items-center justify-between pt-2.5 font-black text-sm text-[#253F5B]">
-                  <span>TỔNG CỘNG THANH TOÁN:</span>
-                  <span className="text-base text-rose-600">
-                    {viewingInvoice.totalAmount.toLocaleString("vi-VN")} đ
-                  </span>
                 </div>
-              </div>
-            </div>
 
-            {/* Mã VietQR Thanh Toán */}
-            <div className="p-4 rounded-2xl bg-[#F0F5FA] border border-[#D9E6F2] flex items-center gap-4">
-              <div className="w-16 h-16 rounded-xl bg-white p-1 border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs">
-                <QrCode className="w-14 h-14 text-slate-800" />
-              </div>
-              <div className="text-xs space-y-0.5">
-                <span className="font-bold text-[#253F5B] block">Quét mã VietQR chuyển khoản:</span>
-                <p className="text-[11px] text-[#526579]">
-                  STK: <strong>1903688888</strong> • Techcombank
-                </p>
-                <p className="text-[10px] text-[#7A93AD]">
-                  Nội dung: <strong>{viewingInvoice.roomNumber} {viewingInvoice.month.replace("Tháng ", "T")}</strong>
-                </p>
+                {/* Mã VietQR Thanh Toán */}
+                <div className="md:col-span-5 flex flex-col justify-between space-y-3 p-4 rounded-2xl bg-[#F8FBFE] border border-[#DEEAF4]">
+                  <div>
+                    <span className="font-bold text-xs text-[#253F5B] block mb-2">
+                      Quét mã VietQR chuyển khoản:
+                    </span>
+                    <div className="w-full flex items-center justify-center p-3 bg-white rounded-xl border border-[#D9E6F2] shadow-2xs">
+                      <QrCode className="w-32 h-32 text-slate-800" />
+                    </div>
+                  </div>
+                  <div className="text-xs space-y-1 bg-white p-3 rounded-xl border border-[#E3EDF6]">
+                    <p className="text-[#526579]">
+                      Ngân hàng: <strong>Techcombank</strong>
+                    </p>
+                    <p className="text-[#526579]">
+                      Số tài khoản: <strong>1903688888</strong>
+                    </p>
+                    <p className="text-[11px] text-[#7A93AD]">
+                      Cú pháp: <strong>{viewingInvoice.roomNumber} {viewingInvoice.month.replace("Tháng ", "T")}</strong>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center justify-between pt-3 border-t border-[#F0F5FA] shrink-0">
               {viewingInvoice.status !== "paid" ? (
                 <button
                   type="button"
                   onClick={() => handleMarkAsPaid(viewingInvoice.id)}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md cursor-pointer flex items-center gap-1.5 transition-all"
+                  className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md cursor-pointer flex items-center gap-1.5 transition-all"
                 >
                   <Check className="w-4 h-4" />
                   <span>Xác nhận Đã Thu Tiền</span>
@@ -646,7 +698,7 @@ export function InvoicesView() {
                     );
                     success("Đã copy nội dung thông báo gửi Zalo cho khách!");
                   }}
-                  className="px-3 py-2 rounded-xl border border-[#D9E6F2] hover:bg-gray-50 text-xs font-bold text-[#526579] cursor-pointer inline-flex items-center gap-1"
+                  className="px-4 py-2.5 rounded-xl border border-[#D9E6F2] hover:bg-gray-50 text-xs font-bold text-[#526579] cursor-pointer inline-flex items-center gap-1.5 transition-colors"
                 >
                   <Share2 className="w-3.5 h-3.5" />
                   <span>Gửi Zalo</span>
@@ -654,7 +706,7 @@ export function InvoicesView() {
                 <button
                   type="button"
                   onClick={() => setViewingInvoice(null)}
-                  className="px-4 py-2 rounded-xl bg-[#253F5B] text-white text-xs font-bold cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-[#253F5B] hover:bg-[#1B2F44] text-white text-xs font-bold cursor-pointer transition-colors"
                 >
                   Đóng
                 </button>
@@ -664,182 +716,234 @@ export function InvoicesView() {
         </div>
       )}
 
-      {/* Modal Chốt Điện Nước & Ra Hóa Đơn */}
+      {/* Modal Chốt Điện Nước & Ra Hóa Đơn (Wide 2-Column Layout - No Scroll) */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-2xl w-full max-w-lg p-6 space-y-5 animate-scaleUp max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-[#F0F5FA]">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
-                  <Receipt className="w-4 h-4" />
+          <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-2xl w-full max-w-4xl lg:max-w-5xl max-h-[94vh] flex flex-col p-6 sm:p-7 space-y-4 animate-scaleUp overflow-hidden">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F0F5FA] shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold border border-rose-100">
+                  <Receipt className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-black text-[#253F5B]">
-                  Chốt Điện Nước & Ra Hóa Đơn
-                </h3>
+                <div>
+                  <h3 className="text-base font-black text-[#253F5B]">
+                    Chốt Chỉ Số Điện Nước & Ra Hóa Đơn Thu Tiền
+                  </h3>
+                  <p className="text-xs text-[#7A93AD]">
+                    Chọn phòng để tự động nạp khách thuê, giá phòng, chỉ số cũ và tính tự động tổng tiền
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
-                className="w-8 h-8 rounded-xl bg-[#F0F5FA] text-[#7A93AD] hover:text-[#253F5B] flex items-center justify-center cursor-pointer transition-colors"
+                className="w-9 h-9 rounded-xl bg-[#F0F5FA] text-[#7A93AD] hover:text-[#253F5B] flex items-center justify-center cursor-pointer transition-colors shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateInvoice} className="space-y-4">
-              {/* Chọn Phòng */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Cơ sở *</label>
-                  <select
-                    value={formBuildingId}
-                    onChange={(e) => setFormBuildingId(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-semibold text-[#253F5B]"
+            <form onSubmit={handleCreateInvoice} className="flex-1 flex flex-col justify-between overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                {/* Cột 1: Thông tin phòng & Khách thuê */}
+                <div className="md:col-span-5 space-y-3.5">
+                  <span className="text-xs font-black text-[#253F5B] uppercase tracking-wider block pb-1 border-b border-[#F0F5FA]">
+                    1. Căn Phòng & Khách Thuê
+                  </span>
+
+                  {/* Chọn Cơ sở & Chọn Phòng từ danh sách */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Cơ sở *</label>
+                      <select
+                        value={formBuildingId}
+                        onChange={(e) => handleSelectBuilding(e.target.value)}
+                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-semibold text-[#253F5B]"
+                      >
+                        {initialBuildings.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Chọn phòng chốt *</label>
+                      <select
+                        value={formRoomNumber}
+                        onChange={(e) => handleSelectRoom(e.target.value)}
+                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-bold text-[#253F5B]"
+                      >
+                        {availableRooms.map((r) => (
+                          <option key={r.id} value={r.roomNumber}>
+                            Phòng {r.roomNumber} ({r.tenantName !== "---" ? r.tenantName : "Trống"})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Tên khách & Tiền phòng */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Khách đại diện *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formTenantName}
+                        onChange={(e) => setFormTenantName(e.target.value)}
+                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] text-xs font-bold text-[#253F5B] bg-[#F9FBFE]"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Tiền phòng (VNĐ)</label>
+                      <input
+                        type="text"
+                        required
+                        value={formRoomPrice}
+                        onChange={(e) => setFormRoomPrice(e.target.value)}
+                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] text-xs font-bold text-[#253F5B] bg-[#F9FBFE]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Dịch vụ cố định */}
+                  <div className="p-3 rounded-xl bg-[#F8FBFE] border border-[#EAF2F8] space-y-1.5 text-xs">
+                    <span className="font-bold text-[#5C84BE] block text-[11px]">Dịch vụ cố định áp dụng:</span>
+                    <div className="flex items-center justify-between text-[#526579]">
+                      <span>Internet / Wifi:</span>
+                      <span className="font-bold text-[#253F5B]">{wifiPrice.toLocaleString("vi-VN")} đ</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[#526579]">
+                      <span>Vệ sinh & Thang máy:</span>
+                      <span className="font-bold text-[#253F5B]">{serviceFee.toLocaleString("vi-VN")} đ</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[#526579]">
+                      <span>Gửi xe máy:</span>
+                      <span className="font-bold text-[#253F5B]">{parkingFee.toLocaleString("vi-VN")} đ</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cột 2: Chốt chỉ số tiêu thụ & Tổng tiền */}
+                <div className="md:col-span-7 space-y-3.5">
+                  <span className="text-xs font-black text-[#253F5B] uppercase tracking-wider block pb-1 border-b border-[#F0F5FA]">
+                    2. Chốt Số Điện - Nước & Tổng Hóa Đơn
+                  </span>
+
+                  {/* Chốt chỉ số ĐIỆN */}
+                  <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-amber-900">
+                      <span className="flex items-center gap-1.5">
+                        <Zap className="w-4 h-4 text-amber-600" />
+                        <span>Chỉ số ĐIỆN (Đơn giá {elecUnitPrice.toLocaleString("vi-VN")} đ/kWh)</span>
+                      </span>
+                      <span className="text-sm font-black text-amber-900">{elecAmount.toLocaleString("vi-VN")} đ</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="text-[10px] text-[#7A93AD] font-semibold block">Số cũ</label>
+                        <input
+                          type="number"
+                          value={formElecOld}
+                          onChange={(e) => setFormElecOld(Number(e.target.value) || 0)}
+                          className="w-full h-9 px-2.5 rounded-lg border border-amber-200 bg-white text-xs font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-[#7A93AD] font-semibold block">Số mới</label>
+                        <input
+                          type="number"
+                          value={formElecNew}
+                          onChange={(e) => setFormElecNew(Number(e.target.value) || 0)}
+                          className="w-full h-9 px-2.5 rounded-lg border border-amber-300 bg-white text-xs font-black text-amber-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-[#7A93AD] font-semibold block">Tiêu thụ</label>
+                        <div className="w-full h-9 flex items-center justify-center font-black text-xs text-amber-800 bg-amber-100 rounded-lg">
+                          {elecUsage} kWh
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chốt chỉ số NƯỚC */}
+                  <div className="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-sky-900">
+                      <span className="flex items-center gap-1.5">
+                        <Droplets className="w-4 h-4 text-sky-600" />
+                        <span>Chỉ số NƯỚC (Đơn giá {waterUnitPrice.toLocaleString("vi-VN")} {waterService?.unit || "đ/khối"})</span>
+                      </span>
+                      <span className="text-sm font-black text-sky-900">{waterAmount.toLocaleString("vi-VN")} đ</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="text-[10px] text-[#7A93AD] font-semibold block">Số cũ</label>
+                        <input
+                          type="number"
+                          value={formWaterOld}
+                          onChange={(e) => setFormWaterOld(Number(e.target.value) || 0)}
+                          className="w-full h-9 px-2.5 rounded-lg border border-sky-200 bg-white text-xs font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-[#7A93AD] font-semibold block">Số mới</label>
+                        <input
+                          type="number"
+                          value={formWaterNew}
+                          onChange={(e) => setFormWaterNew(Number(e.target.value) || 0)}
+                          className="w-full h-9 px-2.5 rounded-lg border border-sky-300 bg-white text-xs font-black text-sky-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-[#7A93AD] font-semibold block">Tiêu thụ</label>
+                        <div className="w-full h-9 flex items-center justify-center font-black text-xs text-sky-800 bg-sky-100 rounded-lg">
+                          {waterUsage} khối
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tự động tính tổng tiền */}
+                  <div className="p-3.5 rounded-2xl bg-[#253F5B] text-white flex items-center justify-between shadow-sm">
+                    <div>
+                      <span className="text-[10px] text-slate-300 block">
+                        Tổng hóa đơn (Phòng + Điện + Nước + Wifi + Phí DV + Xe):
+                      </span>
+                      <div className="text-xl font-black text-emerald-400">
+                        {totalBillCalculated.toLocaleString("vi-VN")} đ
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#EAF2F8] bg-white/10 px-2.5 py-1 rounded-lg">
+                      Tự động tính
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Actions Bar */}
+              <div className="flex items-center justify-between pt-4 mt-4 border-t border-[#F0F5FA] shrink-0">
+                <span className="text-xs text-[#7A93AD] hidden sm:block">
+                  💡 Hóa đơn sau khi xuất sẽ tạo mã VietQR chuyển khoản và sẵn sàng gửi thông báo.
+                </span>
+                <div className="flex items-center gap-3 ml-auto">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className="h-10 px-5 rounded-xl text-xs font-bold text-[#526579] hover:bg-[#F0F5FA] cursor-pointer transition-colors"
                   >
-                    {initialBuildings.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name}
-                      </option>
-                    ))}
-                  </select>
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    className="h-10 px-6 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white text-xs font-bold shadow-md hover:shadow-lg cursor-pointer transition-all flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Xuất Hóa Đơn & Lưu</span>
+                  </button>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Số phòng *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formRoomNumber}
-                    onChange={(e) => setFormRoomNumber(e.target.value)}
-                    placeholder="P001"
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* Tên khách & Tiền phòng */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Khách đại diện *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formTenantName}
-                    onChange={(e) => setFormTenantName(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] text-xs font-bold text-[#253F5B]"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Tiền phòng (VNĐ)</label>
-                  <input
-                    type="text"
-                    required
-                    value={formRoomPrice}
-                    onChange={(e) => setFormRoomPrice(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] text-xs font-bold text-[#253F5B]"
-                  />
-                </div>
-              </div>
-
-              {/* Chốt chỉ số ĐIỆN */}
-              <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold text-amber-900">
-                  <span className="flex items-center gap-1">
-                    <Zap className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Chỉ số ĐIỆN (Đơn giá {elecUnitPrice.toLocaleString("vi-VN")} đ/kWh)</span>
-                  </span>
-                  <span>{elecAmount.toLocaleString("vi-VN")} đ</span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="text-[10px] text-[#7A93AD] block">Số cũ</label>
-                    <input
-                      type="number"
-                      value={formElecOld}
-                      onChange={(e) => setFormElecOld(Number(e.target.value) || 0)}
-                      className="w-full h-9 px-2.5 rounded-lg border border-amber-200 bg-white text-xs font-bold"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-[#7A93AD] block">Số mới</label>
-                    <input
-                      type="number"
-                      value={formElecNew}
-                      onChange={(e) => setFormElecNew(Number(e.target.value) || 0)}
-                      className="w-full h-9 px-2.5 rounded-lg border border-amber-300 bg-white text-xs font-bold text-amber-900"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-[#7A93AD] block">Tiêu thụ</label>
-                    <div className="w-full h-9 flex items-center justify-center font-black text-xs text-amber-700 bg-amber-100 rounded-lg">
-                      {elecUsage} kWh
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Chốt chỉ số NƯỚC */}
-              <div className="p-3.5 rounded-2xl bg-sky-50/60 border border-sky-200/80 space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold text-sky-900">
-                  <span className="flex items-center gap-1">
-                    <Droplets className="w-3.5 h-3.5 text-sky-600" />
-                    <span>Chỉ số NƯỚC (Đơn giá {waterUnitPrice.toLocaleString("vi-VN")} {waterService?.unit || "đ/khối"})</span>
-                  </span>
-                  <span>{waterAmount.toLocaleString("vi-VN")} đ</span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="text-[10px] text-[#7A93AD] block">Số cũ</label>
-                    <input
-                      type="number"
-                      value={formWaterOld}
-                      onChange={(e) => setFormWaterOld(Number(e.target.value) || 0)}
-                      className="w-full h-9 px-2.5 rounded-lg border border-sky-200 bg-white text-xs font-bold"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-[#7A93AD] block">Số mới</label>
-                    <input
-                      type="number"
-                      value={formWaterNew}
-                      onChange={(e) => setFormWaterNew(Number(e.target.value) || 0)}
-                      className="w-full h-9 px-2.5 rounded-lg border border-sky-300 bg-white text-xs font-bold text-sky-900"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-[#7A93AD] block">Tiêu thụ</label>
-                    <div className="w-full h-9 flex items-center justify-center font-black text-xs text-sky-700 bg-sky-100 rounded-lg">
-                      {waterUsage} khối
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tự động tính tổng tiền */}
-              <div className="p-4 rounded-2xl bg-[#253F5B] text-white flex items-center justify-between">
-                <div>
-                  <span className="text-[11px] text-slate-300 block">
-                    Tổng hóa đơn (Phòng + Điện + Nước + Wifi + Xe + Phí dịch vụ):
-                  </span>
-                  <div className="text-xl font-black text-emerald-400">
-                    {totalBillCalculated.toLocaleString("vi-VN")} đ
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#F0F5FA]">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#526579] hover:bg-[#F0F5FA] cursor-pointer"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white text-xs font-bold shadow-md cursor-pointer transition-all"
-                >
-                  Xuất Hóa Đơn & Lưu
-                </button>
               </div>
             </form>
           </div>

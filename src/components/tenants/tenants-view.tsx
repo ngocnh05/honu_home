@@ -23,6 +23,7 @@ import {
 import type { Tenant, TenantRole, TenantStatus } from "@/types/tenant";
 import { initialTenants } from "@/lib/mock-data/tenants";
 import { initialBuildings } from "@/lib/mock-data/buildings";
+import { initialRooms } from "@/lib/mock-data/rooms";
 import { useSnackbar } from "@/components/common/snackbar";
 
 export function TenantsView() {
@@ -49,6 +50,19 @@ export function TenantsView() {
   const [formVehiclePlate, setFormVehiclePlate] = React.useState("");
   const [formStartDate, setFormStartDate] = React.useState("01/01/2026");
   const [formNotes, setFormNotes] = React.useState("");
+
+  // Available rooms for selected building
+  const availableRooms = React.useMemo(() => {
+    return initialRooms.filter((r) => r.buildingId === formBuildingId);
+  }, [formBuildingId]);
+
+  const handleSelectBuilding = (bId: string) => {
+    setFormBuildingId(bId);
+    const rooms = initialRooms.filter((r) => r.buildingId === bId);
+    if (rooms.length > 0) {
+      setFormRoomNumber(rooms[0].roomNumber);
+    }
+  };
 
   // Filtered tenants
   const filteredTenants = React.useMemo(() => {
@@ -446,177 +460,234 @@ export function TenantsView() {
         </div>
       </div>
 
-      {/* Modal Thêm / Sửa Khách Thuê */}
+      {/* Modal Thêm / Sửa Khách Thuê (Wide 2-Column Layout - No Scroll) */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-2xl w-full max-w-lg p-6 space-y-5 animate-scaleUp">
-            <div className="flex items-center justify-between pb-3 border-b border-[#F0F5FA]">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-                  <Users className="w-4 h-4" />
+          <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-2xl w-full max-w-4xl lg:max-w-5xl max-h-[94vh] flex flex-col p-6 sm:p-7 space-y-4 animate-scaleUp overflow-hidden">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F0F5FA] shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold border border-indigo-100">
+                  <Users className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-black text-[#253F5B]">
-                  {editingTenant ? "Chỉnh Sửa Khách Thuê" : "Thêm Khách Thuê Mới"}
-                </h3>
+                <div>
+                  <h3 className="text-base font-black text-[#253F5B]">
+                    {editingTenant ? "Chỉnh Sửa Hồ Sơ Khách Thuê" : "Thêm Khách Thuê Mới"}
+                  </h3>
+                  <p className="text-xs text-[#7A93AD]">
+                    Quản lý thông tin định danh CCCD, phân bổ phòng ở và vai trò hợp đồng
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="w-8 h-8 rounded-xl bg-[#F0F5FA] text-[#7A93AD] hover:text-[#253F5B] flex items-center justify-center cursor-pointer transition-colors"
+                className="w-9 h-9 rounded-xl bg-[#F0F5FA] text-[#7A93AD] hover:text-[#253F5B] flex items-center justify-center cursor-pointer transition-colors shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Vai trò */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#253F5B]">Vai trò trong phòng *</label>
-                <div className="grid grid-cols-2 gap-2">
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                {/* Cột 1: Thông tin cá nhân & Giấy tờ */}
+                <div className="md:col-span-6 space-y-3.5">
+                  <span className="text-xs font-black text-[#253F5B] uppercase tracking-wider block pb-1 border-b border-[#F0F5FA]">
+                    1. Thông Tin Cá Nhân & Giấy Tờ
+                  </span>
+
+                  {/* Vai trò */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#253F5B]">Vai trò trong phòng *</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setFormRole("representative")}
+                        className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                          formRole === "representative"
+                            ? "bg-indigo-50 border-indigo-300 text-indigo-700 shadow-2xs"
+                            : "border-[#D9E6F2] text-[#526579] hover:bg-gray-50"
+                        }`}
+                      >
+                        <UserCheck className="w-3.5 h-3.5" />
+                        <span>Người đại diện (Chủ HĐ)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormRole("member")}
+                        className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                          formRole === "member"
+                            ? "bg-sky-50 border-sky-300 text-sky-700 shadow-2xs"
+                            : "border-[#D9E6F2] text-[#526579] hover:bg-gray-50"
+                        }`}
+                      >
+                        <User className="w-3.5 h-3.5" />
+                        <span>Khách ở cùng phòng</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Tên & SĐT */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Họ và tên *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formFullName}
+                        onChange={(e) => setFormFullName(e.target.value)}
+                        placeholder="Nguyễn Văn A"
+                        className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Số điện thoại *</label>
+                      <input
+                        type="tel"
+                        required
+                        value={formPhone}
+                        onChange={(e) => setFormPhone(e.target.value)}
+                        placeholder="0912.345.678"
+                        className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* CCCD & Tuổi */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="col-span-2 space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Số CCCD (12 số)</label>
+                      <input
+                        type="text"
+                        value={formIdCard}
+                        onChange={(e) => setFormIdCard(e.target.value)}
+                        placeholder="038202008912"
+                        className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Tuổi</label>
+                      <input
+                        type="number"
+                        value={formAge}
+                        onChange={(e) => setFormAge(e.target.value)}
+                        placeholder="23"
+                        className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Quê quán */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#253F5B]">Quê quán</label>
+                    <input
+                      type="text"
+                      value={formHometown}
+                      onChange={(e) => setFormHometown(e.target.value)}
+                      placeholder="Nghệ An, Hà Nội, Nam Định..."
+                      className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-semibold text-[#253F5B] transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Cột 2: Căn phòng phân bổ & Phương tiện */}
+                <div className="md:col-span-6 space-y-3.5">
+                  <span className="text-xs font-black text-[#253F5B] uppercase tracking-wider block pb-1 border-b border-[#F0F5FA]">
+                    2. Căn Phòng Phân Bổ & Xe Cộ
+                  </span>
+
+                  {/* Tòa nhà & Chọn phòng từ danh sách */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Thuộc cơ sở *</label>
+                      <select
+                        value={formBuildingId}
+                        onChange={(e) => handleSelectBuilding(e.target.value)}
+                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-semibold text-[#253F5B]"
+                      >
+                        {initialBuildings.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Chọn căn phòng *</label>
+                      <select
+                        value={formRoomNumber}
+                        onChange={(e) => setFormRoomNumber(e.target.value)}
+                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-bold text-[#253F5B]"
+                      >
+                        {availableRooms.map((r) => (
+                          <option key={r.id} value={r.roomNumber}>
+                            Phòng {r.roomNumber} ({r.type} - {r.priceFormatted})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Biển số xe & Ngày bắt đầu ở */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Biển số xe máy</label>
+                      <input
+                        type="text"
+                        value={formVehiclePlate}
+                        onChange={(e) => setFormVehiclePlate(e.target.value)}
+                        placeholder="29-B1 123.45"
+                        className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all font-mono"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#253F5B]">Ngày bắt đầu ở</label>
+                      <input
+                        type="text"
+                        value={formStartDate}
+                        onChange={(e) => setFormStartDate(e.target.value)}
+                        placeholder="01/01/2026"
+                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-semibold text-[#253F5B]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Ghi chú */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#253F5B]">Ghi chú khách thuê</label>
+                    <textarea
+                      rows={2}
+                      value={formNotes}
+                      onChange={(e) => setFormNotes(e.target.value)}
+                      placeholder="Ghi chú về thói quen, công việc hoặc giấy tờ tạm trú..."
+                      className="w-full p-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs text-[#253F5B] transition-all resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Actions Bar */}
+              <div className="flex items-center justify-between pt-4 mt-4 border-t border-[#F0F5FA] shrink-0">
+                <span className="text-xs text-[#7A93AD] hidden sm:block">
+                  💡 Khách thuê sẽ được lưu vào danh sách phòng và hiển thị trong hợp đồng tương ứng.
+                </span>
+                <div className="flex items-center gap-3 ml-auto">
                   <button
                     type="button"
-                    onClick={() => setFormRole("representative")}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                      formRole === "representative"
-                        ? "bg-indigo-50 border-indigo-300 text-indigo-700 shadow-2xs"
-                        : "border-[#D9E6F2] text-[#526579] hover:bg-gray-50"
-                    }`}
+                    onClick={() => setShowModal(false)}
+                    className="h-10 px-5 rounded-xl text-xs font-bold text-[#526579] hover:bg-[#F0F5FA] cursor-pointer transition-colors"
                   >
-                    <UserCheck className="w-3.5 h-3.5" />
-                    <span>Người đại diện (Chủ HĐ)</span>
+                    Hủy
                   </button>
                   <button
-                    type="button"
-                    onClick={() => setFormRole("member")}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                      formRole === "member"
-                        ? "bg-sky-50 border-sky-300 text-sky-700 shadow-2xs"
-                        : "border-[#D9E6F2] text-[#526579] hover:bg-gray-50"
-                    }`}
+                    type="submit"
+                    className="h-10 px-6 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white text-xs font-bold shadow-md hover:shadow-lg cursor-pointer transition-all flex items-center gap-1.5"
                   >
-                    <User className="w-3.5 h-3.5" />
-                    <span>Khách ở cùng phòng</span>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{editingTenant ? "Lưu Thay Đổi" : "Lưu Khách Thuê"}</span>
                   </button>
                 </div>
-              </div>
-
-              {/* Tên & SĐT */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Họ và tên *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formFullName}
-                    onChange={(e) => setFormFullName(e.target.value)}
-                    placeholder="Nguyễn Văn A"
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Số điện thoại *</label>
-                  <input
-                    type="tel"
-                    required
-                    value={formPhone}
-                    onChange={(e) => setFormPhone(e.target.value)}
-                    placeholder="0912.345.678"
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* CCCD & Tuổi */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-2 space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Số CCCD (12 số)</label>
-                  <input
-                    type="text"
-                    value={formIdCard}
-                    onChange={(e) => setFormIdCard(e.target.value)}
-                    placeholder="038202008912"
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all font-mono"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Tuổi</label>
-                  <input
-                    type="number"
-                    value={formAge}
-                    onChange={(e) => setFormAge(e.target.value)}
-                    placeholder="23"
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* Quê quán & Biển số xe */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Quê quán</label>
-                  <input
-                    type="text"
-                    value={formHometown}
-                    onChange={(e) => setFormHometown(e.target.value)}
-                    placeholder="Nghệ An, Hà Nội..."
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Biển số xe máy</label>
-                  <input
-                    type="text"
-                    value={formVehiclePlate}
-                    onChange={(e) => setFormVehiclePlate(e.target.value)}
-                    placeholder="29-B1 123.45"
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all font-mono"
-                  />
-                </div>
-              </div>
-
-              {/* Tòa nhà & Số phòng */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Thuộc cơ sở *</label>
-                  <select
-                    value={formBuildingId}
-                    onChange={(e) => setFormBuildingId(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-semibold text-[#253F5B]"
-                  >
-                    {initialBuildings.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#253F5B]">Số phòng *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formRoomNumber}
-                    onChange={(e) => setFormRoomNumber(e.target.value)}
-                    placeholder="P001"
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#F0F5FA]">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#526579] hover:bg-[#F0F5FA] cursor-pointer"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white text-xs font-bold shadow-md cursor-pointer transition-all"
-                >
-                  {editingTenant ? "Lưu Thay Đổi" : "Lưu Khách Thuê"}
-                </button>
               </div>
             </form>
           </div>
