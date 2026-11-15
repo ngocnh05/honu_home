@@ -25,6 +25,8 @@ import {
   Clock,
   X,
   Video,
+  Play,
+  Film,
   Zap,
   Droplets,
   Gauge,
@@ -34,6 +36,7 @@ import {
 import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
 import { initialBuildings } from "@/lib/mock-data/buildings";
 import { useSnackbar } from "@/components/common/snackbar";
+import { parseVideoSource } from "@/lib/video-helpers";
 
 // Format 2700000 -> "2.700.000"
 const formatPrice = (val: string | number | undefined): string => {
@@ -101,6 +104,10 @@ export function CreateRoomView() {
     "/images/rooms/room-demo.png",
   ]);
   const [videoUrl, setVideoUrl] = React.useState<string>("");
+  // Media slot switcher: "cover" (Hình 1), "video" (Hình 2), or number (0..n for galleryImages = Hình 3, 4, ...)
+  const [selectedMediaSlot, setSelectedMediaSlot] = React.useState<"cover" | "video" | number>("cover");
+
+  const parsedVideo = parseVideoSource(videoUrl);
 
   // 3. Contract & Tenant Details
   const [tenantName, setTenantName] = React.useState("");
@@ -138,12 +145,22 @@ export function CreateRoomView() {
     );
   };
 
-  // Image upload handlers
+  // Image & Video upload handlers
   const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const url = URL.createObjectURL(file);
       setCoverImage(url);
+      setSelectedMediaSlot("cover");
+    }
+  };
+
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setVideoUrl(url);
+      setSelectedMediaSlot("video");
     }
   };
 
@@ -157,6 +174,11 @@ export function CreateRoomView() {
 
   const removeGalleryImage = (indexToRemove: number) => {
     setGalleryImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+    if (selectedMediaSlot === indexToRemove) {
+      setSelectedMediaSlot("cover");
+    } else if (typeof selectedMediaSlot === "number" && selectedMediaSlot > indexToRemove) {
+      setSelectedMediaSlot(selectedMediaSlot - 1);
+    }
   };
 
   // Service helpers
@@ -310,38 +332,111 @@ export function CreateRoomView() {
                 <span className="text-[11px] text-[#7A93AD]">Tối đa 8 ảnh</span>
               </div>
 
-              {/* Ảnh đại diện chính (Cover Image) */}
-              <div className="relative w-full h-[320px] rounded-[28px] overflow-hidden shadow-md border-2 border-[#E3EDF6] group bg-[#F8FBFE]">
-                <Image
-                  src={coverImage}
-                  alt="Ảnh đại diện phòng"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                  <label className="px-4 py-2 rounded-xl bg-white text-[#253F5B] text-xs font-bold shadow-lg hover:bg-gray-100 transition-all cursor-pointer flex items-center gap-1.5">
-                    <Upload className="w-4 h-4 text-[#5C84BE]" />
-                    <span>Đổi ảnh bìa chính</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleCoverUpload}
-                      className="hidden"
+              {/* Khung xem trước lớn (Preview Box) */}
+              <div className="relative w-full h-[320px] rounded-[28px] overflow-hidden shadow-md border-2 border-[#E3EDF6] bg-slate-900 flex items-center justify-center">
+                {selectedMediaSlot === "cover" && (
+                  <div className="relative w-full h-full group bg-[#F8FBFE]">
+                    <Image
+                      src={coverImage}
+                      alt="Ảnh đại diện chính phòng"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                  </label>
-                </div>
-                <div className="absolute bottom-3 left-3 right-3 bg-white/90 backdrop-blur-sm px-3.5 py-1.5 rounded-xl text-center shadow-sm">
-                  <p className="text-[11px] font-bold text-[#253F5B] flex items-center justify-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#5C84BE]" />
-                    <span>Ảnh đại diện chính phòng</span>
-                  </p>
-                </div>
+                    <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                      <label className="px-4 py-2 rounded-xl bg-white text-[#253F5B] text-xs font-bold shadow-lg hover:bg-gray-100 transition-all cursor-pointer flex items-center gap-1.5">
+                        <Upload className="w-4 h-4 text-[#5C84BE]" />
+                        <span>Đổi ảnh bìa chính (Hình 1)</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleCoverUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                    <div className="absolute bottom-3 left-3 right-3 bg-white/90 backdrop-blur-sm px-3.5 py-1.5 rounded-xl text-center shadow-sm">
+                      <p className="text-[11px] font-bold text-[#253F5B] flex items-center justify-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[#5C84BE]" />
+                        <span>Hình 1: Ảnh đại diện chính phòng</span>
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedMediaSlot === "video" && (
+                  <div className="relative w-full h-full bg-black flex items-center justify-center">
+                    {parsedVideo ? (
+                      <>
+                        {parsedVideo.type === "youtube" ? (
+                          <iframe
+                            src={parsedVideo.src}
+                            title="Video quay phòng thực tế"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="w-full h-full border-0"
+                          />
+                        ) : (
+                          <video
+                            key={parsedVideo.src}
+                            src={parsedVideo.src}
+                            controls
+                            autoPlay
+                            playsInline
+                            className="w-full h-full object-contain"
+                          />
+                        )}
+                        <div className="absolute top-3 left-3 bg-rose-600/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1.5 shadow-sm">
+                          <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                          <span>Hình 2: Video quay phòng (Cloudinary / MP4)</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="p-6 text-center text-white/90 flex flex-col items-center justify-center gap-2.5">
+                        <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center border border-rose-500/30">
+                          <Video className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">Hình 2: Video phòng (Ghim)</p>
+                          <p className="text-[11px] text-slate-300 max-w-[240px] mt-0.5">
+                            Chưa có video. Dán link Cloudinary (mp4), YouTube hoặc tải file video từ máy bên dưới.
+                          </p>
+                        </div>
+                        <label className="mt-1 px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-sm">
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Tải video từ máy</span>
+                          <input
+                            type="file"
+                            accept="video/*"
+                            onChange={handleVideoUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {typeof selectedMediaSlot === "number" && galleryImages[selectedMediaSlot] && (
+                  <div className="relative w-full h-full group bg-[#F8FBFE]">
+                    <Image
+                      src={galleryImages[selectedMediaSlot]}
+                      alt={`Hình ${selectedMediaSlot + 3}`}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute bottom-3 left-3 right-3 bg-white/90 backdrop-blur-sm px-3.5 py-1.5 rounded-xl text-center shadow-sm">
+                      <p className="text-[11px] font-bold text-[#253F5B] flex items-center justify-center gap-1.5">
+                        <span>Hình {selectedMediaSlot + 3}: Ảnh chi tiết góc phòng</span>
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Các ảnh nhỏ / ảnh góc phòng (Gallery thumbnails) */}
+              {/* Dải thumbnail theo thứ tự: Hình 1 (Bìa) -> Hình 2 (Video ghim) -> Hình 3+ (Ảnh thêm) */}
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between text-xs font-bold text-[#526579]">
-                  <span>Ảnh chi tiết góc phòng ({galleryImages.length})</span>
+                  <span>Danh sách ảnh & video ({2 + galleryImages.length})</span>
                   <label className="text-[11px] text-[#5C84BE] hover:underline cursor-pointer flex items-center gap-1">
                     <Plus className="w-3.5 h-3.5" />
                     <span>Thêm ảnh</span>
@@ -355,35 +450,113 @@ export function CreateRoomView() {
                   </label>
                 </div>
 
-                {/* Grid các thumbnail */}
-                <div className="grid grid-cols-4 gap-2.5">
-                  {galleryImages.map((img, idx) => (
-                    <div
-                      key={idx}
-                      className="relative w-full h-[65px] rounded-xl overflow-hidden border border-[#D9E6F2] group shadow-2xs bg-gray-50"
-                    >
-                      <Image
-                        src={img}
-                        alt={`Ảnh nhỏ ${idx + 1}`}
-                        fill
-                        className="object-cover"
-                      />
+                <div className="grid grid-cols-4 gap-2">
+                  {/* 1. HÌNH 1: Ảnh bìa chính */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMediaSlot("cover")}
+                    className={`relative w-full h-[68px] rounded-xl overflow-hidden border-2 transition-all cursor-pointer text-left bg-gray-100 ${
+                      selectedMediaSlot === "cover"
+                        ? "border-[#5C84BE] ring-2 ring-[#5C84BE]/25 shadow-sm scale-102"
+                        : "border-[#D9E6F2] hover:border-slate-400 opacity-90"
+                    }`}
+                    title="Hình 1: Ảnh đại diện chính"
+                  >
+                    <Image
+                      src={coverImage}
+                      alt="Hình 1: Ảnh bìa"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute top-1 left-1 bg-black/70 backdrop-blur-xs text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-md leading-none">
+                      Hình 1
+                    </div>
+                    <div className="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-xs text-white text-[8px] font-bold py-0.5 text-center truncate">
+                      Ảnh bìa
+                    </div>
+                  </button>
+
+                  {/* 2. HÌNH 2: VIDEO GHIM CỐ ĐỊNH */}
+                  <div
+                    onClick={() => setSelectedMediaSlot("video")}
+                    className={`relative w-full h-[68px] rounded-xl overflow-hidden border-2 transition-all cursor-pointer bg-slate-900 group ${
+                      selectedMediaSlot === "video"
+                        ? "border-rose-500 ring-2 ring-rose-500/30 shadow-sm scale-102"
+                        : "border-[#D9E6F2] hover:border-rose-400"
+                    }`}
+                    title="Hình 2: Video quay phòng thực tế (Ghim)"
+                  >
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-rose-950/40 to-slate-900">
+                      <div className="w-6 h-6 rounded-full bg-rose-600 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                        <Play className="w-3 h-3 fill-white ml-0.5" />
+                      </div>
+                    </div>
+                    <div className="absolute top-1 left-1 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md leading-none shadow-xs">
+                      Hình 2
+                    </div>
+                    <div className="absolute bottom-0 inset-x-0 bg-black/75 backdrop-blur-xs text-rose-200 text-[8px] font-bold py-0.5 text-center truncate">
+                      ▶ Video (Ghim)
+                    </div>
+                    {videoUrl && (
                       <button
                         type="button"
-                        onClick={() => removeGalleryImage(idx)}
-                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shadow-sm"
-                        title="Xóa ảnh này"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setVideoUrl("");
+                          if (selectedMediaSlot === "video") setSelectedMediaSlot("cover");
+                        }}
+                        className="absolute top-1 right-1 w-4 h-4 rounded-full bg-black/70 hover:bg-rose-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shadow-sm"
+                        title="Xóa video"
                       >
-                        <X className="w-3 h-3" />
+                        <X className="w-2.5 h-2.5" />
                       </button>
-                    </div>
-                  ))}
+                    )}
+                  </div>
+
+                  {/* 3+. HÌNH 3 TRỞ ĐI: CÁC ẢNH GÓC PHÒNG BỔ SUNG */}
+                  {galleryImages.map((img, idx) => {
+                    const slotNumber = idx + 3;
+                    const isSelected = selectedMediaSlot === idx;
+                    return (
+                      <div
+                        key={idx}
+                        onClick={() => setSelectedMediaSlot(idx)}
+                        className={`relative w-full h-[68px] rounded-xl overflow-hidden border-2 transition-all cursor-pointer group bg-gray-100 ${
+                          isSelected
+                            ? "border-[#5C84BE] ring-2 ring-[#5C84BE]/25 shadow-sm scale-102"
+                            : "border-[#D9E6F2] hover:border-slate-400 opacity-90"
+                        }`}
+                        title={`Hình ${slotNumber}: Ảnh góc phòng`}
+                      >
+                        <Image
+                          src={img}
+                          alt={`Hình ${slotNumber}`}
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute top-1 left-1 bg-black/70 backdrop-blur-xs text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-md leading-none">
+                          Hình {slotNumber}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeGalleryImage(idx);
+                          }}
+                          className="absolute top-1 right-1 w-4.5 h-4.5 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shadow-sm"
+                          title="Xóa ảnh này"
+                        >
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
 
                   {/* Slot bấm thêm ảnh */}
                   {galleryImages.length < 8 && (
-                    <label className="w-full h-[65px] rounded-xl border-2 border-dashed border-[#D5E3F0] hover:border-[#5C84BE] hover:bg-[#F4F9FD] flex flex-col items-center justify-center text-[#5C84BE] transition-colors cursor-pointer">
+                    <label className="w-full h-[68px] rounded-xl border-2 border-dashed border-[#D5E3F0] hover:border-[#5C84BE] hover:bg-[#F4F9FD] flex flex-col items-center justify-center text-[#5C84BE] transition-colors cursor-pointer">
                       <Plus className="w-4 h-4" />
-                      <span className="text-[9px] font-bold mt-0.5">+ Ảnh</span>
+                      <span className="text-[9px] font-bold mt-0.5">+ Thêm ảnh</span>
                       <input
                         type="file"
                         multiple
@@ -394,27 +567,52 @@ export function CreateRoomView() {
                     </label>
                   )}
                 </div>
+              </div>
 
-                {/* Video quay phòng thực tế */}
-                <div className="space-y-2 pt-3 border-t border-[#EEF4FA]">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
-                      <Video className="w-3.5 h-3.5 text-[#5C84BE]" />
-                      Video quay phòng thực tế
+              {/* Cấu hình Video phòng (Ghim ở Hình 2) */}
+              <div className="space-y-2 pt-3 border-t border-[#EEF4FA]">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                    <Video className="w-3.5 h-3.5 text-rose-500" />
+                    <span>Cấu hình Video phòng (Ghim ở Hình 2)</span>
+                  </span>
+                  {videoUrl ? (
+                    <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                      Đã có video
                     </span>
+                  ) : (
                     <span className="text-[10px] text-slate-400 font-semibold">Tùy chọn</span>
-                  </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
                   <input
                     type="url"
                     value={videoUrl}
-                    onChange={(e) => setVideoUrl(e.target.value)}
-                    placeholder="Link video Youtube, TikTok, Drive hoặc file MP4..."
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-medium text-[#253F5B] transition-all placeholder:text-[#A4B3C6]"
+                    onChange={(e) => {
+                      setVideoUrl(e.target.value);
+                      if (e.target.value.trim()) setSelectedMediaSlot("video");
+                    }}
+                    placeholder="Dán link Cloudinary (mp4), YouTube, TikTok..."
+                    className="flex-1 h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-medium text-[#253F5B] transition-all placeholder:text-[#A4B3C6]"
                   />
-                  <p className="text-[10px] text-slate-400">
-                    Giúp khách thuê xem toàn cảnh phòng trực quan trước khi chốt thuê
-                  </p>
+                  <label
+                    className="h-10 px-3 rounded-xl bg-[#F0F5FA] hover:bg-[#E2EEF8] text-[#253F5B] text-xs font-bold border border-[#D9E6F2] cursor-pointer flex items-center gap-1.5 shrink-0 transition-colors"
+                    title="Tải file video từ máy tính"
+                  >
+                    <Upload className="w-3.5 h-3.5 text-[#5C84BE]" />
+                    <span className="hidden sm:inline">Tải video</span>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={handleVideoUpload}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
+                <p className="text-[10px] text-slate-400 leading-relaxed">
+                  Tương lai dùng <strong className="text-slate-600 font-semibold">Cloudinary</strong> lưu trữ video/ảnh miễn phí. Khi dán link hoặc chọn Hình 2, video sẽ phát xem trước trực tiếp tại khung trên.
+                </p>
               </div>
             </div>
 

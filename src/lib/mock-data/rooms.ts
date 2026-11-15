@@ -21,7 +21,7 @@ export const initialRooms: Room[] = [
     vehiclesCount: 2,
     tenantPhone: "0918.137.153",
     tenantHometown: "Nghệ An",
-    videoUrl: "",
+    videoUrl: "https://res.cloudinary.com/demo/video/upload/dog.mp4",
   },
   {
     id: "r2",
@@ -580,6 +580,17 @@ export function getRoomByNumber(roomNumber: string): Room {
     paymentCycle: baseRoom.paymentCycle || "1 tháng/lần",
     initialElectricityIndex: baseRoom.initialElectricityIndex ?? 1250,
     initialWaterIndex: baseRoom.initialWaterIndex ?? 48,
+    galleryImages:
+      baseRoom.galleryImages && baseRoom.galleryImages.length > 0
+        ? baseRoom.galleryImages
+        : [
+            "/images/rooms/room-demo.png",
+            "/images/rooms/room-demo.png",
+          ],
+    videoUrl:
+      baseRoom.videoUrl !== undefined
+        ? baseRoom.videoUrl
+        : "https://res.cloudinary.com/demo/video/upload/dog.mp4",
     customServices:
       baseRoom.customServices && baseRoom.customServices.length > 0
         ? baseRoom.customServices
