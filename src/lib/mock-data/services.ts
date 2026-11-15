@@ -16,9 +16,9 @@ export const initialServices: ServiceItem[] = [
     isMandatory: true,
     appliedRoomsCount: 45,
     priceOptions: [
-      { id: "opt_cg_dien_1", label: "Tiêu chuẩn (3.500 đ/kWh)", price: 3500, unit: "đ/kWh", type: "meter", isDefault: true },
-      { id: "opt_cg_dien_2", label: "Kinh doanh / Tải cao (3.800 đ/kWh)", price: 3800, unit: "đ/kWh", type: "meter" },
-      { id: "opt_cg_dien_3", label: "Khoán trọn gói (350.000 đ/phòng)", price: 350000, unit: "đ/phòng", type: "per_room" },
+      { id: "opt_cg_dien_1", label: "Tiêu chuẩn", price: 3500, unit: "đ/kWh", type: "meter", isDefault: true },
+      { id: "opt_cg_dien_2", label: "Kinh doanh / Tải cao", price: 3800, unit: "đ/kWh", type: "meter" },
+      { id: "opt_cg_dien_3", label: "Khoán trọn gói", price: 350000, unit: "đ/phòng", type: "per_room" },
     ],
   },
   {
@@ -35,10 +35,10 @@ export const initialServices: ServiceItem[] = [
     isMandatory: true,
     appliedRoomsCount: 45,
     priceOptions: [
-      { id: "opt_cg_nuoc_1", label: "Theo đồng hồ (30.000 đ/khối)", price: 30000, unit: "đ/khối", type: "meter", isDefault: true },
-      { id: "opt_cg_nuoc_2", label: "Khoán theo người (100.000 đ/người)", price: 100000, unit: "đ/người", type: "per_person" },
-      { id: "opt_cg_nuoc_3", label: "Khoán trọn gói (150.000 đ/phòng)", price: 150000, unit: "đ/phòng", type: "per_room" },
-      { id: "opt_cg_nuoc_4", label: "Ưu đãi sinh viên (70.000 đ/người)", price: 70000, unit: "đ/người", type: "per_person" },
+      { id: "opt_cg_nuoc_1", label: "Theo đồng hồ", price: 30000, unit: "đ/khối", type: "meter", isDefault: true },
+      { id: "opt_cg_nuoc_2", label: "Khoán theo người", price: 100000, unit: "đ/người", type: "per_person" },
+      { id: "opt_cg_nuoc_3", label: "Khoán trọn gói", price: 150000, unit: "đ/phòng", type: "per_room" },
+      { id: "opt_cg_nuoc_4", label: "Ưu đãi sinh viên", price: 70000, unit: "đ/người", type: "per_person" },
     ],
   },
   {
@@ -55,8 +55,8 @@ export const initialServices: ServiceItem[] = [
     isMandatory: true,
     appliedRoomsCount: 45,
     priceOptions: [
-      { id: "opt_cg_wifi_1", label: "Gói Tiêu chuẩn 300Mbps (50.000 đ/phòng)", price: 50000, unit: "đ/phòng", type: "per_room", isDefault: true },
-      { id: "opt_cg_wifi_2", label: "Gói VIP 500Mbps riêng (100.000 đ/phòng)", price: 100000, unit: "đ/phòng", type: "per_room" },
+      { id: "opt_cg_wifi_1", label: "Gói Tiêu chuẩn 300Mbps", price: 50000, unit: "đ/phòng", type: "per_room", isDefault: true },
+      { id: "opt_cg_wifi_2", label: "Gói VIP 500Mbps", price: 100000, unit: "đ/phòng", type: "per_room" },
       { id: "opt_cg_wifi_3", label: "Miễn phí (Ưu đãi hợp đồng)", price: 0, unit: "đ/phòng", type: "per_room" },
     ],
   },
@@ -74,8 +74,8 @@ export const initialServices: ServiceItem[] = [
     isMandatory: true,
     appliedRoomsCount: 45,
     priceOptions: [
-      { id: "opt_cg_vs_1", label: "Theo đầu người (50.000 đ/người)", price: 50000, unit: "đ/người", type: "per_person", isDefault: true },
-      { id: "opt_cg_vs_2", label: "Trọn gói theo phòng (100.000 đ/phòng)", price: 100000, unit: "đ/phòng", type: "per_room" },
+      { id: "opt_cg_vs_1", label: "Theo đầu người", price: 50000, unit: "đ/người", type: "per_person", isDefault: true },
+      { id: "opt_cg_vs_2", label: "Trọn gói theo phòng", price: 100000, unit: "đ/phòng", type: "per_room" },
     ],
   },
   {

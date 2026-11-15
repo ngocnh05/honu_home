@@ -33,6 +33,8 @@ import {
   FileText,
   BadgeDollarSign,
   Wifi,
+  ChevronDown,
+  ExternalLink,
 } from "lucide-react";
 import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
 import type { ServicePriceOption } from "@/types/service";
@@ -1224,35 +1226,35 @@ export function CreateRoomView() {
                 <div
                   key={srv.id}
                   onClick={() => toggleRoomService(srv.id)}
-                  className={`p-4 sm:p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3.5 ${
+                  className={`p-4 sm:p-4.5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 ${
                     srv.selected
-                      ? "border-[#5C84BE] bg-gradient-to-br from-[#F8FBFE] via-white to-[#F0F6FC] shadow-sm ring-2 ring-[#5C84BE]/15"
+                      ? "border-[#5C84BE] bg-gradient-to-br from-[#F8FBFE] to-white shadow-xs ring-1 ring-[#5C84BE]/20"
                       : "border-[#EAF0F6] bg-white opacity-60 hover:opacity-100 hover:border-slate-300"
                   }`}
                 >
-                  {/* Top row: Checkbox TO, Icon TO, Tên dịch vụ & Giá tiền CỰC ĐẸP */}
-                  <div className="flex items-start justify-between gap-3">
+                  {/* Hàng 1: Nút Checkbox to, Icon to, Tên dịch vụ & Đơn vị tính */}
+                  <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3.5 min-w-0">
-                      {/* Nút chọn TO & RÕ RÀNG */}
+                      {/* Checkbox to rõ */}
                       <div
-                        className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all shrink-0 ${
+                        className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all shrink-0 ${
                           srv.selected
-                            ? "bg-[#5C84BE] text-white shadow-md ring-4 ring-[#5C84BE]/20 scale-105"
+                            ? "bg-[#5C84BE] text-white shadow-xs ring-2 ring-[#5C84BE]/25"
                             : "border-2 border-slate-300 bg-white hover:border-[#5C84BE]"
                         }`}
                       >
-                        {srv.selected && <Check className="w-5 h-5 stroke-[3]" />}
+                        {srv.selected && <Check className="w-4.5 h-4.5 stroke-[3]" />}
                       </div>
 
-                      {/* Icon Dịch vụ TO */}
+                      {/* Icon Dịch vụ */}
                       <div
-                        className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${
                           isElec
-                            ? "bg-amber-100/70 text-amber-600 border border-amber-200"
+                            ? "bg-amber-100/80 text-amber-600 border border-amber-200"
                             : isWater
-                            ? "bg-sky-100/70 text-sky-600 border border-sky-200"
+                            ? "bg-sky-100/80 text-sky-600 border border-sky-200"
                             : isWifi
-                            ? "bg-indigo-100/70 text-indigo-600 border border-indigo-200"
+                            ? "bg-indigo-100/80 text-indigo-600 border border-indigo-200"
                             : "bg-slate-100 text-slate-600 border border-slate-200"
                         }`}
                       >
@@ -1270,7 +1272,7 @@ export function CreateRoomView() {
                       </div>
 
                       <div className="min-w-0">
-                        <span className="text-sm sm:text-base font-black text-[#253F5B] block truncate">
+                        <span className="text-sm font-black text-[#253F5B] block truncate">
                           {srv.name}
                         </span>
                         <span className="text-[11px] text-[#7A93AD] font-bold inline-flex items-center gap-1 mt-0.5">
@@ -1285,14 +1287,14 @@ export function CreateRoomView() {
                       </div>
                     </div>
 
-                    {/* Khối Hiển Thị Đơn Giá To & Rõ Đẹp */}
-                    <div className="flex flex-col items-end text-right shrink-0 bg-white/80 backdrop-blur-xs px-3.5 py-1.5 rounded-2xl border border-[#E3EDF6] shadow-2xs">
+                    {/* Hiển thị Giá tiền Đang Áp Dụng (To, Đậm, Sắc Nét, Không lặp thừa) */}
+                    <div className="flex flex-col items-end text-right shrink-0 bg-[#F4F8FC] px-3.5 py-1.5 rounded-xl border border-[#E3EDF6]">
                       <span className="text-[9px] font-extrabold text-[#7A93AD] uppercase tracking-wider">
-                        Đơn giá áp dụng
+                        Đơn giá phòng
                       </span>
-                      <div className="flex items-baseline gap-1 mt-0.5">
+                      <div className="flex items-baseline gap-1">
                         <span
-                          className={`text-lg sm:text-2xl font-black font-mono tracking-tight transition-colors ${
+                          className={`text-lg sm:text-xl font-black font-mono tracking-tight ${
                             srv.selected ? "text-[#5C84BE]" : "text-slate-400"
                           }`}
                         >
@@ -1309,77 +1311,62 @@ export function CreateRoomView() {
                     </div>
                   </div>
 
-                  {/* Khi chọn: Hiển thị bộ nút bấm chọn Mức Giá (Pills to rõ, bấm là ăn ngay) */}
+                  {/* Hàng 2: COMBOBOX Chọn Gói Giá & Dẫn sang Menu Dịch vụ */}
                   {srv.selected && srv.priceOptions && srv.priceOptions.length > 0 ? (
                     <div
-                      className="pt-3 border-t border-[#EDF4FA] space-y-2"
+                      className="pt-2.5 border-t border-[#EDF4FA] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="flex items-center justify-between text-xs font-bold text-[#526579]">
-                        <span className="flex items-center gap-1.5">
-                          <Layers className="w-3.5 h-3.5 text-[#5C84BE]" />
-                          <span>Chọn gói giá áp dụng cho phòng:</span>
-                        </span>
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-[#526579] shrink-0">
+                        <Layers className="w-3.5 h-3.5 text-[#5C84BE]" />
+                        <span>Mức giá áp dụng:</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-1 sm:justify-end">
+                        {/* Combobox hiện đại, sang trọng, không bị lặp giá */}
+                        <div className="relative flex-1 sm:max-w-xs">
+                          <select
+                            value={srv.selectedOptionId || srv.priceOptions[0]?.id}
+                            onChange={(e) => handleServiceOptionChange(srv.id, e.target.value)}
+                            className="w-full h-9 pl-3.5 pr-8 rounded-xl border-2 border-[#D5E3F0] bg-white text-xs font-bold text-[#253F5B] hover:border-[#5C84BE] focus:border-[#5C84BE] focus:ring-2 focus:ring-[#5C84BE]/20 outline-none transition-all cursor-pointer shadow-2xs appearance-none truncate"
+                          >
+                            {srv.priceOptions.map((opt) => (
+                              <option key={opt.id} value={opt.id}>
+                                {opt.label} • {opt.price.toLocaleString("vi-VN")} {opt.unit}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="w-4 h-4 text-[#7A93AD] pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2" />
+                        </div>
+
+                        {/* Nút sang Menu Dịch Vụ */}
                         <Link
                           href="/services"
                           target="_blank"
-                          className="text-[11px] text-[#5C84BE] hover:underline flex items-center gap-0.5 font-bold"
-                          title="Chỉnh sửa hoặc thêm mức giá mới tại Bảng dịch vụ cơ sở"
+                          className="h-9 px-2.5 rounded-xl border border-[#D5E3F0] bg-[#F8FBFE] hover:bg-[#EDF4FA] text-[#5C84BE] text-xs font-bold shrink-0 flex items-center gap-1 transition-colors"
+                          title="Quản lý và thêm mức giá mới tại Menu Dịch vụ"
                         >
-                          <span>+ Thêm mức giá tại Menu Dịch vụ</span>
-                          <span>↗</span>
+                          <span className="hidden sm:inline">Menu Dịch vụ</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
                         </Link>
-                      </div>
-
-                      {/* Các Nút Bấm To Rõ Chọn Trực Tiếp */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {srv.priceOptions.map((opt) => {
-                          const isOptActive =
-                            (srv.selectedOptionId || srv.priceOptions![0]?.id) === opt.id;
-                          return (
-                            <button
-                              key={opt.id}
-                              type="button"
-                              onClick={() => handleServiceOptionChange(srv.id, opt.id)}
-                              className={`px-3.5 py-2.5 rounded-xl border-2 text-left cursor-pointer transition-all flex items-center justify-between gap-2 ${
-                                isOptActive
-                                  ? "bg-[#5C84BE] text-white border-[#5C84BE] shadow-xs font-bold ring-2 ring-[#5C84BE]/25 scale-101"
-                                  : "bg-white text-[#526579] border-[#D9E6F2] hover:border-[#5C84BE] hover:bg-[#F4F8FC]"
-                              }`}
-                            >
-                              <div className="min-w-0">
-                                <span className="text-xs font-bold block truncate">
-                                  {opt.label}
-                                </span>
-                              </div>
-                              <span
-                                className={`font-mono text-xs font-black shrink-0 ${
-                                  isOptActive ? "text-white" : "text-[#253F5B]"
-                                }`}
-                              >
-                                {opt.price.toLocaleString("vi-VN")} {opt.unit}
-                              </span>
-                            </button>
-                          );
-                        })}
                       </div>
                     </div>
                   ) : srv.selected ? (
                     <div
-                      className="pt-2.5 border-t border-[#EDF4FA] flex items-center justify-between text-xs text-[#7A93AD]"
+                      className="pt-2 border-t border-[#EDF4FA] flex items-center justify-between text-xs text-[#7A93AD]"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <span className="text-[11px] flex items-center gap-1 font-semibold text-slate-500">
                         <Check className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Áp dụng đơn giá chuẩn của cơ sở</span>
+                        <span>Áp dụng mức giá mặc định của cơ sở</span>
                       </span>
                       <Link
                         href="/services"
                         target="_blank"
-                        className="text-[11px] text-[#5C84BE] hover:underline font-bold flex items-center gap-0.5"
+                        className="text-[11px] text-[#5C84BE] hover:underline font-bold flex items-center gap-1"
                       >
-                        <span>Sửa giá tại Menu Dịch vụ</span>
-                        <span>↗</span>
+                        <span>Sửa tại Menu Dịch vụ</span>
+                        <ExternalLink className="w-3 h-3" />
                       </Link>
                     </div>
                   ) : null}
