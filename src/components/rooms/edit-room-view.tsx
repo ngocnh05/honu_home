@@ -1267,7 +1267,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
 
         {/* 5. Card: Bảng Dịch Vụ Áp Dụng Cho Căn Hộ */}
         <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-sm p-8 space-y-6 w-full">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#F0F5FA]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#F0F5FA]">
             <div className="flex items-center gap-2.5">
               <Zap className="w-5 h-5 text-amber-500" />
               <div>
@@ -1275,16 +1275,27 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                   Bảng Dịch Vụ Áp Dụng Cho Phòng
                 </h3>
                 <p className="text-xs text-[#7A93AD]">
-                  Mỗi cơ sở có danh mục dịch vụ riêng. Chọn những dịch vụ căn phòng này sử dụng hoặc chỉnh đơn giá riêng nếu có.
+                  Mỗi cơ sở có danh mục dịch vụ riêng. Chọn những dịch vụ căn phòng này sử dụng và gói giá tương ứng.
                 </p>
               </div>
             </div>
-            <span className="text-xs font-bold text-[#5C84BE] bg-[#EAF2F8] px-3.5 py-1.5 rounded-full border border-[#D8E6F3] self-start sm:self-center">
-              Đã chọn {roomServices.filter((s) => s.selected).length}/{roomServices.length} dịch vụ
-            </span>
+
+            <div className="flex items-center gap-3 self-start sm:self-center">
+              <span className="text-xs font-bold text-[#5C84BE] bg-[#EAF2F8] px-3.5 py-1.5 rounded-full border border-[#D8E6F3]">
+                Đã chọn {roomServices.filter((s) => s.selected).length}/{roomServices.length} dịch vụ
+              </span>
+              <Link
+                href="/services"
+                className="h-9 px-3.5 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white text-xs font-bold shadow-xs hover:shadow-md transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                title="Quản lý và thêm sửa biểu giá tại Menu Dịch vụ cơ sở"
+              >
+                <span>Cấu hình Menu Dịch vụ</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
 
-          {/* Danh sách checkbox dịch vụ của cơ sở */}
+          {/* Danh sách checkbox dịch vụ của cơ sở (Bố cục 2 tầng: Tầng 1 Tên đầy đủ không bị che, Tầng 2 Combobox to rộng 100%) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {roomServices.map((srv) => {
               const isElec = srv.name.toLowerCase().includes("điện");
@@ -1303,10 +1314,10 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                       : "border-[#EAF0F6] bg-white opacity-60 hover:opacity-100 hover:border-slate-300"
                   }`}
                 >
-                  {/* Hàng 1: Nút Checkbox to, Icon to, Tên dịch vụ, và Chọn mức giá dạng Combobox to */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+                  {/* TẦNG 1: Tên dịch vụ hiển thị trọn vẹn, không bao giờ bị cắt chữ/che chữ */}
+                  <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3.5 min-w-0">
-                      {/* Nút Checkbox to rõ: Bấm trực tiếp vào đây để bật/tắt dịch vụ */}
+                      {/* Nút Checkbox to rõ */}
                       <button
                         type="button"
                         onClick={() => toggleRoomService(srv.id)}
@@ -1320,7 +1331,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                         {srv.selected && <Check className="w-5 h-5 stroke-[3]" />}
                       </button>
 
-                      {/* Icon Dịch vụ (Click để toggle nhanh) */}
+                      {/* Icon Dịch vụ */}
                       <div
                         onClick={() => toggleRoomService(srv.id)}
                         className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-2xs cursor-pointer select-none transition-transform hover:scale-105 ${
@@ -1350,7 +1361,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                         onClick={() => toggleRoomService(srv.id)}
                         className="min-w-0 cursor-pointer select-none"
                       >
-                        <span className="text-sm sm:text-base font-black text-[#253F5B] block truncate hover:text-[#5C84BE] transition-colors">
+                        <span className="text-sm sm:text-base font-black text-[#253F5B] block hover:text-[#5C84BE] transition-colors leading-tight">
                           {srv.name}
                         </span>
                         <span className="text-[11px] text-[#7A93AD] font-bold inline-flex items-center gap-1 mt-0.5">
@@ -1365,15 +1376,28 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                       </div>
                     </div>
 
-                    {/* Vùng chọn mức giá Combobox TO hoặc hiển thị đơn giá chuẩn khi không có nhiều gói */}
-                    {srv.selected && srv.priceOptions && srv.priceOptions.length > 0 ? (
-                      <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
-                        {/* Combobox TO, RỘNG, DỄ BẤM - KHÔNG BỊ TRÙNG LẶP */}
-                        <div className="relative w-full sm:w-72">
+                    {/* Khi chưa tick chọn: hiển thị nhãn giá tham chiếu */}
+                    {!srv.selected && (
+                      <span className="text-xs font-bold font-mono text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 shrink-0">
+                        {formatPrice(srv.price)} {srv.unit}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* TẦNG 2: COMBOBOX LỰA CHỌN MỨC GIÁ RỘNG THOẢI MÁI, KHÔNG BỊ CO CỤM */}
+                  {srv.selected && (
+                    <div className="pt-2 border-t border-[#EDF4FA] flex items-center gap-2.5">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-[#526579] shrink-0">
+                        <Layers className="w-3.5 h-3.5 text-[#5C84BE]" />
+                        <span className="hidden sm:inline">Mức giá:</span>
+                      </div>
+
+                      {srv.priceOptions && srv.priceOptions.length > 0 ? (
+                        <div className="relative flex-1">
                           <select
                             value={srv.selectedOptionId || srv.priceOptions[0]?.id}
                             onChange={(e) => handleServiceOptionChange(srv.id, e.target.value)}
-                            className="w-full h-11 pl-4 pr-10 rounded-xl border-2 border-[#D5E3F0] bg-white text-xs sm:text-sm font-bold text-[#253F5B] hover:border-[#5C84BE] focus:border-[#5C84BE] focus:ring-3 focus:ring-[#5C84BE]/20 outline-none transition-all cursor-pointer shadow-xs appearance-none truncate"
+                            className="w-full h-10 pl-3.5 pr-9 rounded-xl border-2 border-[#D5E3F0] bg-white text-xs sm:text-sm font-bold text-[#253F5B] hover:border-[#5C84BE] focus:border-[#5C84BE] focus:ring-3 focus:ring-[#5C84BE]/20 outline-none transition-all cursor-pointer shadow-xs appearance-none"
                           >
                             {srv.priceOptions.map((opt) => (
                               <option key={opt.id} value={opt.id} className="py-1">
@@ -1381,76 +1405,21 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                               </option>
                             ))}
                           </select>
-                          <ChevronDown className="w-5 h-5 text-[#5C84BE] pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" />
+                          <ChevronDown className="w-4 h-4 text-[#5C84BE] pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" />
                         </div>
-
-                        {/* Nút sang Menu Dịch Vụ */}
-                        <Link
-                          href="/services"
-                          className="h-11 px-3.5 rounded-xl border border-[#D5E3F0] bg-[#F8FBFE] hover:bg-[#EDF4FA] text-[#5C84BE] text-xs font-bold shrink-0 flex items-center gap-1.5 transition-colors shadow-2xs"
-                          title="Quản lý và thêm mức giá mới tại Menu Dịch vụ"
-                        >
-                          <span className="hidden sm:inline">Menu Dịch vụ</span>
-                          <ExternalLink className="w-4 h-4" />
-                        </Link>
-                      </div>
-                    ) : srv.selected ? (
-                      <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                        <div className="flex items-baseline gap-1 bg-[#F4F8FC] px-3.5 py-2 rounded-xl border border-[#E3EDF6]">
-                          <span className="text-base sm:text-lg font-black font-mono text-[#5C84BE]">
-                            {formatPrice(srv.price)}
-                          </span>
-                          <span className="text-xs font-black text-[#253F5B]">
-                            {srv.unit}
+                      ) : (
+                        <div className="flex-1 flex items-center justify-between bg-white px-3.5 py-2 rounded-xl border border-[#D5E3F0] text-xs font-bold text-[#253F5B]">
+                          <span>Mặc định cơ sở</span>
+                          <span className="font-mono text-[#5C84BE] font-black">
+                            {formatPrice(srv.price)} {srv.unit}
                           </span>
                         </div>
-                        <Link
-                          href="/services"
-                          className="h-10 px-3 rounded-xl border border-[#D5E3F0] bg-[#F8FBFE] hover:bg-[#EDF4FA] text-[#5C84BE] text-xs font-bold shrink-0 flex items-center gap-1 transition-colors"
-                        >
-                          <span>Menu Dịch vụ</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </Link>
-                      </div>
-                    ) : (
-                      /* Khi chưa chọn: hiển thị mờ đơn vị cơ sở */
-                      <div className="flex items-baseline gap-1 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 opacity-60 shrink-0 self-end sm:self-center">
-                        <span className="text-sm sm:text-base font-bold font-mono text-slate-500">
-                          {formatPrice(srv.price)}
-                        </span>
-                        <span className="text-xs font-bold text-slate-400">
-                          {srv.unit}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}
-          </div>
-
-          {/* Banner Hướng Dẫn Quản Lý Bảng Giá Dịch Vụ Cơ Sở */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-[#F0F5FA] to-white border border-[#D8E6F3] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#526579]">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#5C84BE] text-white flex items-center justify-center shrink-0 shadow-sm">
-                <Layers className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="font-bold text-[#253F5B] block text-xs sm:text-sm">
-                  Muốn cấu hình thêm mức giá mới hoặc bổ sung dịch vụ cho tòa nhà?
-                </span>
-                <span className="text-[11px] text-[#7A93AD]">
-                  Tất cả đơn giá và phân cấp mức giá được quản lý tập trung và chuẩn hóa tại Bảng Dịch Vụ Cơ Sở.
-                </span>
-              </div>
-            </div>
-            <Link
-              href="/services"
-              className="px-4 py-2.5 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white font-bold text-xs shadow-md hover:shadow-lg transition-all shrink-0 flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <span>Mở Bảng Dịch Vụ</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </Link>
           </div>
         </div>
 
