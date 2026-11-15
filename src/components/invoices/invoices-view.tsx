@@ -23,6 +23,7 @@ import {
   FileSpreadsheet,
   ArrowRight,
   Sparkles,
+  User,
 } from "lucide-react";
 import type { Invoice, InvoiceStatus } from "@/types/invoice";
 import { initialInvoices } from "@/lib/mock-data/invoices";
@@ -50,6 +51,10 @@ export function InvoicesView() {
   const [formTenantPhone, setFormTenantPhone] = React.useState("0918.137.153");
   const [formRoomPrice, setFormRoomPrice] = React.useState("2.700.000");
 
+  // Ngày chốt sổ & Hạn thu tiền
+  const [formClosingDate, setFormClosingDate] = React.useState("2026-03-25");
+  const [formDueDate, setFormDueDate] = React.useState("2026-03-28");
+
   // Electricity meters
   const [formElecOld, setFormElecOld] = React.useState(1250);
   const [formElecNew, setFormElecNew] = React.useState(1340);
@@ -58,30 +63,59 @@ export function InvoicesView() {
   const [formWaterOld, setFormWaterOld] = React.useState(48);
   const [formWaterNew, setFormWaterNew] = React.useState(54);
 
-  // Available rooms for selected building
+  // Helper date formatter (YYYY-MM-DD -> DD/MM/YYYY)
+  const formatIsoToVn = (isoStr: string) => {
+    if (!isoStr) return "";
+    const parts = isoStr.split("-");
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return isoStr;
+  };
+
+  // Available rooms for selected building - CHỈ HIỂN THỊ PHÒNG ĐANG THUÊ (ẨN PHÒNG TRỐNG)
   const availableRooms = React.useMemo(() => {
-    return initialRooms.filter((r) => r.buildingId === formBuildingId);
+    return initialRooms.filter(
+      (r) =>
+        r.buildingId === formBuildingId &&
+        r.status === "rented" &&
+        r.tenantName &&
+        r.tenantName !== "---"
+    );
   }, [formBuildingId]);
 
   const handleSelectBuilding = (bId: string) => {
     setFormBuildingId(bId);
-    const rooms = initialRooms.filter((r) => r.buildingId === bId);
+    const rooms = initialRooms.filter(
+      (r) =>
+        r.buildingId === bId &&
+        r.status === "rented" &&
+        r.tenantName &&
+        r.tenantName !== "---"
+    );
     if (rooms.length > 0) {
       const firstRoom = rooms[0];
       setFormRoomNumber(firstRoom.roomNumber);
-      setFormTenantName(firstRoom.tenantName && firstRoom.tenantName !== "---" ? firstRoom.tenantName : "Khách thuê");
+      setFormTenantName(firstRoom.tenantName);
       setFormTenantPhone(firstRoom.tenantPhone || "0912.345.678");
       setFormRoomPrice(firstRoom.price.toLocaleString("vi-VN"));
       setFormElecOld(firstRoom.initialElectricityIndex || 1250);
       setFormElecNew((firstRoom.initialElectricityIndex || 1250) + 85);
       setFormWaterOld(firstRoom.initialWaterIndex || 48);
       setFormWaterNew((firstRoom.initialWaterIndex || 48) + 6);
+    } else {
+      setFormRoomNumber("");
+      setFormTenantName("");
+      setFormTenantPhone("");
+      setFormRoomPrice("0");
     }
   };
 
   const handleSelectRoom = (rNum: string) => {
     setFormRoomNumber(rNum);
-    const r = initialRooms.find((rm) => rm.roomNumber === rNum && rm.buildingId === formBuildingId);
+    const r = initialRooms.find(
+      (rm) => rm.roomNumber === rNum && rm.buildingId === formBuildingId
+    );
     if (r) {
       setFormTenantName(r.tenantName && r.tenantName !== "---" ? r.tenantName : "Khách thuê");
       setFormTenantPhone(r.tenantPhone || "0912.345.678");
@@ -177,8 +211,15 @@ export function InvoicesView() {
   // Submit New Invoice
   const handleCreateInvoice = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formRoomNumber) {
+      error("Vui lòng chọn phòng để chốt hóa đơn!");
+      return;
+    }
     const bld = initialBuildings.find((b) => b.id === formBuildingId);
     const buildingName = bld?.name || "HonuHome Cầu Giấy";
+
+    const formattedDue = formatIsoToVn(formDueDate) || "28/03/2026";
+    const formattedClosing = formatIsoToVn(formClosingDate) || "25/03/2026";
 
     const newInv: Invoice = {
       id: `INV-2026-03-${formRoomNumber.toUpperCase()}`,
@@ -213,9 +254,9 @@ export function InvoicesView() {
       remainingAmount: totalBillCalculated,
       status: "unpaid",
       statusLabel: "Chờ thanh toán",
-      dueDate: "28/03/2026",
-      createdAt: new Date().toLocaleDateString("vi-VN"),
-      notes: "Chốt số điện nước ngày 25 hàng tháng.",
+      dueDate: formattedDue,
+      createdAt: formattedClosing,
+      notes: `Chốt số điện nước ngày ${formattedClosing}.`,
     };
 
     setInvoices((prev) => [newInv, ...prev]);
@@ -748,17 +789,17 @@ export function InvoicesView() {
                 {/* Cột 1: Thông tin phòng & Khách thuê */}
                 <div className="md:col-span-5 space-y-3.5">
                   <span className="text-xs font-black text-[#253F5B] uppercase tracking-wider block pb-1 border-b border-[#F0F5FA]">
-                    1. Căn Phòng & Khách Thuê
+                    1. Căn Phòng & Kỳ Chốt
                   </span>
 
-                  {/* Chọn Cơ sở & Chọn Phòng từ danh sách */}
+                  {/* Chọn Cơ sở & Chọn Phòng (Chỉ hiển thị phòng đang thuê - ẩn phòng trống) */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-[#253F5B]">Cơ sở *</label>
                       <select
                         value={formBuildingId}
                         onChange={(e) => handleSelectBuilding(e.target.value)}
-                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-semibold text-[#253F5B]"
+                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-semibold text-[#253F5B] cursor-pointer"
                       >
                         {initialBuildings.map((b) => (
                           <option key={b.id} value={b.id}>
@@ -769,41 +810,92 @@ export function InvoicesView() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-[#253F5B]">Chọn phòng chốt *</label>
+                      <label className="text-xs font-bold text-[#253F5B]">
+                        Chọn phòng chốt *{" "}
+                        <span className="text-[10px] text-[#7A93AD] font-normal">
+                          ({availableRooms.length} đang thuê)
+                        </span>
+                      </label>
                       <select
                         value={formRoomNumber}
                         onChange={(e) => handleSelectRoom(e.target.value)}
-                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-bold text-[#253F5B]"
+                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-bold text-[#253F5B] cursor-pointer"
                       >
-                        {availableRooms.map((r) => (
-                          <option key={r.id} value={r.roomNumber}>
-                            Phòng {r.roomNumber} ({r.tenantName !== "---" ? r.tenantName : "Trống"})
+                        {availableRooms.length === 0 ? (
+                          <option value="" disabled>
+                            Không có phòng đang thuê
                           </option>
-                        ))}
+                        ) : (
+                          availableRooms.map((r) => (
+                            <option key={r.id} value={r.roomNumber}>
+                              Phòng {r.roomNumber} ({r.tenantName})
+                            </option>
+                          ))
+                        )}
                       </select>
                     </div>
                   </div>
 
-                  {/* Tên khách & Tiền phòng */}
+                  {/* Thông tin tự động từ phòng chọn: Khách đại diện & Giá thuê (Không cần nhập thủ công) */}
+                  <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#F6FAFE] to-[#EFF6FD] border border-[#D5E5F5] flex items-center justify-between shadow-2xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-white border border-[#D8E6F3] flex items-center justify-center text-[#5C84BE] shadow-2xs">
+                        <User className="w-4 h-4 text-[#5C84BE]" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-[#7A93AD] font-bold uppercase tracking-wider block">
+                          Khách đại diện
+                        </span>
+                        <span className="text-xs font-black text-[#253F5B] block">
+                          {formTenantName || "Chưa có khách thuê"}
+                        </span>
+                        {formTenantPhone && (
+                          <span className="text-[10px] text-[#7A93AD] block">
+                            {formTenantPhone}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] text-[#7A93AD] font-bold uppercase tracking-wider block">
+                        Tiền phòng
+                      </span>
+                      <span className="text-sm font-black text-[#5C84BE] block">
+                        {cleanRoomPrice.toLocaleString("vi-VN")} đ
+                      </span>
+                      <span className="text-[10px] text-emerald-600 font-semibold block">
+                        Theo hợp đồng
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bổ sung Ngày chốt sổ & Hạn thu tiền */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-[#253F5B]">Khách đại diện *</label>
+                      <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-[#5C84BE]" />
+                        <span>Ngày chốt sổ *</span>
+                      </label>
                       <input
-                        type="text"
+                        type="date"
                         required
-                        value={formTenantName}
-                        onChange={(e) => setFormTenantName(e.target.value)}
-                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] text-xs font-bold text-[#253F5B] bg-[#F9FBFE]"
+                        value={formClosingDate}
+                        onChange={(e) => setFormClosingDate(e.target.value)}
+                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-bold text-[#253F5B] cursor-pointer"
                       />
                     </div>
+
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-[#253F5B]">Tiền phòng (VNĐ)</label>
+                      <label className="text-xs font-bold text-[#253F5B] flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-rose-500" />
+                        <span>Hạn thu tiền *</span>
+                      </label>
                       <input
-                        type="text"
+                        type="date"
                         required
-                        value={formRoomPrice}
-                        onChange={(e) => setFormRoomPrice(e.target.value)}
-                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] text-xs font-bold text-[#253F5B] bg-[#F9FBFE]"
+                        value={formDueDate}
+                        onChange={(e) => setFormDueDate(e.target.value)}
+                        className="w-full h-10 px-3 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-bold text-rose-600 cursor-pointer"
                       />
                     </div>
                   </div>
