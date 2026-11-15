@@ -23,8 +23,16 @@ import {
   ShieldCheck,
   Send,
   Smartphone,
+  Eye,
+  EyeOff,
+  Lock,
+  Unlock,
+  Copy,
+  RefreshCw,
+  AlertCircle,
+  ShieldAlert,
 } from "lucide-react";
-import type { Tenant, TenantRole, TenantStatus } from "@/types/tenant";
+import type { Tenant, TenantRole, TenantStatus, PortalAccountStatus } from "@/types/tenant";
 import { initialTenants } from "@/lib/mock-data/tenants";
 import { initialBuildings } from "@/lib/mock-data/buildings";
 import { initialRooms } from "@/lib/mock-data/rooms";
@@ -41,6 +49,14 @@ export function TenantsView() {
   const [showModal, setShowModal] = React.useState(false);
   const [editingTenant, setEditingTenant] = React.useState<Tenant | null>(null);
 
+  // Dedicated Portal Account Modal State
+  const [showAccountModal, setShowAccountModal] = React.useState(false);
+  const [accountTenant, setAccountTenant] = React.useState<Tenant | null>(null);
+  const [accountUsername, setAccountUsername] = React.useState("");
+  const [accountPassword, setAccountPassword] = React.useState("");
+  const [accountStatus, setAccountStatus] = React.useState<PortalAccountStatus>("active");
+  const [showPassword, setShowPassword] = React.useState(false);
+
   // Form State
   const [formFullName, setFormFullName] = React.useState("");
   const [formPhone, setFormPhone] = React.useState("");
@@ -55,6 +71,9 @@ export function TenantsView() {
   const [formStartDate, setFormStartDate] = React.useState("01/01/2026");
   const [formNotes, setFormNotes] = React.useState("");
   const [formPortalAccount, setFormPortalAccount] = React.useState(true);
+  const [formPortalUsername, setFormPortalUsername] = React.useState("");
+  const [formPortalPassword, setFormPortalPassword] = React.useState("");
+  const [showFormPassword, setShowFormPassword] = React.useState(false);
 
   // Portal Account Filter
   const [selectedPortalFilter, setSelectedPortalFilter] = React.useState<"all" | "active" | "inactive">("all");
@@ -72,23 +91,82 @@ export function TenantsView() {
     }
   };
 
-  const handleGrantPortal = (tenantId: string, name: string, phone: string) => {
+  const openAccountModal = (t: Tenant) => {
+    setAccountTenant(t);
+    setAccountUsername(t.portalUsername || t.phone);
+    setAccountPassword(t.portalPassword || `Honu@${t.phone.slice(-4) || Math.floor(1000 + Math.random() * 9000)}`);
+    setAccountStatus(t.portalAccountStatus === "locked" ? "locked" : "active");
+    setShowPassword(false);
+    setShowAccountModal(true);
+  };
+
+  const handleCopyAccountCredentials = (tenant: Tenant, customU?: string, customP?: string) => {
+    const u = customU || tenant.portalUsername || tenant.phone;
+    const p = customP || tenant.portalPassword || `Honu@${tenant.phone.slice(-4)}`;
+    const text = `HonuHome - Thông Tin Đăng Nhập Cổng Khách Thuê:
+• Khách thuê: ${tenant.fullName}
+• Phòng: ${tenant.roomNumber} (${tenant.buildingName})
+• Link truy cập: https://portal.honuhome.vn
+• Tên đăng nhập: ${u}
+• Mật khẩu: ${p}
+(Quý khách vui lòng đổi mật khẩu sau lần đăng nhập đầu tiên)`;
+
+    navigator.clipboard.writeText(text);
+    success(`Đã copy thông tin tài khoản & mật khẩu của "${tenant.fullName}" để gửi Zalo!`);
+  };
+
+  const handleDeletePortalAccount = (tenant: Tenant) => {
+    if (
+      window.confirm(
+        `Bạn có chắc chắn muốn XÓA TÀI KHOẢN CỔNG KHÁCH của "${tenant.fullName}"?\n\n• Khách sẽ bị thu hồi quyền đăng nhập web và không thể xem hóa đơn hay gửi sự cố qua app nữa.\n• Hồ sơ khách thuê, thông tin hợp đồng và lịch sử phòng vẫn được lưu giữ an toàn.`
+      )
+    ) {
+      setTenants((prev) =>
+        prev.map((t) =>
+          t.id === tenant.id
+            ? {
+                ...t,
+                portalAccountStatus: "inactive",
+                portalUsername: undefined,
+                portalPassword: undefined,
+              }
+            : t
+        )
+      );
+      success(`Đã xóa tài khoản Cổng Khách của "${tenant.fullName}"!`);
+      setShowAccountModal(false);
+    }
+  };
+
+  const handleSaveAccountModal = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!accountTenant) return;
+    if (!accountUsername.trim()) {
+      error("Vui lòng nhập tên đăng nhập");
+      return;
+    }
+    if (!accountPassword.trim()) {
+      error("Vui lòng nhập mật khẩu");
+      return;
+    }
+
     setTenants((prev) =>
       prev.map((t) =>
-        t.id === tenantId
-          ? { ...t, portalAccountStatus: "active", portalUsername: phone, lastLoginAt: "Vừa kích hoạt" }
+        t.id === accountTenant.id
+          ? {
+              ...t,
+              portalAccountStatus: accountStatus,
+              portalUsername: accountUsername.trim(),
+              portalPassword: accountPassword.trim(),
+              lastLoginAt: t.lastLoginAt || "Vừa cập nhật",
+            }
           : t
       )
     );
-    success(`Đã cấp tài khoản Cổng Khách Thuê cho "${name}" (Tên đăng nhập: ${phone})`);
-  };
 
-  const handleResetPortalPassword = (tenant: Tenant) => {
-    const tempPass = `Honu@${tenant.phone.slice(-4)}`;
-    navigator.clipboard.writeText(
-      `HonuHome thông báo: Thông tin tài khoản Cổng Khách Thuê phòng ${tenant.roomNumber}. Link: portal.honuhome.vn, Đăng nhập: ${tenant.phone}, Mật khẩu tạm: ${tempPass}`
-    );
-    success(`Đã tạo mật khẩu mới (${tempPass}) và copy thông báo gửi Zalo cho khách!`);
+    const statusMsg = accountStatus === "locked" ? "Tạm khóa đăng nhập" : "Đang hoạt động";
+    success(`Đã cập nhật tài khoản Cổng Khách cho "${accountTenant.fullName}" (${statusMsg})!`);
+    setShowAccountModal(false);
   };
 
   // Filtered tenants
@@ -128,6 +206,9 @@ export function TenantsView() {
     setFormStartDate("01/01/2026");
     setFormNotes("");
     setFormPortalAccount(true);
+    setFormPortalUsername("");
+    setFormPortalPassword(`Honu@${Math.floor(1000 + Math.random() * 9000)}`);
+    setShowFormPassword(false);
     setShowModal(true);
   };
 
@@ -146,7 +227,10 @@ export function TenantsView() {
     setFormVehiclePlate(t.vehiclePlate || "");
     setFormStartDate(t.startDate);
     setFormNotes(t.notes || "");
-    setFormPortalAccount(t.portalAccountStatus === "active");
+    setFormPortalAccount(t.portalAccountStatus === "active" || t.portalAccountStatus === "locked");
+    setFormPortalUsername(t.portalUsername || t.phone);
+    setFormPortalPassword(t.portalPassword || `Honu@${t.phone.slice(-4) || "1234"}`);
+    setShowFormPassword(false);
     setShowModal(true);
   };
 
@@ -164,6 +248,9 @@ export function TenantsView() {
 
     const bld = initialBuildings.find((b) => b.id === formBuildingId);
     const buildingName = bld?.name || "HonuHome Cầu Giấy";
+
+    const finalPortalUsername = formPortalUsername.trim() || formPhone.trim();
+    const finalPortalPassword = formPortalPassword.trim() || `Honu@${formPhone.slice(-4) || "1234"}`;
 
     if (editingTenant) {
       setTenants((prev) =>
@@ -184,8 +271,13 @@ export function TenantsView() {
                 vehiclePlate: formVehiclePlate.trim() || undefined,
                 startDate: formStartDate,
                 notes: formNotes,
-                portalAccountStatus: formPortalAccount ? "active" : "inactive",
-                portalUsername: formPortalAccount ? formPhone.trim() : undefined,
+                portalAccountStatus: formPortalAccount
+                  ? item.portalAccountStatus === "locked"
+                    ? "locked"
+                    : "active"
+                  : "inactive",
+                portalUsername: formPortalAccount ? finalPortalUsername : undefined,
+                portalPassword: formPortalAccount ? finalPortalPassword : undefined,
               }
             : item
         )
@@ -209,7 +301,8 @@ export function TenantsView() {
         status: "active",
         notes: formNotes,
         portalAccountStatus: formPortalAccount ? "active" : "inactive",
-        portalUsername: formPortalAccount ? formPhone.trim() : undefined,
+        portalUsername: formPortalAccount ? finalPortalUsername : undefined,
+        portalPassword: formPortalAccount ? finalPortalPassword : undefined,
       };
       setTenants((prev) => [newTenant, ...prev]);
       success(`Đã thêm khách thuê "${formFullName}"${formPortalAccount ? " & kích hoạt tài khoản web" : ""}`);
@@ -472,32 +565,60 @@ export function TenantsView() {
                     <td className="py-4 px-4">
                       {t.portalAccountStatus === "active" ? (
                         <div className="flex flex-col gap-1">
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md w-fit">
-                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>Đã kích hoạt</span>
-                          </span>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] text-[#7A93AD] font-mono">TK: {t.portalUsername || t.phone}</span>
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Hoạt động</span>
+                            </span>
                             <button
                               type="button"
-                              onClick={() => handleResetPortalPassword(t)}
-                              className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-0.5 cursor-pointer"
-                              title="Tạo lại mật khẩu & copy nội dung gửi Zalo cho khách"
+                              onClick={() => openAccountModal(t)}
+                              className="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+                              title="Sửa / Đổi mật khẩu / Xóa tài khoản"
                             >
-                              <KeyRound className="w-2.5 h-2.5" />
-                              <span>Gửi MK</span>
+                              <Edit2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
+                          <div className="flex items-center gap-1.5 text-[10px]">
+                            <span className="text-[#7A93AD] font-mono">TK: {t.portalUsername || t.phone}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyAccountCredentials(t)}
+                              className="font-bold text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-0.5 cursor-pointer ml-auto"
+                              title="Sao chép mật khẩu & thông tin gửi Zalo"
+                            >
+                              <Copy className="w-2.5 h-2.5" />
+                              <span>Gửi Zalo</span>
+                            </button>
+                          </div>
+                        </div>
+                      ) : t.portalAccountStatus === "locked" ? (
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
+                              <Lock className="w-3.5 h-3.5 text-rose-600" />
+                              <span>Tạm khóa</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => openAccountModal(t)}
+                              className="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+                              title="Mở khóa hoặc sửa tài khoản"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                          <span className="text-[10px] text-slate-400 font-mono">TK: {t.portalUsername || t.phone}</span>
                         </div>
                       ) : (
                         <button
                           type="button"
-                          onClick={() => handleGrantPortal(t.id, t.fullName, t.phone)}
-                          className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 border border-slate-200 px-2 py-1 rounded-md cursor-pointer transition-all"
-                          title="Cấp quyền đăng nhập Cổng khách thuê"
+                          onClick={() => openAccountModal(t)}
+                          className="inline-flex items-center gap-1 text-[11px] font-bold text-[#5C84BE] bg-[#F0F5FA] hover:bg-[#5C84BE] hover:text-white border border-[#D9E6F2] hover:border-[#5C84BE] px-2.5 py-1.5 rounded-xl cursor-pointer transition-all shadow-2xs"
+                          title="Cấp tài khoản & đặt mật khẩu web"
                         >
                           <KeyRound className="w-3 h-3" />
-                          <span>Cấp tài khoản</span>
+                          <span>+ Cấp tài khoản</span>
                         </button>
                       )}
                     </td>
@@ -777,26 +898,75 @@ export function TenantsView() {
                     />
                   </div>
 
-                  {/* Kích hoạt tài khoản Cổng Khách Thuê */}
-                  <div className="p-3 rounded-2xl bg-gradient-to-r from-indigo-50/70 to-sky-50/70 border border-indigo-100 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                        <Smartphone className="w-4 h-4" />
+                  {/* Kích hoạt & Cài đặt Tài khoản Cổng Khách Thuê */}
+                  <div className="p-3.5 rounded-2xl bg-gradient-to-r from-indigo-50/70 to-sky-50/70 border border-indigo-100 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                          <Smartphone className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-[#253F5B]">Tài Khoản Cổng Khách Thuê</div>
+                          <div className="text-[10px] text-[#7A93AD]">Khách đăng nhập xem bill & báo sự cố</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-xs font-bold text-[#253F5B]">Cấp Tài Khoản Cổng Khách Thuê</div>
-                        <div className="text-[10px] text-[#7A93AD]">Tài khoản đăng nhập: Số điện thoại của khách (Xem bill & gửi sự cố)</div>
-                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formPortalAccount}
+                          onChange={(e) => setFormPortalAccount(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                      </label>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formPortalAccount}
-                        onChange={(e) => setFormPortalAccount(e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
-                    </label>
+
+                    {formPortalAccount && (
+                      <div className="pt-2 border-t border-indigo-100/70 grid grid-cols-2 gap-2.5">
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-bold text-[#253F5B]">Tên đăng nhập</label>
+                          <input
+                            type="text"
+                            value={formPortalUsername || formPhone}
+                            onChange={(e) => setFormPortalUsername(e.target.value)}
+                            placeholder={formPhone || "0912345678"}
+                            className="w-full h-8 px-2.5 rounded-lg border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-mono font-bold text-[#253F5B]"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <label className="text-[11px] font-bold text-[#253F5B]">Mật khẩu</label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const rand = `Honu@${Math.floor(1000 + Math.random() * 9000)}`;
+                                setFormPortalPassword(rand);
+                              }}
+                              className="text-[10px] text-indigo-600 hover:underline font-bold cursor-pointer"
+                            >
+                              Tạo MK
+                            </button>
+                          </div>
+                          <div className="relative">
+                            <input
+                              type={showFormPassword ? "text" : "password"}
+                              value={formPortalPassword}
+                              onChange={(e) => setFormPortalPassword(e.target.value)}
+                              placeholder="Honu@1234"
+                              className="w-full h-8 pl-2.5 pr-7 rounded-lg border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none text-xs font-mono font-bold text-[#253F5B]"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowFormPassword(!showFormPassword)}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                            >
+                              {showFormPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -820,6 +990,175 @@ export function TenantsView() {
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     <span>{editingTenant ? "Lưu Thay Đổi" : "Lưu Khách Thuê"}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Chuyên Biệt Quản Lý / Sửa / Xóa Mật Khẩu & Tài Khoản Cổng Khách */}
+      {showAccountModal && accountTenant && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-2xl w-full max-w-lg p-6 sm:p-7 space-y-4 animate-scaleUp">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F0F5FA]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold border border-indigo-100 shadow-inner">
+                  <KeyRound className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-[#253F5B]">
+                    Quản Lý Tài Khoản Cổng Khách Thuê
+                  </h3>
+                  <p className="text-xs text-[#7A93AD]">
+                    {accountTenant.fullName} • Phòng {accountTenant.roomNumber} ({accountTenant.buildingName})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAccountModal(false)}
+                className="w-8 h-8 rounded-xl bg-[#F0F5FA] text-[#7A93AD] hover:text-[#253F5B] flex items-center justify-center cursor-pointer transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveAccountModal} className="space-y-4 text-xs">
+              {/* Tên đăng nhập */}
+              <div className="space-y-1.5">
+                <label className="font-bold text-[#253F5B] block">Tên đăng nhập (Username) *</label>
+                <input
+                  type="text"
+                  required
+                  value={accountUsername}
+                  onChange={(e) => setAccountUsername(e.target.value)}
+                  placeholder="0918.137.153"
+                  className="w-full h-10 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none font-bold text-[#253F5B] font-mono"
+                />
+                <span className="text-[10px] text-[#7A93AD]">
+                  Mặc định dùng Số điện thoại của khách, admin có thể đổi sang tên người dùng khác nếu cần.
+                </span>
+              </div>
+
+              {/* Mật khẩu & Nút tạo ngẫu nhiên */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-[#253F5B]">Mật khẩu đăng nhập *</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const randPass = `Honu@${Math.floor(1000 + Math.random() * 9000)}`;
+                      setAccountPassword(randPass);
+                      success(`Đã tạo mật khẩu mới: ${randPass}`);
+                    }}
+                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 cursor-pointer"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    <span>Tạo ngẫu nhiên</span>
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={accountPassword}
+                    onChange={(e) => setAccountPassword(e.target.value)}
+                    placeholder="Nhập mật khẩu mới..."
+                    className="w-full h-10 pl-3.5 pr-10 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] bg-white outline-none font-mono font-bold text-[#253F5B]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <span className="text-[10px] text-[#7A93AD]">
+                  Admin có thể xóa mật khẩu cũ, gõ mật khẩu mới tùy ý hoặc bấm &quot;Tạo ngẫu nhiên&quot;.
+                </span>
+              </div>
+
+              {/* Trạng thái tài khoản */}
+              <div className="space-y-1.5">
+                <label className="font-bold text-[#253F5B] block">Trạng thái tài khoản</label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setAccountStatus("active")}
+                    className={`p-2.5 rounded-xl text-left border cursor-pointer transition-all flex items-center gap-2 ${
+                      accountStatus === "active"
+                        ? "bg-emerald-50 border-emerald-300 text-emerald-800 shadow-xs"
+                        : "bg-white border-[#D9E6F2] text-[#526579] hover:bg-slate-50"
+                    }`}
+                  >
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <div>
+                      <div className="font-bold text-xs">Đang hoạt động</div>
+                      <div className="text-[10px] text-[#7A93AD]">Khách đăng nhập bình thường</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setAccountStatus("locked")}
+                    className={`p-2.5 rounded-xl text-left border cursor-pointer transition-all flex items-center gap-2 ${
+                      accountStatus === "locked"
+                        ? "bg-rose-50 border-rose-300 text-rose-800 shadow-xs"
+                        : "bg-white border-[#D9E6F2] text-[#526579] hover:bg-slate-50"
+                    }`}
+                  >
+                    <Lock className="w-4 h-4 text-rose-600 shrink-0" />
+                    <div>
+                      <div className="font-bold text-xs">Tạm khóa tài khoản</div>
+                      <div className="text-[10px] text-[#7A93AD]">Chặn truy cập portal</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Lịch sử đăng nhập */}
+              {accountTenant.lastLoginAt && (
+                <div className="text-[11px] text-[#7A93AD] bg-[#F8FBFE] p-2.5 rounded-xl border border-[#EAF2F8] flex items-center justify-between">
+                  <span>Lần đăng nhập gần nhất:</span>
+                  <strong className="text-[#253F5B] font-mono">{accountTenant.lastLoginAt}</strong>
+                </div>
+              )}
+
+              {/* Actions Bar: Xóa tài khoản, Copy Zalo, Lưu thay đổi */}
+              <div className="pt-3 border-t border-[#F0F5FA] flex items-center justify-between gap-2">
+                {accountTenant.portalAccountStatus !== "inactive" && (
+                  <button
+                    type="button"
+                    onClick={() => handleDeletePortalAccount(accountTenant)}
+                    className="px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 border border-rose-200 font-bold transition-all flex items-center gap-1 cursor-pointer"
+                    title="Xóa tài khoản web của khách (vẫn giữ nguyên hồ sơ phòng & hợp đồng)"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Xóa tài khoản</span>
+                  </button>
+                )}
+
+                <div className="flex items-center gap-2 ml-auto">
+                  <button
+                    type="button"
+                    onClick={() => handleCopyAccountCredentials(accountTenant, accountUsername, accountPassword)}
+                    className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-[#253F5B] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                    title="Sao chép thông tin tài khoản và mật khẩu để gửi Zalo"
+                  >
+                    <Copy className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Copy Zalo</span>
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Lưu Tài Khoản</span>
                   </button>
                 </div>
               </div>

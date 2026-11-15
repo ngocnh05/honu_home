@@ -22,6 +22,7 @@ export const initialTenants: Tenant[] = [
     roommatesCount: 2,
     portalAccountStatus: "active",
     portalUsername: "0918.137.153",
+    portalPassword: "Honu@7153",
     lastLoginAt: "15/11/2026 10:24",
   },
   {
@@ -65,6 +66,7 @@ export const initialTenants: Tenant[] = [
     roommatesCount: 1,
     portalAccountStatus: "active",
     portalUsername: "0981.445.678",
+    portalPassword: "Honu@5678",
     lastLoginAt: "14/11/2026 19:15",
   },
 
@@ -89,6 +91,7 @@ export const initialTenants: Tenant[] = [
     roommatesCount: 2,
     portalAccountStatus: "active",
     portalUsername: "0942.333.112",
+    portalPassword: "Honu@3112",
     lastLoginAt: "13/11/2026 08:45",
   },
   {
@@ -132,6 +135,7 @@ export const initialTenants: Tenant[] = [
     roommatesCount: 1,
     portalAccountStatus: "active",
     portalUsername: "0904.778.991",
+    portalPassword: "Honu@8991",
     lastLoginAt: "15/11/2026 07:10",
   },
 ];

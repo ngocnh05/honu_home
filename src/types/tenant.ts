@@ -27,5 +27,6 @@ export interface Tenant {
   // Quản lý tài khoản web / app Cổng Khách Thuê (Tenant Portal)
   portalAccountStatus?: PortalAccountStatus; // "active" | "inactive" | "locked"
   portalUsername?: string;                  // Mặc định là SĐT của khách
+  portalPassword?: string;                  // Mật khẩu cổng khách (admin xem, đổi, xóa)
   lastLoginAt?: string;                     // Ví dụ: "14/11/2026 18:30"
 }
