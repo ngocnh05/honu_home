@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import type { Room } from "@/types/room";
 import { parseVideoSource } from "@/lib/video-helpers";
+import { getServicesByBuildingId } from "@/lib/mock-data/services";
 
 interface RoomDetailViewProps {
   room: Room;
@@ -49,6 +50,20 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
 
   // Media slot switcher: "cover" (Hình 1), "video" (Hình 2), or number (0..n for galleryImages = Hình 3, 4, ...)
   const [selectedMediaSlot, setSelectedMediaSlot] = React.useState<"cover" | "video" | number>("cover");
+
+  // Dịch vụ phòng: lấy từ room.customServices hoặc theo cơ sở của phòng
+  const activeServices = React.useMemo(() => {
+    if (room.customServices && room.customServices.length > 0) {
+      return room.customServices;
+    }
+    const bldServices = getServicesByBuildingId(room.buildingId || "bld_cg");
+    return bldServices.map((s) => ({
+      id: s.id,
+      name: s.name,
+      price: s.price,
+      unit: s.unit,
+    }));
+  }, [room.customServices, room.buildingId]);
 
   // Status Badge styles matching Figma
   const statusBadgeConfig = {
@@ -650,74 +665,30 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
                     Bảng giá dịch vụ áp dụng cho căn phòng
                   </h4>
                   <span className="text-xs font-bold text-[#5C84BE] bg-[#EAF2F8] px-2.5 py-0.5 rounded-full">
-                    {room.customServices?.length || 4} khoản dịch vụ
+                    {activeServices.length} khoản dịch vụ
                   </span>
                 </div>
 
-                {room.customServices && room.customServices.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {room.customServices.map((srv) => (
-                      <div
-                        key={srv.id}
-                        className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5 shadow-2xs"
-                      >
-                        <div className="w-8 h-8 rounded-xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shrink-0">
-                          <Sparkles className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-[11px] text-[#7A93AD] font-bold truncate">
-                            {srv.name}
-                          </p>
-                          <p className="text-xs font-extrabold text-[#253F5B] truncate">
-                            {srv.price.toLocaleString("vi-VN")} {srv.unit}
-                          </p>
-                        </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {activeServices.map((srv) => (
+                    <div
+                      key={srv.id}
+                      className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5 shadow-2xs"
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-[#EAF2F8] text-[#5C84BE] flex items-center justify-center shrink-0">
+                        <Sparkles className="w-4 h-4" />
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                        <Zap className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-[#7A93AD] font-bold">Điện</p>
-                        <p className="text-xs font-extrabold text-[#253F5B]">3.500 đ/kWh</p>
+                      <div className="min-w-0">
+                        <p className="text-[11px] text-[#7A93AD] font-bold truncate">
+                          {srv.name}
+                        </p>
+                        <p className="text-xs font-extrabold text-[#253F5B] truncate">
+                          {srv.price.toLocaleString("vi-VN")} {srv.unit}
+                        </p>
                       </div>
                     </div>
-
-                    <div className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
-                        <Droplets className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-[#7A93AD] font-bold">Nước</p>
-                        <p className="text-xs font-extrabold text-[#253F5B]">30.000 đ/m³</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                        <Wifi className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-[#7A93AD] font-bold">Wifi / Mạng</p>
-                        <p className="text-xs font-extrabold text-[#253F5B]">50.000 đ/tháng</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-white p-3 rounded-2xl border border-[#E3EDF6] flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                        <BadgeDollarSign className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-[#7A93AD] font-bold">Vệ sinh chung</p>
-                        <p className="text-xs font-extrabold text-[#253F5B]">100.000 đ/người</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
 
               {/* Action Buttons */}

@@ -201,20 +201,23 @@ export function ServicesView() {
           >
             Tất cả cơ sở
           </button>
-          {initialBuildings.map((b) => (
-            <button
-              key={b.id}
-              type="button"
-              onClick={() => setSelectedBuildingId(b.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                selectedBuildingId === b.id
-                  ? "bg-[#253F5B] text-white shadow-sm"
-                  : "bg-[#F4F8FC] text-[#526579] hover:bg-[#EAF2F8]"
-              }`}
-            >
-              {b.name}
-            </button>
-          ))}
+          {initialBuildings.map((b) => {
+            const count = services.filter((s) => s.buildingId === b.id).length;
+            return (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => setSelectedBuildingId(b.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  selectedBuildingId === b.id
+                    ? "bg-[#253F5B] text-white shadow-sm"
+                    : "bg-[#F4F8FC] text-[#526579] hover:bg-[#EAF2F8]"
+                }`}
+              >
+                {b.name} ({count})
+              </button>
+            );
+          })}
         </div>
 
         <div className="relative w-full sm:w-72">

@@ -27,6 +27,7 @@ import {
 import type { Invoice, InvoiceStatus } from "@/types/invoice";
 import { initialInvoices } from "@/lib/mock-data/invoices";
 import { initialBuildings } from "@/lib/mock-data/buildings";
+import { getServicesByBuildingId } from "@/lib/mock-data/services";
 import { useSnackbar } from "@/components/common/snackbar";
 
 export function InvoicesView() {
@@ -48,20 +49,28 @@ export function InvoicesView() {
   const [formTenantPhone, setFormTenantPhone] = React.useState("0918.137.153");
   const [formRoomPrice, setFormRoomPrice] = React.useState("2.700.000");
 
-  // Electricity
+  // Electricity meters
   const [formElecOld, setFormElecOld] = React.useState(1250);
   const [formElecNew, setFormElecNew] = React.useState(1340);
-  const [elecUnitPrice] = React.useState(3500);
 
-  // Water
+  // Water meters
   const [formWaterOld, setFormWaterOld] = React.useState(48);
   const [formWaterNew, setFormWaterNew] = React.useState(54);
-  const [waterUnitPrice] = React.useState(30000);
 
-  // Fixed Services
-  const [wifiPrice] = React.useState(50000);
-  const [serviceFee] = React.useState(100000);
-  const [parkingFee] = React.useState(200000);
+  // Building services lookup (Tự động lấy đơn giá theo từng cơ sở)
+  const currentBuildingServices = React.useMemo(() => {
+    return getServicesByBuildingId(formBuildingId);
+  }, [formBuildingId]);
+
+  const elecService = currentBuildingServices.find((s) => s.type === "meter" && s.name.toLowerCase().includes("điện"));
+  const waterService = currentBuildingServices.find((s) => s.name.toLowerCase().includes("nước"));
+  const wifiService = currentBuildingServices.find((s) => s.type === "per_room");
+
+  const elecUnitPrice = elecService?.price || 3500;
+  const waterUnitPrice = waterService?.price || 30000;
+  const wifiPrice = wifiService?.price || 50000;
+  const serviceFee = 100000;
+  const parkingFee = 200000;
 
   // Calculations
   const elecUsage = Math.max(0, formElecNew - formElecOld);
@@ -736,7 +745,7 @@ export function InvoicesView() {
                 <div className="flex items-center justify-between text-xs font-bold text-amber-900">
                   <span className="flex items-center gap-1">
                     <Zap className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Chỉ số ĐIỆN (Đơn giá 3.500 đ/kWh)</span>
+                    <span>Chỉ số ĐIỆN (Đơn giá {elecUnitPrice.toLocaleString("vi-VN")} đ/kWh)</span>
                   </span>
                   <span>{elecAmount.toLocaleString("vi-VN")} đ</span>
                 </div>
@@ -773,7 +782,7 @@ export function InvoicesView() {
                 <div className="flex items-center justify-between text-xs font-bold text-sky-900">
                   <span className="flex items-center gap-1">
                     <Droplets className="w-3.5 h-3.5 text-sky-600" />
-                    <span>Chỉ số NƯỚC (Đơn giá 30.000 đ/khối)</span>
+                    <span>Chỉ số NƯỚC (Đơn giá {waterUnitPrice.toLocaleString("vi-VN")} {waterService?.unit || "đ/khối"})</span>
                   </span>
                   <span>{waterAmount.toLocaleString("vi-VN")} đ</span>
                 </div>

@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
 import { initialBuildings } from "@/lib/mock-data/buildings";
+import { getServicesByBuildingId } from "@/lib/mock-data/services";
 import { useSnackbar } from "@/components/common/snackbar";
 import { parseVideoSource } from "@/lib/video-helpers";
 
@@ -152,11 +153,28 @@ export function EditRoomView({ room }: EditRoomViewProps) {
   const [initialWaterIndex, setInitialWaterIndex] = React.useState<string>(
     String(room.initialWaterIndex ?? 48)
   );
-  const [services, setServices] = React.useState<CustomService[]>(
-    room.customServices && room.customServices.length > 0
-      ? room.customServices
-      : defaultInitialServices
-  );
+  // Dịch vụ của cơ sở (Mỗi cơ sở có bảng dịch vụ riêng, phòng CHỌN dịch vụ áp dụng)
+  const [roomServices, setRoomServices] = React.useState(() => {
+    const catalog = getServicesByBuildingId(room.buildingId || "bld_cg");
+    const existing = room.customServices || [];
+    return catalog.map((s) => {
+      const matched = existing.find(
+        (e) => e.name.toLowerCase().trim() === s.name.toLowerCase().trim() || e.id === s.id
+      );
+      return {
+        id: s.id,
+        name: s.name,
+        price: matched ? matched.price : s.price,
+        unit: matched ? matched.unit : s.unit,
+        type: s.type,
+        selected:
+          matched !== undefined ||
+          s.isMandatory ||
+          s.type === "meter" ||
+          s.type === "per_room",
+      };
+    });
+  });
 
   // 5. Notes & Handover
   const [notes, setNotes] = React.useState<string>(
@@ -211,27 +229,32 @@ export function EditRoomView({ room }: EditRoomViewProps) {
     }
   };
 
-  // Services management
-  const handleAddService = () => {
-    const newId = `srv_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`;
-    setServices((prev) => [
-      ...prev,
-      { id: newId, name: "", price: 0, unit: "đ/tháng" },
-    ]);
-  };
-
-  const handleUpdateService = (
-    id: string,
-    field: "name" | "price" | "unit",
-    value: string | number
-  ) => {
-    setServices((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, [field]: value } : s))
+  // Khi đổi cơ sở: nạp danh mục dịch vụ của cơ sở đó
+  const handleBuildingChange = (newBuildingId: string) => {
+    setBuildingId(newBuildingId);
+    const catalog = getServicesByBuildingId(newBuildingId);
+    setRoomServices(
+      catalog.map((s) => ({
+        id: s.id,
+        name: s.name,
+        price: s.price,
+        unit: s.unit,
+        type: s.type,
+        selected: s.isMandatory || s.type === "meter" || s.type === "per_room",
+      }))
     );
   };
 
-  const handleRemoveService = (id: string) => {
-    setServices((prev) => prev.filter((s) => s.id !== id));
+  const toggleRoomService = (id: string) => {
+    setRoomServices((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, selected: !s.selected } : s))
+    );
+  };
+
+  const updateRoomServicePrice = (id: string, price: number) => {
+    setRoomServices((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, price } : s))
+    );
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -256,7 +279,14 @@ export function EditRoomView({ room }: EditRoomViewProps) {
     setIsSubmitting(true);
 
     const cleanDeposit = parsePrice(deposit);
-    const validServices = services.filter((s) => s.name.trim() !== "");
+    const validServices: CustomService[] = roomServices
+      .filter((s) => s.selected)
+      .map((s) => ({
+        id: s.id,
+        name: s.name,
+        price: s.price,
+        unit: s.unit,
+      }));
 
     const selectedBuilding = initialBuildings.find((b) => b.id === buildingId);
 
@@ -668,7 +698,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
                 </label>
                 <select
                   value={buildingId}
-                  onChange={(e) => setBuildingId(e.target.value)}
+                  onChange={(e) => handleBuildingChange(e.target.value)}
                   className="w-full h-11 px-3.5 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#253F5B] bg-white cursor-pointer transition-all"
                 >
                   {initialBuildings.map((b) => (
@@ -1132,108 +1162,100 @@ export function EditRoomView({ room }: EditRoomViewProps) {
         </div>
 
         {/* 5. Card: Bảng Dịch Vụ Áp Dụng Cho Căn Hộ */}
-        <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-sm p-8 space-y-5 w-full">
-          <div className="flex items-center justify-between pb-3 border-b border-[#F0F5FA]">
+        <div className="bg-white rounded-3xl border border-[#E3EDF6] shadow-sm p-8 space-y-6 w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#F0F5FA]">
             <div className="flex items-center gap-2.5">
-              <Sparkles className="w-5 h-5 text-[#5C84BE]" />
+              <Zap className="w-5 h-5 text-amber-500" />
               <div>
-                <h3 className="text-base font-bold text-[#253F5B]">
-                  Bảng Dịch Vụ & Chi Phí Phòng
+                <h3 className="text-base font-black text-[#253F5B]">
+                  Bảng Dịch Vụ Áp Dụng Cho Phòng
                 </h3>
                 <p className="text-xs text-[#7A93AD]">
-                  Tự do cập nhật đơn giá điện, nước, internet và các dịch vụ riêng cho căn phòng
+                  Mỗi cơ sở có danh mục dịch vụ riêng. Chọn những dịch vụ căn phòng này sử dụng hoặc chỉnh đơn giá riêng nếu có.
                 </p>
               </div>
             </div>
-
-            <button
-              type="button"
-              onClick={handleAddService}
-              className="px-4 py-2 rounded-xl bg-[#5C84BE] hover:bg-[#4B73AD] active:scale-95 text-white text-xs font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
-            >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Thêm khoản dịch vụ</span>
-            </button>
+            <span className="text-xs font-bold text-[#5C84BE] bg-[#EAF2F8] px-3.5 py-1.5 rounded-full border border-[#D8E6F3] self-start sm:self-center">
+              Đã chọn {roomServices.filter((s) => s.selected).length}/{roomServices.length} dịch vụ
+            </span>
           </div>
 
-          {/* Danh sách các dòng dịch vụ */}
-          <div className="space-y-3">
-            {services.map((service) => (
+          {/* Danh sách checkbox dịch vụ của cơ sở */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {roomServices.map((srv) => (
               <div
-                key={service.id}
-                className="flex items-center gap-3 bg-[#F8FBFE] p-3 rounded-2xl border border-[#DEEBF5] hover:border-[#5C84BE] transition-colors"
+                key={srv.id}
+                onClick={() => toggleRoomService(srv.id)}
+                className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                  srv.selected
+                    ? "border-[#5C84BE] bg-[#F8FBFE] shadow-2xs"
+                    : "border-[#EAF0F6] bg-white opacity-60 hover:opacity-100"
+                }`}
               >
-                {/* Tên dịch vụ */}
-                <div className="flex-1 min-w-[200px]">
-                  <input
-                    type="text"
-                    placeholder="Tên dịch vụ (VD: Tiền điện, Nước, Giặt sấy...)"
-                    value={service.name}
-                    onChange={(e) =>
-                      handleUpdateService(service.id, "name", e.target.value)
-                    }
-                    className="w-full h-10 px-3.5 rounded-xl border border-[#D5E3F0] focus:border-[#5C84BE] focus:bg-white bg-white outline-none text-xs font-bold text-[#253F5B]"
-                  />
-                </div>
-
-                {/* Đơn giá */}
-                <div className="w-[150px] xl:w-[170px]">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="Đơn giá"
-                      value={formatPrice(service.price)}
-                      onChange={(e) =>
-                        handleUpdateService(
-                          service.id,
-                          "price",
-                          parsePrice(e.target.value)
-                        )
-                      }
-                      className="w-full h-10 pl-3 pr-10 rounded-xl border border-[#D5E3F0] focus:border-[#5C84BE] focus:bg-white bg-white outline-none text-xs font-bold text-[#253F5B] text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#7A93AD] font-bold pointer-events-none">
-                      đ
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
+                      srv.selected
+                        ? "bg-[#5C84BE] text-white shadow-xs"
+                        : "border-2 border-slate-300 bg-white"
+                    }`}
+                  >
+                    {srv.selected && <Check className="w-4 h-4 stroke-[3]" />}
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-[#253F5B] block">
+                      {srv.name}
+                    </span>
+                    <span className="text-[10px] text-[#7A93AD] font-semibold">
+                      {srv.type === "meter"
+                        ? "Đo theo công tơ"
+                        : srv.type === "per_person"
+                        ? "Theo đầu người"
+                        : srv.type === "per_vehicle"
+                        ? "Theo số xe"
+                        : "Theo phòng"}
                     </span>
                   </div>
                 </div>
 
-                {/* Đơn vị tính */}
-                <div className="w-[120px] xl:w-[140px]">
-                  <select
-                    value={service.unit}
-                    onChange={(e) =>
-                      handleUpdateService(service.id, "unit", e.target.value)
-                    }
-                    className="w-full h-10 px-3 rounded-xl border border-[#D5E3F0] focus:border-[#5C84BE] outline-none text-xs font-bold text-[#4B6584] bg-white cursor-pointer"
-                  >
-                    <option value="đ/kWh">đ/kWh</option>
-                    <option value="đ/khối">đ/khối</option>
-                    <option value="đ/người">đ/người</option>
-                    <option value="đ/phòng">đ/phòng</option>
-                    <option value="đ/xe">đ/xe</option>
-                    <option value="đ/tháng">đ/tháng</option>
-                  </select>
-                </div>
-
-                {/* Nút Xóa */}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveService(service.id)}
-                  className="p-2.5 rounded-xl text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                  title="Xóa dịch vụ này"
+                {/* Giá dịch vụ: hiển thị hoặc cho phép điều chỉnh giá riêng cho phòng */}
+                <div
+                  className="flex items-center gap-1.5"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatPrice(srv.price)}
+                      onChange={(e) =>
+                        updateRoomServicePrice(srv.id, parsePrice(e.target.value))
+                      }
+                      disabled={!srv.selected}
+                      className={`w-28 h-9 px-2.5 rounded-xl border text-right text-xs font-bold transition-all ${
+                        srv.selected
+                          ? "bg-white border-[#D5E3F0] text-[#253F5B] focus:border-[#5C84BE]"
+                          : "bg-slate-100 border-slate-200 text-slate-400"
+                      }`}
+                    />
+                  </div>
+                  <span className="text-xs font-bold text-[#5C84BE] min-w-[55px]">
+                    {srv.unit}
+                  </span>
+                </div>
               </div>
             ))}
+          </div>
 
-            {services.length === 0 && (
-              <div className="py-8 text-center text-xs text-[#7A93AD] border border-dashed border-[#CFDFEE] rounded-2xl bg-[#F8FBFE]">
-                Chưa có khoản dịch vụ nào. Bấm <b>"+ Thêm khoản dịch vụ"</b> ở góc phải để tạo.
-              </div>
-            )}
+          <div className="p-3.5 rounded-2xl bg-[#F0F5FA] border border-[#DEEAF4] flex items-center justify-between text-xs text-[#526579]">
+            <span>
+              Cần bổ sung thêm dịch vụ mới cho toàn cơ sở? Quản lý tại trang:
+            </span>
+            <Link
+              href="/services"
+              className="font-bold text-[#5C84BE] hover:underline flex items-center gap-1"
+            >
+              <span>Bảng giá Dịch vụ cơ sở</span> &rarr;
+            </Link>
           </div>
         </div>
 
@@ -1265,7 +1287,7 @@ export function EditRoomView({ room }: EditRoomViewProps) {
           <div className="text-xs text-[#7A93AD] font-medium">
             Phòng: <b className="text-[#253F5B]">{roomNumber || room.roomNumber}</b> •{" "}
             Giá: <b className="text-[#253F5B]">{price || 0} đ/tháng</b> •{" "}
-            Dịch vụ: <b className="text-[#253F5B]">{services.length} khoản</b>
+            Dịch vụ: <b className="text-[#253F5B]">{roomServices.filter((s) => s.selected).length} khoản</b>
           </div>
 
           <div className="flex items-center gap-3">

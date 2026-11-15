@@ -25,6 +25,7 @@ import {
 import type { Contract, ContractStatus } from "@/types/contract";
 import { initialContracts } from "@/lib/mock-data/contracts";
 import { initialBuildings } from "@/lib/mock-data/buildings";
+import { getServicesByBuildingId } from "@/lib/mock-data/services";
 import { useSnackbar } from "@/components/common/snackbar";
 
 export function ContractsView() {
@@ -106,11 +107,11 @@ export function ContractsView() {
       paymentCycle: "1 tháng/lần",
       occupantsCount: Number(formOccupants) || 1,
       vehiclesCount: Number(formVehicles) || 1,
-      services: [
-        { name: "Điện sinh hoạt", price: 3500, unit: "đ/kWh" },
-        { name: "Nước sạch", price: 30000, unit: "đ/khối" },
-        { name: "Wifi Mesh", price: 50000, unit: "đ/phòng" },
-      ],
+      services: getServicesByBuildingId(formBuildingId).map((s) => ({
+        name: s.name,
+        price: s.price,
+        unit: s.unit,
+      })),
       initialElectricityIndex: 1250,
       initialWaterIndex: 48,
       status: "active",
