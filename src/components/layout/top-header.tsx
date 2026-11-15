@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, BellRing, ChevronRight, Home } from "lucide-react";
+import { BellRing, ChevronRight, Home } from "lucide-react";
 
 interface TopHeaderProps {
   unreadCount?: number;
@@ -25,7 +25,6 @@ const routeNames: Record<string, string> = {
 
 export function TopHeader({ unreadCount = 99 }: TopHeaderProps) {
   const pathname = usePathname();
-  const [searchValue, setSearchValue] = React.useState("");
 
   // Build breadcrumb items from current pathname
   const breadcrumbs = React.useMemo(() => {
@@ -58,7 +57,7 @@ export function TopHeader({ unreadCount = 99 }: TopHeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 h-[60px] xl:h-[64px] bg-white border-b border-[#E3EDF6] flex items-center justify-between px-5 xl:px-7 w-full transition-all">
-      {/* Left Area: Breadcrumbs + Search Bar */}
+      {/* Left Area: Breadcrumbs */}
       <div className="flex items-center gap-3 xl:gap-4 min-w-0">
         {/* Dynamic Breadcrumbs */}
         <nav
@@ -88,27 +87,6 @@ export function TopHeader({ unreadCount = 99 }: TopHeaderProps) {
             </React.Fragment>
           ))}
         </nav>
-
-        {/* Divider */}
-        <div className="hidden sm:block h-4 w-px bg-[#D6E3EF] shrink-0" />
-
-        {/* Search Bar - Sleek & Compact Pill */}
-        <div className="relative w-[180px] sm:w-[220px] lg:w-[260px] xl:w-[300px]">
-          <input
-            type="text"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            placeholder="Tìm Kiếm..."
-            className="w-full h-[36px] xl:h-[38px] pl-3.5 pr-9 rounded-full bg-[#F2F8FC] border border-[#DEEBF5] focus:border-[#5C84BE] focus:bg-white text-xs xl:text-sm text-[#253F5B] placeholder:text-[#A4B3C6] outline-none transition-all duration-200"
-          />
-          <button
-            type="button"
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full text-[#5C84BE] hover:text-[#426ba8] hover:bg-[#E2EFF9] transition-colors cursor-pointer"
-            aria-label="Thực hiện tìm kiếm"
-          >
-            <Search className="w-3.5 h-3.5 stroke-[2.3]" />
-          </button>
-        </div>
       </div>
 
       {/* Right Controls: Notifications & Profile */}

@@ -17,6 +17,8 @@ import {
   TrendingUp,
   AlertCircle,
   Phone,
+  Search,
+  X,
 } from "lucide-react";
 import {
   EditActionIcon,
@@ -32,6 +34,7 @@ import { useSnackbar } from "@/components/common/snackbar";
 export function RoomsTable() {
   const { success, error, warning } = useSnackbar();
   const [rooms, setRooms] = React.useState<Room[]>(initialRooms);
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [buildingFilter, setBuildingFilter] = React.useState("ALL");
   const [typeFilter, setTypeFilter] = React.useState("ALL");
   const [statusFilter, setStatusFilter] = React.useState("ALL");
@@ -41,17 +44,27 @@ export function RoomsTable() {
 
   const itemsPerPage = 7;
 
-  // Filter logic based on Building, Type, Status
+  // Filter logic based on Search Query, Building, Type, Status
   const filteredRooms = React.useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
     return rooms.filter((r) => {
+      const matchSearch =
+        !q ||
+        r.roomNumber.toLowerCase().includes(q) ||
+        (r.tenantName && r.tenantName.toLowerCase().includes(q)) ||
+        (r.tenantPhone && r.tenantPhone.toLowerCase().includes(q)) ||
+        (r.tenantHometown && r.tenantHometown.toLowerCase().includes(q)) ||
+        (r.buildingName && r.buildingName.toLowerCase().includes(q)) ||
+        String(r.price).includes(q);
+
       const matchBuilding =
         buildingFilter === "ALL" || r.buildingId === buildingFilter;
       const matchType = typeFilter === "ALL" || r.type === typeFilter;
       const matchStatus = statusFilter === "ALL" || r.status === statusFilter;
 
-      return matchBuilding && matchType && matchStatus;
+      return matchSearch && matchBuilding && matchType && matchStatus;
     });
-  }, [rooms, buildingFilter, typeFilter, statusFilter]);
+  }, [rooms, searchQuery, buildingFilter, typeFilter, statusFilter]);
 
   // Compute aggregate stats based on active building filter
   const stats = React.useMemo(() => {
@@ -146,8 +159,36 @@ export function RoomsTable() {
           </div>
         </div>
 
-        {/* 3 Bộ lọc đặt cạnh Nút Thêm phòng */}
+        {/* Thanh tìm kiếm thông minh & Các Bộ lọc đặt cạnh Nút Thêm phòng */}
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Ô Tìm Kiếm Phòng Chuyên Nghiệp */}
+          <div className="relative w-full sm:w-64 lg:w-72">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              placeholder="Tìm số phòng, khách thuê, SĐT..."
+              className="w-full h-10 pl-9 pr-8 rounded-xl bg-[#F4F8FC] hover:bg-[#EAF2F9] focus:bg-white border border-[#D9E6F2] focus:border-[#5C84BE] text-xs font-bold text-[#253F5B] placeholder:text-[#94A9C0] outline-none transition-all shadow-2xs"
+            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5C84BE] pointer-events-none stroke-[2.3]" />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setCurrentPage(1);
+                }}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors"
+                title="Xóa tìm kiếm"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
           {/* Lọc cơ sở / tòa nhà */}
           <div className="relative min-w-[155px]">
             <select
@@ -468,8 +509,32 @@ export function RoomsTable() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-slate-400 text-xs font-semibold">
-                    Không tìm thấy phòng nào phù hợp với bộ lọc hiện tại.
+                  <td colSpan={9} className="py-16 text-center text-slate-400">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
+                        <Search className="w-6 h-6 stroke-[2]" />
+                      </div>
+                      <p className="text-sm font-bold text-[#253F5B]">
+                        Không tìm thấy phòng nào phù hợp
+                      </p>
+                      <p className="text-xs text-[#7A93B0]">
+                        {searchQuery
+                          ? `Không có kết quả khớp với từ khóa "${searchQuery}". Vui lòng thử tìm số phòng hoặc tên khác.`
+                          : "Không có phòng nào phù hợp với các bộ lọc hiện tại."}
+                      </p>
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery("");
+                            setCurrentPage(1);
+                          }}
+                          className="mt-2 text-xs font-bold text-[#5C84BE] hover:underline"
+                        >
+                          Xóa tìm kiếm
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               )}
