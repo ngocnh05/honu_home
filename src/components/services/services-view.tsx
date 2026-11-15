@@ -367,14 +367,6 @@ export function ServicesView() {
     }
   };
 
-  const handleResetDefaultAmenities = () => {
-    if (window.confirm("Khôi phục danh mục tiện nghi mặc định ban đầu?")) {
-      setAmenities(initialAmenities);
-      saveAmenities(initialAmenities);
-      success("Đã khôi phục danh mục tiện nghi mặc định!");
-    }
-  };
-
   return (
     <div className="w-full space-y-6 animate-fadeIn pb-16 select-none">
       {/* 1. Header Bar */}
@@ -410,54 +402,32 @@ export function ServicesView() {
           </div>
         </div>
 
-        {/* Tab Switcher & Action Button */}
-        <div className="flex items-center gap-3">
-          <div className="flex bg-[#F4F8FC] p-1 rounded-2xl border border-[#DEEAF4]">
-            <button
-              type="button"
-              onClick={() => setActiveTab("services")}
-              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === "services"
-                  ? "bg-white text-[#253F5B] shadow-xs"
-                  : "text-[#7A93AD] hover:text-[#253F5B]"
-              }`}
-            >
-              <Zap className="w-3.5 h-3.5 text-amber-500" />
-              <span>Bảng Giá Dịch Vụ</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("amenities")}
-              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === "amenities"
-                  ? "bg-white text-[#253F5B] shadow-xs"
-                  : "text-[#7A93AD] hover:text-[#253F5B]"
-              }`}
-            >
-              <Armchair className="w-3.5 h-3.5 text-indigo-500" />
-              <span>Tiện Nghi Phòng</span>
-            </button>
-          </div>
-
-          {activeTab === "services" ? (
-            <button
-              type="button"
-              onClick={openCreateModal}
-              className="h-10 px-4 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Thêm Dịch Vụ</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={openCreateAmenityModal}
-              className="h-10 px-4 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Thêm Tiện Nghi</span>
-            </button>
-          )}
+        {/* Tab Switcher */}
+        <div className="flex bg-[#F4F8FC] p-1.5 rounded-2xl border border-[#DEEAF4] shrink-0">
+          <button
+            type="button"
+            onClick={() => setActiveTab("services")}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === "services"
+                ? "bg-white text-[#253F5B] shadow-xs ring-1 ring-[#253F5B]/10"
+                : "text-[#7A93AD] hover:text-[#253F5B]"
+            }`}
+          >
+            <Zap className="w-4 h-4 text-amber-500" />
+            <span>Bảng Giá Dịch Vụ</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("amenities")}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === "amenities"
+                ? "bg-white text-[#253F5B] shadow-xs ring-1 ring-[#253F5B]/10"
+                : "text-[#7A93AD] hover:text-[#253F5B]"
+            }`}
+          >
+            <Armchair className="w-4 h-4 text-indigo-500" />
+            <span>Tiện Nghi Phòng</span>
+          </button>
         </div>
       </div>
 
@@ -499,15 +469,26 @@ export function ServicesView() {
               })}
             </div>
 
-            <div className="relative w-full sm:w-72">
-              <input
-                type="text"
-                placeholder="Tìm tên dịch vụ, đơn giá..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 pl-9 pr-4 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
-              />
-              <Search className="w-4 h-4 text-[#7A93AD] absolute left-3 top-1/2 -translate-y-1/2" />
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+              <div className="relative w-full sm:w-72">
+                <input
+                  type="text"
+                  placeholder="Tìm tên dịch vụ, đơn giá..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-10 pl-9 pr-4 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
+                />
+                <Search className="w-4 h-4 text-[#7A93AD] absolute left-3 top-1/2 -translate-y-1/2" />
+              </div>
+
+              <button
+                type="button"
+                onClick={openCreateModal}
+                className="h-10 px-4 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Thêm Dịch Vụ Mới</span>
+              </button>
             </div>
           </div>
 
@@ -633,31 +614,30 @@ export function ServicesView() {
       {/* ========================================================= */}
       {activeTab === "amenities" && (
         <div className="space-y-6">
-          {/* Controls Bar: Search & Reset */}
+          {/* Controls Bar: Đồng nhất bố cục chuẩn với Tab Bảng giá */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#E3EDF6] shadow-sm">
-            <div className="relative w-full sm:w-80">
-              <input
-                type="text"
-                placeholder="Tìm tên tiện nghi (giường, máy lạnh...)"
-                value={amenitySearch}
-                onChange={(e) => setAmenitySearch(e.target.value)}
-                className="w-full h-10 pl-9 pr-4 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
-              />
-              <Search className="w-4 h-4 text-[#7A93AD] absolute left-3 top-1/2 -translate-y-1/2" />
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black text-[#253F5B] uppercase tracking-wider bg-[#F4F8FC] px-3.5 py-2 rounded-xl border border-[#E3EDF6]">
+                Danh mục tiện nghi sẵn có ({filteredAmenities.length})
+              </span>
             </div>
 
             <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-              <button
-                type="button"
-                onClick={handleResetDefaultAmenities}
-                className="text-xs font-bold text-[#7A93AD] hover:text-[#253F5B] px-3 py-2 rounded-xl hover:bg-[#F0F5FA] transition-colors cursor-pointer"
-              >
-                Khôi phục mặc định
-              </button>
+              <div className="relative w-full sm:w-72">
+                <input
+                  type="text"
+                  placeholder="Tìm tên tiện nghi (giường, máy lạnh...)"
+                  value={amenitySearch}
+                  onChange={(e) => setAmenitySearch(e.target.value)}
+                  className="w-full h-10 pl-9 pr-4 rounded-xl border border-[#D9E6F2] focus:border-[#5C84BE] focus:bg-white bg-[#F9FBFE] outline-none text-xs font-bold text-[#253F5B] transition-all"
+                />
+                <Search className="w-4 h-4 text-[#7A93AD] absolute left-3 top-1/2 -translate-y-1/2" />
+              </div>
+
               <button
                 type="button"
                 onClick={openCreateAmenityModal}
-                className="h-10 px-4 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                className="h-10 px-4 rounded-xl bg-[#5C84BE] hover:bg-[#4A72AC] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
               >
                 <Plus className="w-4 h-4" />
                 <span>Thêm Tiện Nghi Mới</span>
