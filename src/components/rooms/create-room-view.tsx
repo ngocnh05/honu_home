@@ -40,6 +40,7 @@ import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
 import type { ServicePriceOption } from "@/types/service";
 import { initialBuildings } from "@/lib/mock-data/buildings";
 import { getServicesByBuildingId } from "@/lib/mock-data/services";
+import { getAmenities, AmenityItem } from "@/lib/mock-data/amenities";
 import { useSnackbar } from "@/components/common/snackbar";
 import { parseVideoSource } from "@/lib/video-helpers";
 
@@ -94,12 +95,20 @@ export function CreateRoomView() {
     "Phòng mới sạch sẽ, thoáng mát, có ban công đón gió tự nhiên, nội thất cơ bản."
   );
   const [status, setStatus] = React.useState<RoomStatus>("available");
+  const [availableAmenities, setAvailableAmenities] = React.useState<AmenityItem[]>([]);
   const [selectedAmenities, setSelectedAmenities] = React.useState<string[]>([
     "Giường",
     "Tủ quần áo",
     "Wifi",
     "Máy lạnh",
   ]);
+
+  React.useEffect(() => {
+    setAvailableAmenities(getAmenities());
+    const handleSync = () => setAvailableAmenities(getAmenities());
+    window.addEventListener("honuhome_amenities_changed", handleSync);
+    return () => window.removeEventListener("honuhome_amenities_changed", handleSync);
+  }, []);
 
   // 2. Images & Video
   const [coverImage, setCoverImage] = React.useState<string>(
@@ -826,36 +835,50 @@ export function CreateRoomView() {
 
               {/* Hàng 3: Tiện Nghi Phòng */}
               <div className="space-y-2 pt-1 border-t border-[#F0F5FA]">
-                <label className="text-xs font-bold text-[#253F5B] block">
-                  Tiện Nghi Sẵn Có Trong Phòng (Tích chọn)
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-[#253F5B] block">
+                    Tiện Nghi Sẵn Có Trong Phòng (Tích chọn)
+                  </label>
+                  <Link
+                    href="/services"
+                    target="_blank"
+                    className="text-[11px] font-bold text-[#5C84BE] hover:underline flex items-center gap-1"
+                    title="Mở trang Quản lý Bảng dịch vụ & Tiện nghi để thêm, sửa, xóa danh mục tiện nghi"
+                  >
+                    <span>Quản lý Tiện nghi</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </div>
+
                 <div className="flex flex-wrap gap-2.5">
-                  {availableAmenitiesList.map((item) => {
-                    const isSelected = selectedAmenities.includes(item.name);
-                    return (
-                      <button
-                        type="button"
-                        key={item.name}
-                        onClick={() => toggleAmenity(item.name)}
-                        className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
-                          isSelected
-                            ? "bg-[#EAF2F8] border-[#5C84BE] text-[#253F5B] shadow-2xs"
-                            : "bg-[#F8FBFE] border-[#DEEAF4] text-[#7A93AD] hover:border-[#B6D0E6]"
-                        }`}
-                      >
-                        <div
-                          className={`w-4 h-4 rounded-md flex items-center justify-center border text-[10px] ${
+                  {(availableAmenities.length > 0 ? availableAmenities : availableAmenitiesList).map(
+                    (item) => {
+                      const isSelected = selectedAmenities.includes(item.name);
+                      return (
+                        <button
+                          type="button"
+                          key={item.name}
+                          onClick={() => toggleAmenity(item.name)}
+                          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                             isSelected
-                              ? "bg-[#5C84BE] border-[#5C84BE] text-white"
-                              : "border-[#B6D0E6] bg-white"
+                              ? "bg-[#EAF2F8] border-[#5C84BE] text-[#253F5B] shadow-2xs"
+                              : "bg-[#F8FBFE] border-[#DEEAF4] text-[#7A93AD] hover:border-[#B6D0E6]"
                           }`}
                         >
-                          {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                        </div>
-                        <span>{item.name}</span>
-                      </button>
-                    );
-                  })}
+                          <div
+                            className={`w-4 h-4 rounded-md flex items-center justify-center border text-[10px] ${
+                              isSelected
+                                ? "bg-[#5C84BE] border-[#5C84BE] text-white"
+                                : "border-[#B6D0E6] bg-white"
+                            }`}
+                          >
+                            {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                          </div>
+                          <span>{item.name}</span>
+                        </button>
+                      );
+                    }
+                  )}
                 </div>
               </div>
 
