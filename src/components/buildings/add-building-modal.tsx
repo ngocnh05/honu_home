@@ -18,6 +18,7 @@ import {
   ImageIcon,
 } from "lucide-react";
 import type { Building, NewBuildingInput } from "@/types/building";
+import { useSnackbar } from "@/components/common/snackbar";
 
 interface AddBuildingModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export function AddBuildingModal({
   onSubmit,
   editingBuilding,
 }: AddBuildingModalProps) {
+  const { error } = useSnackbar();
   const [name, setName] = React.useState("");
   const [code, setCode] = React.useState("");
   const [address, setAddress] = React.useState("");
@@ -118,7 +120,7 @@ export function AddBuildingModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !address.trim()) {
-      alert("Vui lòng nhập tên tòa nhà và địa chỉ chi tiết!");
+      error("Vui lòng nhập tên tòa nhà và địa chỉ chi tiết!");
       return;
     }
 

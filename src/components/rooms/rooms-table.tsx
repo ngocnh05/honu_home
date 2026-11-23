@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Plus,
   ChevronDown,
@@ -32,15 +33,33 @@ import { DeleteConfirmDialog } from "@/components/common/delete-confirm-dialog";
 import { useSnackbar } from "@/components/common/snackbar";
 
 export function RoomsTable() {
+  const searchParams = useSearchParams();
+  const paramBuilding = searchParams.get("buildingId");
+  const paramStatus = searchParams.get("status");
+
   const { success, error, warning } = useSnackbar();
   const [rooms, setRooms] = React.useState<Room[]>(initialRooms);
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [buildingFilter, setBuildingFilter] = React.useState("ALL");
+  const [buildingFilter, setBuildingFilter] = React.useState(paramBuilding || "ALL");
   const [typeFilter, setTypeFilter] = React.useState("ALL");
-  const [statusFilter, setStatusFilter] = React.useState("ALL");
+  const [statusFilter, setStatusFilter] = React.useState(paramStatus || "ALL");
   const [currentPage, setCurrentPage] = React.useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
   const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; roomNumber: string } | null>(null);
+
+  React.useEffect(() => {
+    if (paramBuilding) {
+      setBuildingFilter(paramBuilding);
+      setCurrentPage(1);
+    }
+  }, [paramBuilding]);
+
+  React.useEffect(() => {
+    if (paramStatus) {
+      setStatusFilter(paramStatus);
+      setCurrentPage(1);
+    }
+  }, [paramStatus]);
 
   const itemsPerPage = 7;
 
@@ -357,9 +376,13 @@ export function RoomsTable() {
                       <td className="px-4">
                         <div className="flex flex-col">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-extrabold text-[#253F5B] text-base tracking-tight">
+                            <Link
+                              href={`/rooms/${room.roomNumber}`}
+                              className="font-extrabold text-[#253F5B] text-base tracking-tight hover:text-[#5C84BE] transition-colors cursor-pointer"
+                              title={`Xem chi tiết phòng ${room.roomNumber}`}
+                            >
                               {room.roomNumber}
-                            </span>
+                            </Link>
                             {room.floor && (
                               <span className="text-[10px] font-bold text-[#5C84BE] bg-[#EAF2F8] px-1.5 py-0.5 rounded-md">
                                 T{room.floor}

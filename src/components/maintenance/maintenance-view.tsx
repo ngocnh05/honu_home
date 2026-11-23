@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Wrench,
   Plus,
@@ -53,20 +55,42 @@ import type {
 import { useSnackbar } from "@/components/common/snackbar";
 
 export function MaintenanceView() {
+  const searchParams = useSearchParams();
+  const paramStatus = searchParams.get("status");
+  const paramBuilding = searchParams.get("buildingId");
+  const paramRoom = searchParams.get("room");
+  const paramTab = searchParams.get("tab") as ("incidents" | "building_plans") | null;
+
   const { success, error } = useSnackbar();
 
   // Active Tab: "incidents" (Sự cố khách báo) | "building_plans" (Kế hoạch bảo trì tòa nhà)
-  const [activeTab, setActiveTab] = React.useState<"incidents" | "building_plans">("incidents");
+  const [activeTab, setActiveTab] = React.useState<"incidents" | "building_plans">(paramTab || "incidents");
 
   // Data States
   const [incidents, setIncidents] = React.useState<IncidentReport[]>(initialIncidents);
   const [plans, setPlans] = React.useState<BuildingMaintenancePlan[]>(initialMaintenancePlans);
 
   // Filters
-  const [selectedBuildingId, setSelectedBuildingId] = React.useState<string>("all");
-  const [incidentStatusFilter, setIncidentStatusFilter] = React.useState<string>("all");
+  const [selectedBuildingId, setSelectedBuildingId] = React.useState<string>(paramBuilding || "all");
+  const [incidentStatusFilter, setIncidentStatusFilter] = React.useState<string>(paramStatus || "all");
   const [planStatusFilter, setPlanStatusFilter] = React.useState<string>("all");
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchQuery, setSearchQuery] = React.useState(paramRoom || "");
+
+  React.useEffect(() => {
+    if (paramStatus) setIncidentStatusFilter(paramStatus);
+  }, [paramStatus]);
+
+  React.useEffect(() => {
+    if (paramBuilding) setSelectedBuildingId(paramBuilding);
+  }, [paramBuilding]);
+
+  React.useEffect(() => {
+    if (paramRoom) setSearchQuery(paramRoom);
+  }, [paramRoom]);
+
+  React.useEffect(() => {
+    if (paramTab) setActiveTab(paramTab);
+  }, [paramTab]);
 
   // -------------------------------------------------------------
   // Modals
@@ -614,9 +638,13 @@ export function MaintenanceView() {
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-[#5C84BE] bg-[#EAF2F8] px-2.5 py-1 rounded-lg text-xs">
+                        <Link
+                          href={`/rooms/${t.roomNumber}`}
+                          className="font-extrabold text-[#5C84BE] bg-[#EAF2F8] hover:bg-[#d5e7f7] px-2.5 py-1 rounded-lg text-xs transition-colors cursor-pointer"
+                          title={`Xem chi tiết phòng ${t.roomNumber}`}
+                        >
                           Phòng {t.roomNumber}
-                        </span>
+                        </Link>
                         <span className="text-[11px] text-[#7A93AD] font-semibold truncate max-w-[120px]">
                           {t.buildingName}
                         </span>

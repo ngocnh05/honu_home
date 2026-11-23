@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import {
   BarChart3,
   TrendingUp,
@@ -70,32 +71,52 @@ export function ReportsView() {
 
       {/* 2. Stat Numbers */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
-        <div className="bg-white p-5 rounded-3xl border border-[#E3EDF6] shadow-sm space-y-1">
-          <span className="text-xs text-[#7A93AD] font-bold">Doanh thu tháng 03/2026</span>
+        <Link
+          href="/invoices"
+          className="bg-white p-5 rounded-3xl border border-[#E3EDF6] shadow-sm hover:shadow-md hover:border-[#BFD7EB] transition-all space-y-1 block group"
+        >
+          <span className="text-xs text-[#7A93AD] font-bold group-hover:text-[#5C84BE] transition-colors">
+            Doanh thu tháng 03/2026
+          </span>
           <div className="text-2xl font-black text-[#253F5B]">164.500.000 đ</div>
           <span className="text-[11px] text-emerald-600 font-bold flex items-center gap-1">
             <ArrowUpRight className="w-3.5 h-3.5" />
             <span>+8.2% so với tháng trước</span>
           </span>
-        </div>
+        </Link>
 
-        <div className="bg-white p-5 rounded-3xl border border-[#E3EDF6] shadow-sm space-y-1">
-          <span className="text-xs text-[#7A93AD] font-bold">Tỷ lệ lấp đầy phòng</span>
+        <Link
+          href="/rooms?status=rented"
+          className="bg-white p-5 rounded-3xl border border-[#E3EDF6] shadow-sm hover:shadow-md hover:border-[#BFD7EB] transition-all space-y-1 block group"
+        >
+          <span className="text-xs text-[#7A93AD] font-bold group-hover:text-indigo-600 transition-colors">
+            Tỷ lệ lấp đầy phòng
+          </span>
           <div className="text-2xl font-black text-indigo-600">95.5%</div>
           <span className="text-[11px] text-[#7A93AD]">43/45 phòng đang thuê</span>
-        </div>
+        </Link>
 
-        <div className="bg-white p-5 rounded-3xl border border-[#E3EDF6] shadow-sm space-y-1">
-          <span className="text-xs text-[#7A93AD] font-bold">Thực thu thành công</span>
+        <Link
+          href="/invoices?status=paid"
+          className="bg-white p-5 rounded-3xl border border-[#E3EDF6] shadow-sm hover:shadow-md hover:border-[#BFD7EB] transition-all space-y-1 block group"
+        >
+          <span className="text-xs text-[#7A93AD] font-bold group-hover:text-emerald-700 transition-colors">
+            Thực thu thành công
+          </span>
           <div className="text-2xl font-black text-emerald-700">148.200.000 đ</div>
           <span className="text-[11px] text-emerald-600 font-bold">90.1% đã thanh toán</span>
-        </div>
+        </Link>
 
-        <div className="bg-white p-5 rounded-3xl border border-[#E3EDF6] shadow-sm space-y-1">
-          <span className="text-xs text-[#7A93AD] font-bold">Công nợ còn lại</span>
+        <Link
+          href="/invoices?status=pending"
+          className="bg-white p-5 rounded-3xl border border-[#E3EDF6] shadow-sm hover:shadow-md hover:border-[#BFD7EB] transition-all space-y-1 block group"
+        >
+          <span className="text-xs text-[#7A93AD] font-bold group-hover:text-rose-600 transition-colors">
+            Công nợ còn lại
+          </span>
           <div className="text-2xl font-black text-rose-600">16.300.000 đ</div>
           <span className="text-[11px] text-rose-500 font-semibold">4 phòng chưa hoàn tất</span>
-        </div>
+        </Link>
       </div>
 
       {/* 3. Main Chart & Breakdown */}

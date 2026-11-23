@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Receipt,
   Plus,
@@ -33,12 +35,29 @@ import { getServicesByBuildingId } from "@/lib/mock-data/services";
 import { useSnackbar } from "@/components/common/snackbar";
 
 export function InvoicesView() {
+  const searchParams = useSearchParams();
+  const paramStatus = searchParams.get("status") as ("all" | InvoiceStatus) | null;
+  const paramBuilding = searchParams.get("buildingId");
+  const paramRoom = searchParams.get("room");
+
   const { success, error } = useSnackbar();
   const [invoices, setInvoices] = React.useState<Invoice[]>(initialInvoices);
   const [selectedMonth, setSelectedMonth] = React.useState("Tháng 03/2026");
-  const [selectedBuildingId, setSelectedBuildingId] = React.useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = React.useState<"all" | InvoiceStatus>("all");
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [selectedBuildingId, setSelectedBuildingId] = React.useState<string>(paramBuilding || "all");
+  const [selectedStatus, setSelectedStatus] = React.useState<"all" | InvoiceStatus>(paramStatus || "all");
+  const [searchQuery, setSearchQuery] = React.useState(paramRoom || "");
+
+  React.useEffect(() => {
+    if (paramStatus) setSelectedStatus(paramStatus);
+  }, [paramStatus]);
+
+  React.useEffect(() => {
+    if (paramBuilding) setSelectedBuildingId(paramBuilding);
+  }, [paramBuilding]);
+
+  React.useEffect(() => {
+    if (paramRoom) setSearchQuery(paramRoom);
+  }, [paramRoom]);
 
   // Modal State
   const [viewingInvoice, setViewingInvoice] = React.useState<Invoice | null>(null);
@@ -513,9 +532,13 @@ export function InvoicesView() {
                     {/* Phòng & Cơ sở */}
                     <td className="py-3.5 px-5">
                       <div className="flex items-center gap-2.5">
-                        <span className="font-black text-[#5C84BE] bg-[#EAF2F8] px-2.5 py-1.5 rounded-xl text-xs shadow-2xs">
+                        <Link
+                          href={`/rooms/${inv.roomNumber}`}
+                          className="font-black text-[#5C84BE] bg-[#EAF2F8] hover:bg-[#d5e7f7] px-2.5 py-1.5 rounded-xl text-xs shadow-2xs transition-colors cursor-pointer"
+                          title={`Xem chi tiết phòng ${inv.roomNumber}`}
+                        >
                           {inv.roomNumber}
-                        </span>
+                        </Link>
                         <div>
                           <div className="font-bold text-[#253F5B] text-xs">
                             {inv.buildingName}

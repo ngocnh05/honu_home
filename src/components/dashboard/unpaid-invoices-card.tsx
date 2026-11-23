@@ -45,7 +45,7 @@ export function UnpaidInvoicesCard({ summary }: UnpaidInvoicesCardProps) {
 
       {/* Action Button */}
       <Link
-        href="/invoices"
+        href="/invoices?status=pending"
         className="w-full h-11 xl:h-12 rounded-2xl bg-[#5C84BE] hover:bg-[#4D74AD] active:scale-[0.99] text-white font-semibold text-xs xl:text-sm flex items-center justify-center gap-2 shadow-sm shadow-[#5C84BE]/20 transition-all cursor-pointer"
       >
         <span>Xem Chi Tiết</span>

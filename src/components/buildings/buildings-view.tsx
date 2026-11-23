@@ -369,7 +369,7 @@ export function BuildingsView() {
                   {/* Actions Bar */}
                   <div className="pt-3 border-t border-[#EEF3F8] flex items-center justify-between gap-2">
                     <Link
-                      href={`/rooms`}
+                      href={`/rooms?buildingId=${building.id}`}
                       className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 rounded-xl bg-[#EAF2F8] hover:bg-[#DCE9F5] text-[#253F5B] font-bold text-xs transition-colors cursor-pointer"
                     >
                       <DoorOpen className="w-3.5 h-3.5 text-[#5C84BE]" />

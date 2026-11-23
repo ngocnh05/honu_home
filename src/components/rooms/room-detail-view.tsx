@@ -30,12 +30,14 @@ import {
 import type { Room, CustomService } from "@/types/room";
 import { parseVideoSource } from "@/lib/video-helpers";
 import { getServicesByBuildingId } from "@/lib/mock-data/services";
+import { useSnackbar } from "@/components/common/snackbar";
 
 interface RoomDetailViewProps {
   room: Room;
 }
 
 export function RoomDetailView({ room }: RoomDetailViewProps) {
+  const { success } = useSnackbar();
   const [activeTab, setActiveTab] = React.useState<"general" | "history" | "notes">(
     "general"
   );
@@ -858,7 +860,7 @@ export function RoomDetailView({ room }: RoomDetailViewProps) {
               <button
                 type="button"
                 onClick={() => {
-                  alert(`Đã gửi yêu cầu gia hạn hợp đồng phòng ${room.roomNumber}!`);
+                  success(`Đã gửi yêu cầu gia hạn hợp đồng phòng ${room.roomNumber}!`);
                   setShowRenewModal(false);
                 }}
                 className="px-4 py-2 rounded-xl text-xs font-bold bg-[#0D99FF] text-white hover:bg-[#0088ee] cursor-pointer"

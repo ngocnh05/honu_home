@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Users,
   UserCheck,
@@ -39,11 +41,28 @@ import { initialRooms } from "@/lib/mock-data/rooms";
 import { useSnackbar } from "@/components/common/snackbar";
 
 export function TenantsView() {
+  const searchParams = useSearchParams();
+  const paramBuilding = searchParams.get("buildingId");
+  const paramRoom = searchParams.get("room") || searchParams.get("roomNumber");
+  const paramRole = searchParams.get("role") as ("all" | TenantRole) | null;
+
   const { success, error } = useSnackbar();
   const [tenants, setTenants] = React.useState<Tenant[]>(initialTenants);
-  const [selectedBuildingId, setSelectedBuildingId] = React.useState<string>("all");
-  const [selectedRole, setSelectedRole] = React.useState<"all" | TenantRole>("all");
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [selectedBuildingId, setSelectedBuildingId] = React.useState<string>(paramBuilding || "all");
+  const [selectedRole, setSelectedRole] = React.useState<"all" | TenantRole>(paramRole || "all");
+  const [searchQuery, setSearchQuery] = React.useState(paramRoom || "");
+
+  React.useEffect(() => {
+    if (paramBuilding) setSelectedBuildingId(paramBuilding);
+  }, [paramBuilding]);
+
+  React.useEffect(() => {
+    if (paramRoom) setSearchQuery(paramRoom);
+  }, [paramRoom]);
+
+  React.useEffect(() => {
+    if (paramRole) setSelectedRole(paramRole);
+  }, [paramRole]);
 
   // Modal State
   const [showModal, setShowModal] = React.useState(false);
@@ -552,9 +571,13 @@ export function TenantsView() {
                     {/* Phòng & Cơ sở */}
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-extrabold text-[#5C84BE] bg-[#EAF2F8] px-2.5 py-0.5 rounded-md">
+                        <Link
+                          href={`/rooms/${t.roomNumber}`}
+                          className="font-extrabold text-[#5C84BE] bg-[#EAF2F8] hover:bg-[#d5e7f7] px-2.5 py-0.5 rounded-md transition-colors cursor-pointer"
+                          title={`Xem chi tiết phòng ${t.roomNumber}`}
+                        >
                           {t.roomNumber}
-                        </span>
+                        </Link>
                         <span className="text-[11px] text-[#7A93AD] font-semibold truncate max-w-[130px]">
                           {t.buildingName}
                         </span>

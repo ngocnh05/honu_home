@@ -97,7 +97,10 @@ export function LoginForm() {
   };
 
   const handleGoogleSignIn = () => {
-    alert("Tính năng Đăng nhập với Google đang được tích hợp!");
+    setServerMessage({
+      type: "error",
+      text: "Tính năng Đăng nhập với Google đang được phát triển và sẽ sớm ra mắt!",
+    });
   };
 
   return (

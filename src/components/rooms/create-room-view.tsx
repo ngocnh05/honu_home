@@ -80,7 +80,7 @@ const availableAmenitiesList = [
 
 export function CreateRoomView() {
   const router = useRouter();
-  const { success } = useSnackbar();
+  const { success, error } = useSnackbar();
 
   // 1. Basic Specs
   const [buildingId, setBuildingId] = React.useState(
@@ -296,7 +296,7 @@ export function CreateRoomView() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!roomNumber.trim()) {
-      alert("Vui lòng nhập số phòng!");
+      error("Vui lòng nhập số phòng!");
       return;
     }
 

@@ -85,7 +85,7 @@ interface EditRoomViewProps {
 
 export function EditRoomView({ room }: EditRoomViewProps) {
   const router = useRouter();
-  const { success } = useSnackbar();
+  const { success, error } = useSnackbar();
 
   // 1. Basic Specs initialized from room
   const [buildingId, setBuildingId] = React.useState(room.buildingId || "bld_cg");
@@ -341,18 +341,18 @@ export function EditRoomView({ room }: EditRoomViewProps) {
     e.preventDefault();
 
     if (!roomNumber.trim()) {
-      alert("Vui lòng nhập số phòng!");
+      error("Vui lòng nhập số phòng!");
       return;
     }
 
     const cleanPrice = parsePrice(price);
     if (!cleanPrice) {
-      alert("Vui lòng nhập giá thuê phòng!");
+      error("Vui lòng nhập giá thuê phòng!");
       return;
     }
 
     if (status === "rented" && !tenantName.trim()) {
-      alert("Phòng đang thuê cần nhập họ tên người thuê!");
+      error("Phòng đang thuê cần nhập họ tên người thuê!");
       return;
     }
 

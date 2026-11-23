@@ -37,24 +37,28 @@ export default function DashboardPage() {
           value={kpis.totalRooms}
           icon={Building2}
           variant="primary"
+          href="/rooms"
         />
         <KpiCard
           label="Đang Thuê"
           value={kpis.occupiedRooms}
           icon={UserCheck}
           variant="success"
+          href="/rooms?status=rented"
         />
         <KpiCard
           label="Phòng Trống"
           value={kpis.availableRooms}
           icon={KeyRound}
           variant="warning"
+          href="/rooms?status=available"
         />
         <KpiCard
           label="Tỷ lệ lấp đầy"
           value={kpis.occupancyRate}
           icon={TrendingUp}
           variant="info"
+          href="/reports"
         />
       </div>
 

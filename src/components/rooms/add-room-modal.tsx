@@ -19,6 +19,7 @@ import {
   Cake,
 } from "lucide-react";
 import type { Room, RoomStatus, RoomType, CustomService } from "@/types/room";
+import { useSnackbar } from "@/components/common/snackbar";
 
 interface AddRoomModalProps {
   isOpen: boolean;
@@ -50,6 +51,7 @@ const defaultInitialServices: CustomService[] = [
 ];
 
 export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) {
+  const { error } = useSnackbar();
   // Basic Info
   const [roomNumber, setRoomNumber] = React.useState("");
   const [type, setType] = React.useState<RoomType>("Phòng Đơn");
@@ -114,7 +116,7 @@ export function AddRoomModal({ isOpen, onClose, onAddRoom }: AddRoomModalProps) 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!roomNumber.trim()) {
-      alert("Vui lòng nhập số phòng!");
+      error("Vui lòng nhập số phòng!");
       return;
     }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Zap,
   Droplets,
@@ -41,15 +42,27 @@ import {
 import { useSnackbar } from "@/components/common/snackbar";
 
 export function ServicesView() {
+  const searchParams = useSearchParams();
+  const paramTab = searchParams.get("tab") as ("services" | "amenities") | null;
+  const paramBuilding = searchParams.get("buildingId");
+
   const { success, error } = useSnackbar();
 
   // Tab State: "services" (Bảng giá dịch vụ) vs "amenities" (Tiện nghi phòng)
-  const [activeTab, setActiveTab] = React.useState<"services" | "amenities">("services");
+  const [activeTab, setActiveTab] = React.useState<"services" | "amenities">(paramTab || "services");
 
   // SERVICES STATE
   const [services, setServices] = React.useState<ServiceItem[]>(initialServices);
-  const [selectedBuildingId, setSelectedBuildingId] = React.useState<string>("all");
+  const [selectedBuildingId, setSelectedBuildingId] = React.useState<string>(paramBuilding || "all");
   const [searchQuery, setSearchQuery] = React.useState("");
+
+  React.useEffect(() => {
+    if (paramTab) setActiveTab(paramTab);
+  }, [paramTab]);
+
+  React.useEffect(() => {
+    if (paramBuilding) setSelectedBuildingId(paramBuilding);
+  }, [paramBuilding]);
 
   // Services Modal State
   const [showModal, setShowModal] = React.useState(false);

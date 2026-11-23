@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   FileText,
   FileCheck2,
@@ -30,15 +32,37 @@ import { getServicesByBuildingId } from "@/lib/mock-data/services";
 import { useSnackbar } from "@/components/common/snackbar";
 
 export function ContractsView() {
+  const searchParams = useSearchParams();
+  const paramStatus = searchParams.get("status") as ("all" | ContractStatus) | null;
+  const paramBuilding = searchParams.get("buildingId");
+  const paramRoom = searchParams.get("roomNumber") || searchParams.get("room");
+  const paramNew = searchParams.get("new");
+
   const { success, error } = useSnackbar();
   const [contracts, setContracts] = React.useState<Contract[]>(initialContracts);
-  const [selectedBuildingId, setSelectedBuildingId] = React.useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = React.useState<"all" | ContractStatus>("all");
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [selectedBuildingId, setSelectedBuildingId] = React.useState<string>(paramBuilding || "all");
+  const [selectedStatus, setSelectedStatus] = React.useState<"all" | ContractStatus>(paramStatus || "all");
+  const [searchQuery, setSearchQuery] = React.useState(paramRoom || "");
 
   // Modal State
-  const [showModal, setShowModal] = React.useState(false);
+  const [showModal, setShowModal] = React.useState(paramNew === "true");
   const [viewingContract, setViewingContract] = React.useState<Contract | null>(null);
+
+  React.useEffect(() => {
+    if (paramStatus) setSelectedStatus(paramStatus);
+  }, [paramStatus]);
+
+  React.useEffect(() => {
+    if (paramBuilding) setSelectedBuildingId(paramBuilding);
+  }, [paramBuilding]);
+
+  React.useEffect(() => {
+    if (paramRoom) setSearchQuery(paramRoom);
+  }, [paramRoom]);
+
+  React.useEffect(() => {
+    if (paramNew === "true") setShowModal(true);
+  }, [paramNew]);
 
   // Form State for New Contract
   const [formBuildingId, setFormBuildingId] = React.useState("bld_cg");
@@ -345,9 +369,13 @@ export function ContractsView() {
                   {/* Phòng & Cơ sở */}
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-black text-[#5C84BE] bg-[#EAF2F8] px-2.5 py-0.5 rounded-md text-xs">
+                      <Link
+                        href={`/rooms/${c.roomNumber}`}
+                        className="font-black text-[#5C84BE] bg-[#EAF2F8] hover:bg-[#d5e7f7] px-2.5 py-0.5 rounded-md text-xs transition-colors cursor-pointer"
+                        title={`Xem chi tiết phòng ${c.roomNumber}`}
+                      >
                         {c.roomNumber}
-                      </span>
+                      </Link>
                       <span className="text-[11px] text-[#7A93AD] font-semibold truncate max-w-[130px]">
                         {c.buildingName}
                       </span>
